@@ -1,0 +1,27 @@
+id: bonsai-smoke-v0
+purpose: test whether Bonsai Image 4B unpacked can run on public GitHub Actions CPU runner
+runner: ubuntu-latest
+
+limits:
+  width: 256
+  height: 256
+  images_per_prompt: 1
+  prompts: 1
+  timeout_minutes: 90
+  artifact_retention_days: 7
+
+prompt:
+  id: cat-lineart
+  text: simple black outline sleeping cat, white background, no text
+
+candidate:
+  id: bonsai-image-4b-binary-unpacked
+  enabled: true
+  backend: diffusers
+  model_ref: prism-ml/bonsai-image-binary-4B-unpacked
+  role: cpu-smoke-experimental
+
+policy:
+  commit_outputs: false
+  upload_artifact: true
+  concurrency_group: bonsai-smoke-queue
