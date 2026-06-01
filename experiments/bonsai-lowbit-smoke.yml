@@ -1,0 +1,30 @@
+id: bonsai-lowbit-smoke-v0
+purpose: inspect Bonsai low-bit package layout before attempting CPU ONNX conversion
+runner: ubuntu-latest
+
+limits:
+  timeout_minutes: 60
+  artifact_retention_days: 7
+
+candidate:
+  id: bonsai-image-4b-binary-gemlite-1bit
+  backend: lowbit-pack-probe
+  model_ref: prism-ml/bonsai-image-binary-4B-gemlite-1bit
+  base_model_ref: prism-ml/bonsai-image-binary-4B-unpacked
+  task: text-to-image
+
+probe:
+  required_milestone: pack_layout_probe
+  download_large_files: false
+  known_runtime: gemlite-hqq-cuda
+  target_runtime: onnxruntime-cpu
+  milestones:
+    - pack_layout_probe
+    - metadata_download
+    - cpu_conversion_plan
+
+policy:
+  commit_outputs: false
+  upload_artifact: true
+  concurrency_group: bonsai-lowbit-smoke-queue
+  fail_if_required_milestone_not_reached: true
