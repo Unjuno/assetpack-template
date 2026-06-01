@@ -36,11 +36,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir pyyaml huggingface_hub
+          pip install --no-cache-dir pyyaml huggingface_hub safetensors
 
       - name: Verify probe dependencies
         run: |
-          python -c "import torch, huggingface_hub, yaml; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__)"
+          python -c "import torch, huggingface_hub, yaml, safetensors; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__)"
 
       - name: Self-test low-bit probe
         run: |
@@ -54,6 +54,10 @@ jobs:
         run: |
           python scripts/probe_bonsai_lowbit_layer_cols.py
 
+      - name: Compare low-bit layer to unpacked layer
+        run: |
+          python scripts/compare_bonsai_lowbit_to_unpacked_layer.py
+
       - name: Show low-bit report summary
         if: always()
         run: |
@@ -62,6 +66,9 @@ jobs:
           fi
           if [ -f reports/bonsai-lowbit-layer/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-layer/report.json').read_text()); print(json.dumps({'layer': r.get('layer'), 'orig_shape': r.get('orig_shape'), 'metadata': r.get('metadata'), 'attempts': [(a.get('nbits'), a.get('status'), a.get('error_type')) for a in r.get('attempts', [])]}, indent=2))"
+          fi
+          if [ -f reports/bonsai-lowbit-compare/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-compare/report.json').read_text()); print(json.dumps({'layer': r.get('layer'), 'mae': r.get('mean_abs_error'), 'max_abs_error': r.get('max_abs_error'), 'cosine_similarity': r.get('cosine_similarity')}, indent=2))"
           fi
 
       - name: Upload low-bit reports
@@ -72,4 +79,5 @@ jobs:
           path: |
             reports/bonsai-lowbit-smoke/
             reports/bonsai-lowbit-layer/
+            reports/bonsai-lowbit-compare/
           retention-days: 7
