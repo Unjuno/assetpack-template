@@ -52,6 +52,10 @@ class OneLinear(torch.nn.Module):
         return self.linear(x)
 
 
+def path_size(path: Path) -> int:
+    return path.stat().st_size if path.exists() else 0
+
+
 def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     weight = load_weight()
@@ -72,6 +76,7 @@ def main() -> int:
         dynamic_axes={"x": {0: "batch"}, "y": {0: "batch"}},
     )
 
+    external_data_path = Path(str(onnx_path) + ".data")
     sess = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
     y_ort = sess.run(None, {"x": x.cpu().numpy().astype(np.float32)})[0]
     diff = y_ort - y_pt
@@ -79,7 +84,10 @@ def main() -> int:
         "model_ref": MODEL_REF,
         "layer": LAYER,
         "onnx_path": str(onnx_path),
-        "onnx_size_bytes": onnx_path.stat().st_size,
+        "onnx_size_bytes": path_size(onnx_path),
+        "external_data_path": str(external_data_path) if external_data_path.exists() else None,
+        "external_data_size_bytes": path_size(external_data_path),
+        "total_onnx_artifact_size_bytes": path_size(onnx_path) + path_size(external_data_path),
         "input_shape": list(x.shape),
         "output_shape": list(y_pt.shape),
         "pytorch_output_mean": float(y_pt.mean()),
