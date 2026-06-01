@@ -24,22 +24,23 @@ def stat(x: torch.Tensor) -> dict:
     }
 
 
-def unpack_rows(packed: torch.Tensor, nbits: int, output_rows: int) -> torch.Tensor:
-    rows, cols = packed.shape
-    if output_rows % rows != 0:
-        raise ValueError(f"output_rows {output_rows} is not divisible by packed rows {rows}")
-    elems = output_rows // rows
+def unpack_cols_transposed(packed_t: torch.Tensor, nbits: int, output_cols: int) -> torch.Tensor:
+    packed = packed_t.t().contiguous()
+    rows, packed_cols = packed.shape
+    if output_cols % packed_cols != 0:
+        raise ValueError(f"output_cols {output_cols} is not divisible by packed cols {packed_cols}")
+    elems = output_cols // packed_cols
     shifts = torch.arange(elems, dtype=packed.dtype) * nbits
     mask = (1 << nbits) - 1
     y = ((packed.unsqueeze(-1) >> shifts) & mask).to(torch.float32)
-    return y.permute(0, 2, 1).reshape(output_rows, cols)
+    return y.reshape(rows, output_cols)
 
 
-def repeat_rows(x: torch.Tensor, rows: int) -> torch.Tensor:
+def expand_group_rows(x: torch.Tensor, rows: int) -> torch.Tensor:
     if x.shape[0] == rows:
         return x.to(torch.float32)
     if rows % x.shape[0] != 0:
-        raise ValueError(f"cannot repeat {x.shape[0]} groups to {rows} rows")
+        raise ValueError(f"cannot expand {x.shape[0]} groups to {rows} rows")
     return x.to(torch.float32).repeat_interleave(rows // x.shape[0], dim=0)
 
 
@@ -57,9 +58,9 @@ def main() -> int:
     attempts = []
     for nbits in [1, 2, 4, 8]:
         try:
-            unpacked = unpack_rows(W_q, nbits=nbits, output_rows=orig_shape[0])
-            s = repeat_rows(scales, unpacked.shape[0])
-            z = repeat_rows(zeros, unpacked.shape[0])
+            unpacked = unpack_cols_transposed(W_q, nbits=nbits, output_cols=orig_shape[1])
+            s = expand_group_rows(scales, unpacked.shape[0])
+            z = expand_group_rows(zeros, unpacked.shape[0])
             if s.shape != unpacked.shape or z.shape != unpacked.shape:
                 raise ValueError(f"shape mismatch unpacked={list(unpacked.shape)} scales={list(s.shape)} zeros={list(z.shape)}")
             attempts.append({
@@ -79,6 +80,7 @@ def main() -> int:
         "state_dict_size_bytes": path.stat().st_size,
         "orig_shape": orig_shape,
         "metadata": metadata,
+        "packing_interpretation": "W_q appears stored as pack_over_cols(..., transpose=True); probe transposes it back before column-unpack.",
         "W_q": stat(W_q),
         "scales": stat(scales),
         "zeros": stat(zeros),
