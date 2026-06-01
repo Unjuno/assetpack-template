@@ -1,0 +1,46 @@
+name: diffusers-smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Model candidate to test
+        required: true
+        default: tiny-sd
+        type: choice
+        options:
+          - tiny-sd
+          - sd-turbo
+          - bk-sdm-tiny
+          - all
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml pillow torch diffusers transformers accelerate safetensors
+
+      - name: Run CPU smoke test
+        run: |
+          python scripts/run_diffusers_smoke.py --model "${{ inputs.model }}" --out reports/diffusers-smoke
+
+      - name: Upload smoke report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diffusers-smoke-${{ inputs.model }}
+          path: reports/diffusers-smoke/
+          retention-days: 7
