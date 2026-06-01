@@ -36,11 +36,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxruntime
+          pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxscript onnxruntime
 
       - name: Verify probe dependencies
         run: |
-          python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxruntime', ort.__version__)"
+          python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxscript, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxscript', onnxscript.__version__); print('onnxruntime', ort.__version__)"
 
       - name: Self-test low-bit probe
         run: |
