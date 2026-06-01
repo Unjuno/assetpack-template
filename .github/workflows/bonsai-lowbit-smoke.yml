@@ -50,17 +50,26 @@ jobs:
         run: |
           python scripts/run_bonsai_lowbit_probe.py
 
+      - name: Run one-layer unpack probe
+        run: |
+          python scripts/probe_bonsai_lowbit_layer.py
+
       - name: Show low-bit report summary
         if: always()
         run: |
           if [ -f reports/bonsai-lowbit-smoke/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-smoke/report.json').read_text()); print(json.dumps({'status': r.get('status'), 'milestone_reached': r.get('milestone_reached'), 'error_type': r.get('error_type'), 'error': r.get('error'), 'stages': [(s.get('name'), s.get('status'), s.get('error_type')) for s in r.get('stages', [])]}, indent=2))"
           fi
+          if [ -f reports/bonsai-lowbit-layer/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-layer/report.json').read_text()); print(json.dumps({'layer': r.get('layer'), 'orig_shape': r.get('orig_shape'), 'metadata': r.get('metadata'), 'attempts': [(a.get('nbits'), a.get('status'), a.get('error_type')) for a in r.get('attempts', [])]}, indent=2))"
+          fi
 
-      - name: Upload low-bit report
+      - name: Upload low-bit reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: bonsai-lowbit-smoke-report
-          path: reports/bonsai-lowbit-smoke/
+          path: |
+            reports/bonsai-lowbit-smoke/
+            reports/bonsai-lowbit-layer/
           retention-days: 7
