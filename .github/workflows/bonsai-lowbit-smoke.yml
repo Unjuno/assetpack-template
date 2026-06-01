@@ -36,11 +36,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir pyyaml huggingface_hub safetensors
+          pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxruntime
 
       - name: Verify probe dependencies
         run: |
-          python -c "import torch, huggingface_hub, yaml, safetensors; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__)"
+          python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxruntime', ort.__version__)"
 
       - name: Self-test low-bit probe
         run: |
@@ -58,6 +58,10 @@ jobs:
         run: |
           python scripts/compare_bonsai_lowbit_to_unpacked_layer.py
 
+      - name: Export recovered low-bit layer to ONNX
+        run: |
+          python scripts/export_bonsai_lowbit_layer_onnx.py
+
       - name: Show low-bit report summary
         if: always()
         run: |
@@ -68,7 +72,10 @@ jobs:
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-layer/report.json').read_text()); print(json.dumps({'layer': r.get('layer'), 'orig_shape': r.get('orig_shape'), 'metadata': r.get('metadata'), 'attempts': [(a.get('nbits'), a.get('status'), a.get('error_type')) for a in r.get('attempts', [])]}, indent=2))"
           fi
           if [ -f reports/bonsai-lowbit-compare/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-compare/report.json').read_text()); print(json.dumps({'layer': r.get('layer'), 'mae': r.get('mean_abs_error'), 'max_abs_error': r.get('max_abs_error'), 'cosine_similarity': r.get('cosine_similarity')}, indent=2))"
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-compare/report.json').read_text()); print(json.dumps({'layer': r.get('layer'), 'mae': r.get('mean_abs_error'), 'max_abs_error': r.get('max_abs_error'), 'cosine64': r.get('cosine_similarity_float64'), 'exact_equal': r.get('exact_equal')}, indent=2))"
+          fi
+          if [ -f reports/bonsai-lowbit-layer-onnx/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-layer-onnx/report.json').read_text()); print(json.dumps({'layer': r.get('layer'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'mae': r.get('mean_abs_error'), 'max_abs_error': r.get('max_abs_error'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5')}, indent=2))"
           fi
 
       - name: Upload low-bit reports
@@ -80,4 +87,5 @@ jobs:
             reports/bonsai-lowbit-smoke/
             reports/bonsai-lowbit-layer/
             reports/bonsai-lowbit-compare/
+            reports/bonsai-lowbit-layer-onnx/
           retention-days: 7
