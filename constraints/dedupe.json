@@ -1,0 +1,11 @@
+{
+  "exact": true,
+  "canonical_slots": true,
+  "normalized_prompt_hash": true,
+  "near_duplicate": {
+    "enabled": true,
+    "method": "jaccard_shingles",
+    "shingle_size": 3,
+    "threshold": 0.85
+  }
+}
