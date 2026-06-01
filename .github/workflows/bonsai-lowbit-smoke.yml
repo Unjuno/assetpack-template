@@ -50,9 +50,9 @@ jobs:
         run: |
           python scripts/run_bonsai_lowbit_probe.py
 
-      - name: Run one-layer unpack probe
+      - name: Run one-layer column-group probe
         run: |
-          python scripts/probe_bonsai_lowbit_layer.py
+          python scripts/probe_bonsai_lowbit_layer_cols.py
 
       - name: Show low-bit report summary
         if: always()
