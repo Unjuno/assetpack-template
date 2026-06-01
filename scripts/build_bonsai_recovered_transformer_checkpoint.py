@@ -56,6 +56,8 @@ def main() -> int:
         "lowbit_ref": LOWBIT_REF,
         "unpacked_ref": UNPACKED_REF,
         "lowbit_path": str(lowbit_path),
+        "checkpoint_root": str(OUT_DIR),
+        "checkpoint_subfolder": "transformer",
         "checkpoint_dir": str(CHECKPOINT_DIR),
         "checkpoint_path": str(checkpoint_path),
         "checkpoint_size_bytes": checkpoint_path.stat().st_size,
@@ -68,7 +70,8 @@ def main() -> int:
     }
     (OUT_DIR / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
-        "checkpoint_path": report["checkpoint_path"],
+        "checkpoint_root": report["checkpoint_root"],
+        "checkpoint_subfolder": report["checkpoint_subfolder"],
         "checkpoint_size_bytes": report["checkpoint_size_bytes"],
         "recovered_key_count": report["recovered_key_count"],
         "quantized_prefix_count": report["quantized_prefix_count"],
