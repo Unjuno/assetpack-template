@@ -15,7 +15,12 @@ on:
           - all
 
 permissions:
+  actions: read
   contents: read
+
+concurrency:
+  group: diffusers-smoke-queue
+  cancel-in-progress: false
 
 jobs:
   smoke:
@@ -27,6 +32,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Observe workflow queue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run list --workflow diffusers-smoke.yml --status queued --limit 20 || true
+          gh run list --workflow diffusers-smoke.yml --status in_progress --limit 20 || true
 
       - name: Install dependencies
         run: |
