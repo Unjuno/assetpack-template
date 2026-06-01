@@ -28,10 +28,16 @@ def run(cmd, cwd=None, timeout=None):
     }
 
 
+def write_report(out_dir, result):
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "report.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def main() -> int:
     cfg = yaml.safe_load(Path("experiments/bonsai-smoke.yml").read_text(encoding="utf-8"))
     limits = cfg.get("limits", {})
     cand = cfg.get("candidate", {})
+    policy = cfg.get("policy", {})
     out_dir = Path("reports/bonsai-smoke")
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -60,6 +66,17 @@ def main() -> int:
 
     total_start = time.time()
     try:
+        gpu_check = run(["bash", "-lc", "command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi || true"], timeout=60)
+        result["stages"].append({"name": "gpu_preflight", **gpu_check})
+
+        has_nvidia = "NVIDIA-SMI" in gpu_check.get("output", "")
+        if not has_nvidia and policy.get("expected_failure_on_cpu_only", False):
+            result["status"] = "skipped"
+            result["reason"] = "No NVIDIA GPU detected. Bonsai official Linux path requires CUDA/gemlite, so CPU-only ubuntu-latest is unsupported."
+            result["seconds"] = round(time.time() - total_start, 3)
+            write_report(out_dir, result)
+            return 0
+
         if demo_dir.exists():
             shutil.rmtree(demo_dir)
 
@@ -99,9 +116,9 @@ def main() -> int:
         result["error"] = str(exc)[:2000]
     finally:
         result["seconds"] = round(time.time() - total_start, 3)
-        (out_dir / "report.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        write_report(out_dir, result)
 
-    return 0 if result["status"] == "passed" else 1
+    return 0 if result["status"] in {"passed", "skipped"} else 1
 
 
 if __name__ == "__main__":
