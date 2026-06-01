@@ -35,7 +35,12 @@ jobs:
       - name: Install probe dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
           pip install --no-cache-dir pyyaml huggingface_hub
+
+      - name: Verify probe dependencies
+        run: |
+          python -c "import torch, huggingface_hub, yaml; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__)"
 
       - name: Self-test low-bit probe
         run: |
@@ -49,7 +54,7 @@ jobs:
         if: always()
         run: |
           if [ -f reports/bonsai-lowbit-smoke/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-smoke/report.json').read_text()); print(json.dumps({'status': r.get('status'), 'milestone_reached': r.get('milestone_reached'), 'error_type': r.get('error_type'), 'stages': [(s.get('name'), s.get('status'), s.get('error_type')) for s in r.get('stages', [])]}, indent=2))"
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-smoke/report.json').read_text()); print(json.dumps({'status': r.get('status'), 'milestone_reached': r.get('milestone_reached'), 'error_type': r.get('error_type'), 'error': r.get('error'), 'stages': [(s.get('name'), s.get('status'), s.get('error_type')) for s in r.get('stages', [])]}, indent=2))"
           fi
 
       - name: Upload low-bit report
