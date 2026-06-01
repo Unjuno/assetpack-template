@@ -1,0 +1,41 @@
+name: Asset request
+description: Submit structured fields for a fixed-theme asset recipe.
+title: "[asset] "
+labels:
+  - asset-request
+  - needs-validation
+body:
+  - type: input
+    id: subject
+    attributes:
+      label: Subject
+      placeholder: sleeping cat
+    validations:
+      required: true
+
+  - type: input
+    id: scene
+    attributes:
+      label: Scene
+      placeholder: simple sitting pose
+    validations:
+      required: true
+
+  - type: input
+    id: audience
+    attributes:
+      label: Audience
+      placeholder: children
+    validations:
+      required: true
+
+  - type: dropdown
+    id: license
+    attributes:
+      label: License
+      options:
+        - CC0-1.0
+        - CC-BY-4.0
+        - OWNED
+    validations:
+      required: true
