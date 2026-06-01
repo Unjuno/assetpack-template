@@ -1,0 +1,53 @@
+name: bonsai-lowbit-runtime-linears
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Show runner resources
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --no-cache-dir huggingface_hub
+
+      - name: Run all low-bit runtime linear probes
+        env:
+          BONSAI_RUNTIME_LINEAR_BATCH: "2"
+          BONSAI_RUNTIME_LINEAR_LIMIT: "0"
+        run: |
+          python scripts/probe_bonsai_lowbit_runtime_all_linears.py
+
+      - name: Show probe summary
+        if: always()
+        run: |
+          if [ -f reports/bonsai-lowbit-runtime-linears/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-runtime-linears/report.json').read_text()); print(json.dumps({'source_model_ref': r.get('source_model_ref'), 'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'runtime_linear_count': r.get('runtime_linear_count'), 'failure_count': r.get('failure_count'), 'allclose_all': r.get('allclose_all'), 'max_abs_error': r.get('max_abs_error'), 'total_seconds': r.get('total_seconds'), 'size_ratio_reference_fp32_to_packed': r.get('size_ratio_reference_fp32_to_packed')}, indent=2))"
+          fi
+
+      - name: Upload probe report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-lowbit-runtime-linears-report
+          path: reports/bonsai-lowbit-runtime-linears/report.json
+          retention-days: 7
