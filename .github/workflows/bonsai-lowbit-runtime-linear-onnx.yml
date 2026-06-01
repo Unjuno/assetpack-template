@@ -1,0 +1,50 @@
+name: bonsai-lowbit-runtime-linear-onnx
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Show runner resources
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --no-cache-dir huggingface_hub onnx onnxscript onnxruntime
+
+      - name: Export and run low-bit runtime linear ONNX
+        run: |
+          python scripts/export_bonsai_lowbit_runtime_linear_onnx.py
+
+      - name: Show ONNX probe summary
+        if: always()
+        run: |
+          if [ -f reports/bonsai-lowbit-runtime-linear-onnx/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-runtime-linear-onnx/report.json').read_text()); s=r.get('initializer_summary',{}); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'constant_folding_disabled': r.get('constant_folding_disabled'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'packed_nbytes': r.get('packed_nbytes'), 'expanded_fp32_weight_nbytes': r.get('expanded_fp32_weight_nbytes'), 'initializer_estimated_nbytes': s.get('initializer_estimated_nbytes'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error')}, indent=2))"
+          fi
+
+      - name: Upload ONNX probe report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-lowbit-runtime-linear-onnx-report
+          path: reports/bonsai-lowbit-runtime-linear-onnx/report.json
+          retention-days: 7
