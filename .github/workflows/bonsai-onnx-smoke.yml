@@ -26,19 +26,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml huggingface_hub hf_transfer onnx onnxruntime diffusers transformers accelerate safetensors torch
 
-      - name: Self-test Bonsai ONNX probe script
+      - name: Self-test Bonsai script
         run: |
           python scripts/run_bonsai_onnx_probe.py --self-test
 
-      - name: Run Bonsai ONNX CPU layout probe
+      - name: Run Bonsai staged check
         env:
-          BONSAI_REQUIRED_MILESTONE: layout_probe
-          BONSAI_DOWNLOAD_WEIGHTS: "false"
-          BONSAI_EXPORT_COMPONENT: vae_decoder
+          HF_HUB_ENABLE_HF_TRANSFER: "1"
         run: |
           python scripts/run_bonsai_onnx_probe.py
 
-      - name: Upload Bonsai ONNX probe report
+      - name: Upload Bonsai report
         if: always()
         uses: actions/upload-artifact@v4
         with:
