@@ -1,0 +1,70 @@
+assetpack:
+  id: assetpack-template
+  title: "Assetpack Template"
+  version: 0.1.0
+
+theme:
+  locked: true
+  category: coloring_lineart
+  description: "Fixed-theme prompt recipe generation and CI image-generation experiments"
+
+generation:
+  image_generation: true
+  mode: smoke_test
+  allow_commit_generated_images: false
+  width: 256
+  height: 256
+  images_per_prompt: 1
+  timeout_minutes_per_model: 20
+
+prompt_policy:
+  mechanical_only: true
+  allow_free_prompt: false
+  required_terms:
+    - "black outline"
+    - "white background"
+    - "closed regions"
+    - "no text"
+  banned_terms_file: constraints/banned_terms.json
+
+dedupe:
+  exact: true
+  canonical_slots: true
+  normalized_prompt_hash: true
+  near_duplicate:
+    enabled: true
+    method: jaccard_shingles
+    shingle_size: 3
+    threshold: 0.85
+
+records:
+  keep_summary: true
+  keep_failure_reason: true
+  keep_artifacts: false
+  artifact_retention_days: 7
+
+license:
+  allowed:
+    - CC0-1.0
+    - CC-BY-4.0
+    - OWNED
+  default: CC0-1.0
+
+models:
+  candidates:
+    - id: tiny-sd
+      enabled: false
+      role: cpu_smoke
+      backend: diffusers
+    - id: sd-turbo
+      enabled: false
+      role: cpu_smoke
+      backend: diffusers
+    - id: bk-sdm-tiny
+      enabled: false
+      role: cpu_smoke
+      backend: diffusers
+    - id: bonsai-image-4b
+      enabled: false
+      role: cpu_experimental
+      backend: experimental
