@@ -1,0 +1,20 @@
+id: bonsai-onnx-smoke-v0
+purpose: test whether Bonsai Image 4B unpacked can be exported to ONNX for CPU runtime experiments
+runner: ubuntu-latest
+
+limits:
+  timeout_minutes: 90
+  artifact_retention_days: 7
+
+candidate:
+  id: bonsai-image-4b-binary-unpacked
+  backend: onnx-export-probe
+  model_ref: prism-ml/bonsai-image-binary-4B-unpacked
+  task: text-to-image
+  library_name: diffusers
+
+policy:
+  commit_outputs: false
+  upload_artifact: true
+  concurrency_group: bonsai-onnx-smoke-queue
+  expected_failure_if_not_diffusers_pipeline: true
