@@ -1,0 +1,4 @@
+id: coloring_lineart_default
+version: 1
+prompt: "simple black outline {subject} for {audience}, {scene}, white background, closed regions, clean continuous thick lines, no text"
+negative_prompt: "color, gray, shadow, texture, thin lines, broken lines, text, logo, watermark"
