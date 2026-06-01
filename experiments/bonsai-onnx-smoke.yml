@@ -1,5 +1,5 @@
-id: bonsai-onnx-smoke-v1
-purpose: staged Bonsai Image 4B ONNX Runtime CPU experiment
+id: bonsai-onnx-smoke-v2
+purpose: staged Bonsai ONNX CPU experiment
 runner: ubuntu-latest
 
 limits:
@@ -22,11 +22,12 @@ cpu_smoke:
       prompt: a simple bonsai tree, white background, no text
 
 export:
-  required_milestone: ort_cpu_forward
+  required_milestone: component_load
   download_weights: true
-  component: vae_decoder
+  component: transformer
   milestones:
     - layout_probe
+    - component_load
     - component_export
     - ort_cpu_forward
     - cpu_image_generation
