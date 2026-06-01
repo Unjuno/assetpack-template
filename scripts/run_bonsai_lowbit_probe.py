@@ -93,6 +93,49 @@ def analyze(files: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def summarize_json(value: Any, depth: int = 0) -> Any:
+    if depth >= 3:
+        if isinstance(value, dict):
+            return {"type": "dict", "keys": sorted(map(str, value.keys()))[:40], "len": len(value)}
+        if isinstance(value, list):
+            return {"type": "list", "len": len(value), "sample": value[:3]}
+        return value
+    if isinstance(value, dict):
+        return {str(k): summarize_json(v, depth + 1) for k, v in list(value.items())[:80]}
+    if isinstance(value, list):
+        return [summarize_json(v, depth + 1) for v in value[:20]]
+    return value
+
+
+def download_metadata(model_ref: str, json_files: list[str], out_dir: Path) -> dict[str, Any]:
+    from huggingface_hub import hf_hub_download
+
+    meta_dir = out_dir / "metadata"
+    meta_dir.mkdir(parents=True, exist_ok=True)
+    wanted = [
+        "manifest.json",
+        "transformer-gemlite-int1/config.json",
+        "transformer-gemlite-int1/quantization_config.json",
+        "transformer-gemlite-int1/gemlite_autotune.json",
+        "text_encoder-hqq-4bit/config.json",
+        "vae/config.json",
+    ]
+    selected = [p for p in wanted if p in set(json_files)]
+    summaries: dict[str, Any] = {}
+    copied: list[str] = []
+    for path in selected:
+        local = Path(hf_hub_download(repo_id=model_ref, filename=path, repo_type="model"))
+        data = json.loads(local.read_text(encoding="utf-8"))
+        target = meta_dir / path.replace("/", "__")
+        target.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        copied.append(str(target))
+        summaries[path] = {
+            "top_level_keys": sorted(map(str, data.keys())) if isinstance(data, dict) else None,
+            "summary": summarize_json(data),
+        }
+    return {"metadata_files": selected, "copied_files": copied, "summaries": summaries}
+
+
 def add_stage(result: dict[str, Any], name: str, fn):
     start = time.time()
     try:
@@ -104,8 +147,11 @@ def add_stage(result: dict[str, Any], name: str, fn):
         raise
 
 
-def conversion_plan(analysis: dict[str, Any]) -> dict[str, Any]:
+def conversion_plan(analysis: dict[str, Any], metadata: dict[str, Any] | None = None) -> dict[str, Any]:
     kinds = analysis.get("by_kind", {})
+    summaries = (metadata or {}).get("summaries", {})
+    qcfg = summaries.get("transformer-gemlite-int1/quantization_config.json", {})
+    manifest = summaries.get("manifest.json", {})
     return {
         "target": "onnxruntime-cpu",
         "source_pack_summary": {
@@ -113,18 +159,24 @@ def conversion_plan(analysis: dict[str, Any]) -> dict[str, Any]:
             "has_hqq_markers": analysis["runtime_inference"]["looks_like_hqq_pack"],
             "has_gemlite_markers": analysis["runtime_inference"]["looks_like_gemlite_pack"],
             "has_model_index_json": analysis["has_model_index_json"],
+            "largest_files": analysis.get("large_files", [])[:5],
         },
+        "metadata_signals": {
+            "manifest_keys": manifest.get("top_level_keys"),
+            "transformer_quantization_config_keys": qcfg.get("top_level_keys"),
+        },
+        "decision": "probe metadata first; do not attempt direct ONNX Runtime CPU execution of Gemlite kernels",
         "next_actions": [
-            "download small json/config files only and inspect quantization metadata",
-            "identify exact packed tensor file format and loader class",
-            "check whether dequantized torch modules can be materialized without CUDA",
-            "if CPU materialization works, export dequantized component to ONNX as a correctness baseline",
-            "if CPU materialization does not work, implement or reuse a pack reader before ONNX export",
+            "inspect transformer-gemlite-int1/quantization_config.json to identify packed tensor schema",
+            "download transformer-gemlite-int1/state_dict.pt in a controlled run and inspect torch object keys on CPU",
+            "determine whether packed tensors include enough scales/zeros/metadata to dequantize to FP16/BF16 tensors",
+            "if CPU dequantization works, export a dequantized transformer component to ONNX as a correctness baseline",
+            "if CPU dequantization does not work, implement or reuse a Gemlite pack reader before ONNX export",
         ],
         "hard_constraints": [
             "ONNX Runtime CPU does not execute Gemlite CUDA kernels directly",
-            "a successful low-bit ONNX path needs either dequantization to standard tensors or custom ONNX-compatible low-bit operators",
-            "do not claim full text-to-image support until transformer, text encoder, scheduler, and VAE are composed",
+            "HQQ text encoder and Gemlite transformer are separate packed formats",
+            "full text-to-image support requires transformer, text encoder, scheduler, and VAE composition",
         ],
     }
 
@@ -152,12 +204,19 @@ def run(args: argparse.Namespace) -> int:
     start = time.time()
     try:
         payload = add_stage(result, "pack_layout_probe", lambda: {"analysis": analyze(hf_files(cand["model_ref"]))})
+        analysis = payload["analysis"]
         result["milestone_reached"] = "pack_layout_probe"
         if rank(required) <= rank("pack_layout_probe"):
             result["status"] = "passed"
             return 0
 
-        plan = add_stage(result, "cpu_conversion_plan", lambda: {"plan": conversion_plan(payload["analysis"])})
+        metadata = add_stage(result, "metadata_download", lambda: download_metadata(cand["model_ref"], analysis.get("json_files", []), out_dir))
+        result["milestone_reached"] = "metadata_download"
+        if rank(required) <= rank("metadata_download"):
+            result["status"] = "passed"
+            return 0
+
+        add_stage(result, "cpu_conversion_plan", lambda: {"plan": conversion_plan(analysis, metadata)})
         result["milestone_reached"] = "cpu_conversion_plan"
         if rank(required) <= rank("cpu_conversion_plan"):
             result["status"] = "passed"
@@ -178,12 +237,14 @@ def run(args: argparse.Namespace) -> int:
 def self_test() -> int:
     analysis = analyze([
         {"path": "README.md", "size": 10},
-        {"path": "transformer/gemlite_qlinear.pt", "size": 1024},
-        {"path": "text_encoder/hqq_config.json", "size": 20},
+        {"path": "manifest.json", "size": 20},
+        {"path": "transformer-gemlite-int1/quantization_config.json", "size": 30},
+        {"path": "transformer-gemlite-int1/state_dict.pt", "size": 1024},
+        {"path": "text_encoder-hqq-4bit/qmodel.pt", "size": 2048},
     ])
     assert analysis["runtime_inference"]["looks_like_gemlite_pack"] is True
     assert analysis["runtime_inference"]["looks_like_hqq_pack"] is True
-    assert rank("pack_layout_probe") == 0
+    assert rank("metadata_download") == 1
     print("self-test passed")
     return 0
 
