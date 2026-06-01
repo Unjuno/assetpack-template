@@ -9,7 +9,7 @@ from typing import Any
 
 import yaml
 
-MILESTONES = ["pack_layout_probe", "metadata_download", "cpu_conversion_plan"]
+MILESTONES = ["pack_layout_probe", "metadata_download", "state_dict_inspect", "cpu_conversion_plan"]
 
 
 def rank(name: str) -> int:
@@ -136,6 +136,79 @@ def download_metadata(model_ref: str, json_files: list[str], out_dir: Path) -> d
     return {"metadata_files": selected, "copied_files": copied, "summaries": summaries}
 
 
+def tensor_summary(value: Any) -> dict[str, Any]:
+    try:
+        import torch
+    except Exception:
+        torch = None
+    if torch is not None and isinstance(value, torch.Tensor):
+        return {"kind": "tensor", "shape": list(value.shape), "dtype": str(value.dtype), "device": str(value.device), "numel": int(value.numel())}
+    if isinstance(value, dict):
+        return {"kind": "dict", "len": len(value), "keys": sorted(map(str, value.keys()))[:50]}
+    if isinstance(value, (list, tuple)):
+        return {"kind": type(value).__name__, "len": len(value), "sample_types": [type(x).__name__ for x in list(value)[:10]]}
+    return {"kind": type(value).__name__, "repr": repr(value)[:200]}
+
+
+def inspect_state_dict(model_ref: str, out_dir: Path) -> dict[str, Any]:
+    import torch
+    from huggingface_hub import hf_hub_download
+
+    local = Path(hf_hub_download(repo_id=model_ref, filename="transformer-gemlite-int1/state_dict.pt", repo_type="model"))
+    try:
+        obj = torch.load(local, map_location="cpu", weights_only=True)
+        load_mode = "weights_only_true"
+    except TypeError:
+        obj = torch.load(local, map_location="cpu")
+        load_mode = "legacy_torch_load"
+    except Exception as exc:
+        obj = torch.load(local, map_location="cpu", weights_only=False)
+        load_mode = f"weights_only_false_after_{type(exc).__name__}"
+
+    if isinstance(obj, dict):
+        keys = sorted(map(str, obj.keys()))
+        entries = []
+        dtype_counts: dict[str, int] = {}
+        tensor_count = 0
+        tensor_numel = 0
+        for key in keys[:300]:
+            value = obj[key]
+            summary = tensor_summary(value)
+            summary["key"] = key
+            entries.append(summary)
+            if summary.get("kind") == "tensor":
+                tensor_count += 1
+                dtype = summary["dtype"]
+                dtype_counts[dtype] = dtype_counts.get(dtype, 0) + 1
+                tensor_numel += int(summary["numel"])
+        top_kind = "dict"
+    else:
+        keys = []
+        entries = [tensor_summary(obj)]
+        dtype_counts = {}
+        tensor_count = 0
+        tensor_numel = 0
+        top_kind = type(obj).__name__
+
+    result = {
+        "local_path": str(local),
+        "file_size_bytes": local.stat().st_size,
+        "file_size_mb": mb(local.stat().st_size),
+        "torch_load_mode": load_mode,
+        "top_kind": top_kind,
+        "top_key_count": len(keys),
+        "top_keys_sample": keys[:100],
+        "entries_sample": entries,
+        "tensor_count_sampled": tensor_count,
+        "tensor_numel_sampled": tensor_numel,
+        "dtype_counts_sampled": dtype_counts,
+    }
+    target = out_dir / "state_dict_inspect.json"
+    target.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    result["copied_summary"] = str(target)
+    return result
+
+
 def add_stage(result: dict[str, Any], name: str, fn):
     start = time.time()
     try:
@@ -147,7 +220,7 @@ def add_stage(result: dict[str, Any], name: str, fn):
         raise
 
 
-def conversion_plan(analysis: dict[str, Any], metadata: dict[str, Any] | None = None) -> dict[str, Any]:
+def conversion_plan(analysis: dict[str, Any], metadata: dict[str, Any] | None = None, state_dict: dict[str, Any] | None = None) -> dict[str, Any]:
     kinds = analysis.get("by_kind", {})
     summaries = (metadata or {}).get("summaries", {})
     qcfg = summaries.get("transformer-gemlite-int1/quantization_config.json", {})
@@ -165,13 +238,19 @@ def conversion_plan(analysis: dict[str, Any], metadata: dict[str, Any] | None = 
             "manifest_keys": manifest.get("top_level_keys"),
             "transformer_quantization_config_keys": qcfg.get("top_level_keys"),
         },
-        "decision": "probe metadata first; do not attempt direct ONNX Runtime CPU execution of Gemlite kernels",
+        "state_dict_signals": {
+            "available": state_dict is not None,
+            "top_kind": None if state_dict is None else state_dict.get("top_kind"),
+            "top_key_count": None if state_dict is None else state_dict.get("top_key_count"),
+            "dtype_counts_sampled": None if state_dict is None else state_dict.get("dtype_counts_sampled"),
+        },
+        "decision": "inspect packed tensors first; do not claim direct ONNX Runtime CPU execution of Gemlite kernels",
         "next_actions": [
-            "inspect transformer-gemlite-int1/quantization_config.json to identify packed tensor schema",
-            "download transformer-gemlite-int1/state_dict.pt in a controlled run and inspect torch object keys on CPU",
-            "determine whether packed tensors include enough scales/zeros/metadata to dequantize to FP16/BF16 tensors",
-            "if CPU dequantization works, export a dequantized transformer component to ONNX as a correctness baseline",
-            "if CPU dequantization does not work, implement or reuse a Gemlite pack reader before ONNX export",
+            "map state_dict key schema to quantized_fqns from quantization_config.json",
+            "identify packed weight tensors, scale tensors, and skipped fp16 tensors",
+            "write a CPU dequantization probe for one small Gemlite INT1 linear layer",
+            "compare dequantized tensor shape against matching unpacked transformer module",
+            "only after dequantization is validated, attempt ONNX export of a dequantized component",
         ],
         "hard_constraints": [
             "ONNX Runtime CPU does not execute Gemlite CUDA kernels directly",
@@ -216,7 +295,13 @@ def run(args: argparse.Namespace) -> int:
             result["status"] = "passed"
             return 0
 
-        add_stage(result, "cpu_conversion_plan", lambda: {"plan": conversion_plan(analysis, metadata)})
+        state_dict = add_stage(result, "state_dict_inspect", lambda: inspect_state_dict(cand["model_ref"], out_dir))
+        result["milestone_reached"] = "state_dict_inspect"
+        if rank(required) <= rank("state_dict_inspect"):
+            result["status"] = "passed"
+            return 0
+
+        add_stage(result, "cpu_conversion_plan", lambda: {"plan": conversion_plan(analysis, metadata, state_dict)})
         result["milestone_reached"] = "cpu_conversion_plan"
         if rank(required) <= rank("cpu_conversion_plan"):
             result["status"] = "passed"
@@ -244,7 +329,7 @@ def self_test() -> int:
     ])
     assert analysis["runtime_inference"]["looks_like_gemlite_pack"] is True
     assert analysis["runtime_inference"]["looks_like_hqq_pack"] is True
-    assert rank("metadata_download") == 1
+    assert rank("state_dict_inspect") == 2
     print("self-test passed")
     return 0
 
