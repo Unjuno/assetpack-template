@@ -87,6 +87,12 @@ def find_unpacked_tensor() -> tuple[torch.Tensor, dict]:
     return tensor, meta
 
 
+def cosine64(a: torch.Tensor, b: torch.Tensor) -> float:
+    af = a.flatten().to(torch.float64)
+    bf = b.flatten().to(torch.float64)
+    return float((af @ bf) / (torch.linalg.vector_norm(af) * torch.linalg.vector_norm(bf)))
+
+
 def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     low, low_meta = load_lowbit_layer()
@@ -111,11 +117,12 @@ def main() -> int:
         "diff_stats": stat(diff),
         "mean_abs_error": float(diff.abs().mean()),
         "max_abs_error": float(diff.abs().max()),
-        "cosine_similarity": float(torch.nn.functional.cosine_similarity(low_f.flatten(), ref_f.flatten(), dim=0)),
-        "interpretation": "If cosine is high and MAE is low relative to ref std, this one-layer dequantization formula is plausible.",
+        "cosine_similarity_float64": cosine64(low_f, ref_f),
+        "exact_equal": bool(torch.equal(low_f, ref_f)),
+        "interpretation": "If exact_equal is true or MAE is near zero, this one-layer dequantization formula matches the unpacked reference.",
     }
     (OUT_DIR / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"layer": LAYER, "low_shape": report["lowbit_stats"]["shape"], "ref_shape": report["unpacked_stats"]["shape"], "mae": report["mean_abs_error"], "cosine": report["cosine_similarity"]}, indent=2))
+    print(json.dumps({"layer": LAYER, "low_shape": report["lowbit_stats"]["shape"], "ref_shape": report["unpacked_stats"]["shape"], "mae": report["mean_abs_error"], "cosine64": report["cosine_similarity_float64"], "exact_equal": report["exact_equal"]}, indent=2))
     return 0
 
 
