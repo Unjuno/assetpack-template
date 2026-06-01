@@ -1,0 +1,61 @@
+name: bonsai-lowbit-smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bonsai-lowbit-smoke-queue
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Show runner resources
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+
+      - name: Install probe dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir pyyaml huggingface_hub
+
+      - name: Self-test low-bit probe
+        run: |
+          python scripts/run_bonsai_lowbit_probe.py --self-test
+
+      - name: Run low-bit pack probe
+        run: |
+          python scripts/run_bonsai_lowbit_probe.py
+
+      - name: Show low-bit report summary
+        if: always()
+        run: |
+          if [ -f reports/bonsai-lowbit-smoke/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-smoke/report.json').read_text()); print(json.dumps({'status': r.get('status'), 'milestone_reached': r.get('milestone_reached'), 'error_type': r.get('error_type'), 'stages': [(s.get('name'), s.get('status'), s.get('error_type')) for s in r.get('stages', [])]}, indent=2))"
+          fi
+
+      - name: Upload low-bit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-lowbit-smoke-report
+          path: reports/bonsai-lowbit-smoke/
+          retention-days: 7
