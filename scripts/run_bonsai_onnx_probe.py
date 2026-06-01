@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import gc
 import json
 import os
 import time
@@ -10,7 +11,7 @@ from typing import Any
 
 import yaml
 
-MILESTONES = ["layout_probe", "component_export", "ort_cpu_forward", "cpu_image_generation"]
+MILESTONES = ["layout_probe", "component_load", "component_export", "ort_cpu_forward", "cpu_image_generation"]
 
 
 def rank(name: str) -> int:
@@ -94,6 +95,72 @@ def add_stage(result: dict[str, Any], name: str, fn):
         raise
 
 
+def load_component(model_ref: str, component: str) -> dict[str, Any]:
+    if component == "vae_decoder":
+        from huggingface_hub import hf_hub_download
+
+        config_path = hf_hub_download(repo_id=model_ref, filename="vae/config.json", repo_type="model")
+        config = json.loads(Path(config_path).read_text(encoding="utf-8"))
+        return {
+            "component": component,
+            "load_kind": "config_only",
+            "class_name": config.get("_class_name", "AutoencoderKL"),
+            "config_keys": sorted(config.keys()),
+        }
+
+    if component == "transformer":
+        import torch
+        import diffusers
+        from huggingface_hub import hf_hub_download
+
+        config_path = hf_hub_download(repo_id=model_ref, filename="transformer/config.json", repo_type="model")
+        config = json.loads(Path(config_path).read_text(encoding="utf-8"))
+        class_name = config.get("_class_name", "FluxTransformer2DModel")
+        cls = getattr(diffusers, class_name)
+        model = cls.from_pretrained(
+            model_ref,
+            subfolder="transformer",
+            torch_dtype=torch.float16,
+            low_cpu_mem_usage=True,
+        )
+        model.eval()
+        dtype_counts: dict[str, int] = {}
+        param_count = 0
+        for param in model.parameters():
+            dtype_counts[str(param.dtype)] = dtype_counts.get(str(param.dtype), 0) + param.numel()
+            param_count += param.numel()
+        payload = {
+            "component": component,
+            "load_kind": "weights",
+            "class_name": class_name,
+            "param_count": int(param_count),
+            "param_count_billion": round(param_count / 1_000_000_000, 3),
+            "dtype_param_counts": dtype_counts,
+            "config_keys": sorted(config.keys()),
+            "selected_config": {
+                key: config.get(key)
+                for key in [
+                    "in_channels",
+                    "out_channels",
+                    "num_layers",
+                    "num_single_layers",
+                    "attention_head_dim",
+                    "num_attention_heads",
+                    "joint_attention_dim",
+                    "pooled_projection_dim",
+                    "guidance_embeds",
+                    "axes_dims_rope",
+                ]
+                if key in config
+            },
+        }
+        del model
+        gc.collect()
+        return payload
+
+    raise RuntimeError(f"unsupported component: {component}")
+
+
 def export_vae_decoder(model_ref: str, out_dir: Path, width: int, height: int) -> dict[str, Any]:
     import torch
     from diffusers import AutoencoderKL
@@ -137,6 +204,14 @@ def export_vae_decoder(model_ref: str, out_dir: Path, width: int, height: int) -
         "onnx_size_mb": mb(out_path.stat().st_size),
         "input_shape": list(dummy.shape),
     }
+
+
+def export_component(model_ref: str, component: str, out_dir: Path, width: int, height: int) -> dict[str, Any]:
+    if component == "vae_decoder":
+        return export_vae_decoder(model_ref, out_dir, width, height)
+    if component == "transformer":
+        raise RuntimeError("transformer ONNX export is intentionally gated behind a successful transformer component_load run")
+    raise RuntimeError(f"unsupported component: {component}")
 
 
 def ort_forward(onnx_path: Path, input_shape: list[int]) -> dict[str, Any]:
@@ -194,14 +269,18 @@ def run(args: argparse.Namespace) -> int:
             return 0
 
         if not download:
-            raise RuntimeError("component export requires workflow input download_weights=true")
-        if component != "vae_decoder":
-            raise RuntimeError("only vae_decoder is implemented as the first component export target")
+            raise RuntimeError("component load requires download_weights=true")
+
+        add_stage(result, "component_load", lambda: load_component(cand["model_ref"], component))
+        result["milestone_reached"] = "component_load"
+        if rank(required) <= rank("component_load"):
+            result["status"] = "passed"
+            return 0
 
         payload = add_stage(
             result,
             "component_export",
-            lambda: export_vae_decoder(cand["model_ref"], out_dir, int(cpu.get("width", 128)), int(cpu.get("height", 128))),
+            lambda: export_component(cand["model_ref"], component, out_dir, int(cpu.get("width", 128)), int(cpu.get("height", 128))),
         )
         result["milestone_reached"] = "component_export"
         if rank(required) <= rank("component_export"):
@@ -227,15 +306,19 @@ def run(args: argparse.Namespace) -> int:
 
 def self_test() -> int:
     assert rank("layout_probe") == 0
-    assert rank("ort_cpu_forward") == 2
+    assert rank("component_load") == 1
+    assert rank("ort_cpu_forward") == 3
     analysis = analyze([
         {"path": "README.md", "size": 1},
+        {"path": "transformer/config.json", "size": 2},
+        {"path": "transformer/diffusion_pytorch_model.safetensors", "size": 2048},
         {"path": "vae/config.json", "size": 2},
         {"path": "vae/diffusion_pytorch_model.safetensors", "size": 1024},
     ])
     assert analysis["has_model_index_json"] is False
     assert analysis["component_candidates"]["vae"]["present"] is True
-    assert analysis["safetensors_count"] == 1
+    assert analysis["component_candidates"]["transformer"]["present"] is True
+    assert analysis["safetensors_count"] == 2
     print("self-test passed")
     return 0
 
