@@ -49,5 +49,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bonsai-recovered-transformer-loader-report
-          path: reports/bonsai-recovered-transformer-checkpoint/
+          path: |
+            reports/bonsai-recovered-transformer-checkpoint/report.json
+            reports/bonsai-recovered-transformer-checkpoint/load_report.json
           retention-days: 7
