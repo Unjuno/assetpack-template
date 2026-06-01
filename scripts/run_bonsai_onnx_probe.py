@@ -32,6 +32,7 @@ def main() -> int:
         "model_id": cand.get("id"),
         "model_ref": cand.get("model_ref"),
         "backend": cand.get("backend"),
+        "library_name": cand.get("library_name", "diffusers"),
         "status": "failed",
         "stages": [],
     }
@@ -40,6 +41,7 @@ def main() -> int:
     try:
         export = run([
             "optimum-cli", "export", "onnx",
+            "--library", cand.get("library_name", "diffusers"),
             "--model", cand.get("model_ref"),
             "--task", cand.get("task", "text-to-image"),
             str(onnx_dir),
