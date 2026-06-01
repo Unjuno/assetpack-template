@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any
 
 import torch
-from diffusers import FluxTransformer2DModel
 from huggingface_hub import hf_hub_download
 from safetensors import safe_open
 
@@ -19,6 +18,7 @@ UNPACKED_TRANSFORMER = "transformer/diffusion_pytorch_model.safetensors"
 OUT_DIR = Path("reports/bonsai-single-block-inventory")
 BLOCK_INDEX = 0
 BLOCK_PREFIX = f"single_transformer_blocks.{BLOCK_INDEX}"
+FUSED_QKV_MLP = f"{BLOCK_PREFIX}.attn.to_qkv_mlp_proj.weight"
 
 
 def tensor_shape_map_from_safetensors(path: Path) -> dict[str, list[int]]:
@@ -40,10 +40,6 @@ def lowbit_recovered_shapes(sd: dict[str, Any]) -> dict[str, list[int]]:
     return shapes
 
 
-def block_related_module_keys(module_keys: list[str]) -> list[str]:
-    return sorted(k for k in module_keys if k.startswith(BLOCK_PREFIX + "."))
-
-
 def block_related_checkpoint_keys(keys: set[str]) -> list[str]:
     return sorted(k for k in keys if k.startswith(BLOCK_PREFIX + "."))
 
@@ -61,6 +57,25 @@ def classify_checkpoint_key(key: str, q_prefixes: set[str]) -> str:
     return "other_passthrough"
 
 
+def infer_split_targets_from_fused(fused_shape: list[int]) -> dict[str, Any]:
+    out_features, in_features = fused_shape
+    hidden_size = in_features
+    mlp_size = out_features - 3 * hidden_size
+    return {
+        "fused_key": FUSED_QKV_MLP,
+        "fused_shape": fused_shape,
+        "hidden_size": hidden_size,
+        "mlp_size": mlp_size,
+        "valid": mlp_size > 0,
+        "inferred_split_outputs": [
+            {"logical_name": "attn.to_q", "shape": [hidden_size, in_features], "range": [0, hidden_size]},
+            {"logical_name": "attn.to_k", "shape": [hidden_size, in_features], "range": [hidden_size, 2 * hidden_size]},
+            {"logical_name": "attn.to_v", "shape": [hidden_size, in_features], "range": [2 * hidden_size, 3 * hidden_size]},
+            {"logical_name": "proj_mlp", "shape": [mlp_size, in_features], "range": [3 * hidden_size, out_features]},
+        ],
+    }
+
+
 def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     config_path = Path(hf_hub_download(repo_id=UNPACKED_REF, filename=TRANSFORMER_CONFIG, repo_type="model"))
@@ -68,29 +83,26 @@ def main() -> int:
     _lowbit_path, lowbit_sd = load_lowbit_transformer_state_dict(LOWBIT_REF)
     recovered_shapes = lowbit_recovered_shapes(lowbit_sd)
     q_prefixes = set(quantized_prefixes(lowbit_sd))
-
-    config = FluxTransformer2DModel.load_config(str(config_path.parent))
-    module = FluxTransformer2DModel.from_config(config)
-    module_shapes = {k: list(v.shape) for k, v in module.state_dict().items()}
     reference_shapes = tensor_shape_map_from_safetensors(ref_path)
 
-    module_block_keys = block_related_module_keys(list(module_shapes))
     checkpoint_block_keys = block_related_checkpoint_keys(set(reference_shapes))
     recovered_block_keys = block_related_checkpoint_keys(set(recovered_shapes))
 
     checkpoint_entries = []
+    class_counts: dict[str, int] = {}
     for key in checkpoint_block_keys:
+        cls = classify_checkpoint_key(key, q_prefixes)
+        class_counts[cls] = class_counts.get(cls, 0) + 1
         checkpoint_entries.append({
             "key": key,
             "shape": reference_shapes[key],
             "recovered_shape": recovered_shapes.get(key),
-            "class": classify_checkpoint_key(key, q_prefixes),
+            "class": cls,
             "available_from_lowbit": key in recovered_shapes,
         })
 
-    # Diffusers module uses split keys; checkpoint may use fused keys. Summarize likely fused mappings.
-    split_candidates = [k for k in module_block_keys if any(part in k for part in [".attn.to_q.", ".attn.to_k.", ".attn.to_v.", ".proj_mlp."])]
     fused_candidates = [k for k in checkpoint_block_keys if "to_qkv_mlp_proj" in k]
+    split_inference = infer_split_targets_from_fused(reference_shapes[FUSED_QKV_MLP]) if FUSED_QKV_MLP in reference_shapes else None
 
     missing_recovered = sorted(set(checkpoint_block_keys) - set(recovered_block_keys))
     unexpected_recovered = sorted(set(recovered_block_keys) - set(checkpoint_block_keys))
@@ -106,19 +118,20 @@ def main() -> int:
         "block_prefix": BLOCK_PREFIX,
         "uses_lowbit_source": True,
         "writes_expanded_checkpoint": False,
-        "module_class": "FluxTransformer2DModel",
-        "module_block_key_count": len(module_block_keys),
+        "static_inventory_only": True,
+        "instantiates_full_transformer_module": False,
+        "config_path": str(config_path),
         "checkpoint_block_key_count": len(checkpoint_block_keys),
         "recovered_block_key_count": len(recovered_block_keys),
+        "class_counts": class_counts,
         "missing_recovered_count": len(missing_recovered),
         "unexpected_recovered_count": len(unexpected_recovered),
         "shape_mismatch_count": len(shape_mismatches),
         "all_checkpoint_block_keys_recoverable": not missing_recovered and not shape_mismatches,
         "checkpoint_entries": checkpoint_entries,
-        "module_block_keys_sample": module_block_keys[:120],
         "checkpoint_block_keys": checkpoint_block_keys,
-        "split_module_candidates": split_candidates,
         "fused_checkpoint_candidates": fused_candidates,
+        "fused_split_inference": split_inference,
         "missing_recovered": missing_recovered,
         "unexpected_recovered": unexpected_recovered,
         "shape_mismatches": shape_mismatches,
@@ -126,12 +139,14 @@ def main() -> int:
     (OUT_DIR / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "block_prefix": BLOCK_PREFIX,
-        "module_block_key_count": report["module_block_key_count"],
+        "static_inventory_only": report["static_inventory_only"],
+        "instantiates_full_transformer_module": report["instantiates_full_transformer_module"],
         "checkpoint_block_key_count": report["checkpoint_block_key_count"],
         "recovered_block_key_count": report["recovered_block_key_count"],
+        "class_counts": class_counts,
         "all_checkpoint_block_keys_recoverable": report["all_checkpoint_block_keys_recoverable"],
         "fused_checkpoint_candidates": fused_candidates,
-        "split_module_candidate_count": len(split_candidates),
+        "fused_split_inference": split_inference,
     }, indent=2))
     return 0 if report["all_checkpoint_block_keys_recoverable"] else 1
 
