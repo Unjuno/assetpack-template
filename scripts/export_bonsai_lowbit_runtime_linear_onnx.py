@@ -30,10 +30,15 @@ class LowBitLinearRuntimeOnnx(torch.nn.Module):
 
     def recovered_weight(self) -> torch.Tensor:
         # W_q is stored transposed: [packed_cols, out_features].
-        wq = self.wq_t.t().contiguous()
-        shifts = torch.arange(self.elements_per_sample, dtype=wq.dtype, device=wq.device) * self.nbits
-        mask = (1 << self.nbits) - 1
-        unpacked = ((wq.unsqueeze(-1) >> shifts) & mask).to(torch.float32).reshape(self.out_features, self.in_features)
+        # Avoid Tensor bitshift here because the current torch.onnx exporter does
+        # not lower aten.__rshift__. Use arithmetic unpack instead:
+        # floor(W_q / 2**shift) mod 2**nbits.
+        wq = self.wq_t.t().contiguous().to(torch.float32)
+        shifts = torch.arange(self.elements_per_sample, dtype=torch.float32, device=wq.device) * float(self.nbits)
+        divisors = torch.pow(torch.tensor(2.0, dtype=torch.float32, device=wq.device), shifts)
+        base = float(1 << self.nbits)
+        shifted = torch.floor(wq.unsqueeze(-1) / divisors)
+        unpacked = torch.remainder(shifted, base).reshape(self.out_features, self.in_features)
         scales = self.scales.t().contiguous().to(torch.float32).repeat_interleave(self.group_size, dim=1)
         zeros = self.zeros.t().contiguous().to(torch.float32).repeat_interleave(self.group_size, dim=1)
         return unpacked * scales + zeros
@@ -102,6 +107,7 @@ def main() -> int:
         "uses_lowbit_source": True,
         "writes_expanded_checkpoint": False,
         "constant_folding_disabled": True,
+        "unpack_lowering": "arithmetic_floor_div_mod_no_bitshift",
         "layer": LAYER,
         "lowbit_path": str(lowbit_path),
         "onnx_path": str(onnx_path),
@@ -120,6 +126,7 @@ def main() -> int:
         "uses_lowbit_source": report["uses_lowbit_source"],
         "writes_expanded_checkpoint": report["writes_expanded_checkpoint"],
         "constant_folding_disabled": report["constant_folding_disabled"],
+        "unpack_lowering": report["unpack_lowering"],
         "onnx_size_bytes": report["onnx_size_bytes"],
         "packed_nbytes": report["packed_nbytes"],
         "expanded_fp32_weight_nbytes": report["expanded_fp32_weight_nbytes"],
