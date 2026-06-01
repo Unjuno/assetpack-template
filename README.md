@@ -176,6 +176,21 @@ Initial candidate classes:
 
 The repository should store model test results in `reports/` so the final model decision is based on evidence, not preference.
 
+#### Bonsai ONNX Runtime CPU experiment
+
+`bonsai-onnx-smoke` is a CPU experiment. It does not use the official Bonsai GPU runtime.
+
+The previous probe tried to export `prism-ml/bonsai-image-binary-4B-unpacked` as one complete Diffusers pipeline with `optimum-cli export onnx --library diffusers`. That path fails before runtime because the model repository does not provide `model_index.json` for whole-pipeline loading.
+
+The current experiment is staged:
+
+1. `layout_probe` inspects the Hugging Face repository file layout.
+2. `component_export` exports an explicit component to ONNX. The first implemented target is `vae_decoder`.
+3. `ort_cpu_forward` loads the exported ONNX model with ONNX Runtime CPU and runs one tensor forward pass.
+4. `cpu_image_generation` is reserved for a later composed pipeline with text encoder, scheduler, transformer, and VAE.
+
+The default config currently requires `ort_cpu_forward`. That means CI must at least produce an ONNX component and execute it on CPU. It is not yet a full text-to-image pass. Full Bonsai CPU image generation remains a separate milestone because it must compose multiple heavy components and may exceed GitHub-hosted runner RAM.
+
 ### 8. Experiment Records
 
 Experiment records must be kept even if generated images are later deleted.
