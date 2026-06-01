@@ -1,5 +1,5 @@
-id: bonsai-smoke-v0
-purpose: test whether Bonsai Image 4B unpacked can run on public GitHub Actions CPU runner
+id: bonsai-smoke-v1
+purpose: test Bonsai Image 4B through the official Bonsai Image Demo path on public GitHub Actions
 runner: ubuntu-latest
 
 limits:
@@ -15,13 +15,16 @@ prompt:
   text: simple black outline sleeping cat, white background, no text
 
 candidate:
-  id: bonsai-image-4b-binary-unpacked
+  id: bonsai-image-4b-binary-gemlite
   enabled: true
-  backend: diffusers
-  model_ref: prism-ml/bonsai-image-binary-4B-unpacked
+  backend: official-demo
+  demo_repo: https://github.com/PrismML-Eng/Bonsai-Image-Demo.git
+  demo_ref: main
+  model: binary-gemlite
   role: cpu-smoke-experimental
 
 policy:
   commit_outputs: false
   upload_artifact: true
   concurrency_group: bonsai-smoke-queue
+  expected_failure_on_cpu_only: true
