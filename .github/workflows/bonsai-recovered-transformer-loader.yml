@@ -1,0 +1,53 @@
+name: bonsai-recovered-transformer-loader
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Show runner resources
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --no-cache-dir huggingface_hub safetensors diffusers transformers accelerate
+
+      - name: Build and load recovered transformer checkpoint
+        run: |
+          python scripts/load_bonsai_recovered_transformer_checkpoint.py
+
+      - name: Show loader summary
+        if: always()
+        run: |
+          if [ -f reports/bonsai-recovered-transformer-checkpoint/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-recovered-transformer-checkpoint/report.json').read_text()); print(json.dumps({'checkpoint_size_bytes': r.get('checkpoint_size_bytes'), 'recovered_key_count': r.get('recovered_key_count'), 'quantized_prefix_count': r.get('quantized_prefix_count'), 'dtype_numel_counts': r.get('dtype_numel_counts')}, indent=2))"
+          fi
+          if [ -f reports/bonsai-recovered-transformer-checkpoint/load_report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-recovered-transformer-checkpoint/load_report.json').read_text()); print(json.dumps({'load_status': r.get('load_status'), 'module_key_count': r.get('module_key_count'), 'param_count': r.get('param_count'), 'param_dtype_counts': r.get('param_dtype_counts')}, indent=2))"
+          fi
+
+      - name: Upload loader report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-recovered-transformer-loader-report
+          path: reports/bonsai-recovered-transformer-checkpoint/
+          retention-days: 7
