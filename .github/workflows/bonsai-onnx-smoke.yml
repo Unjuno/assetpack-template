@@ -14,27 +14,78 @@ jobs:
   export:
     runs-on: ubuntu-latest
     timeout-minutes: 180
+    env:
+      HF_HUB_ENABLE_HF_TRANSFER: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Show runner resources
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+
+      - name: Install CPU runtime dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyyaml huggingface_hub hf_transfer onnx onnxscript onnxruntime diffusers transformers accelerate safetensors torch
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --no-cache-dir pyyaml huggingface_hub hf_transfer safetensors onnx onnxscript onnxruntime diffusers transformers accelerate
+
+      - name: Verify Python packages
+        run: |
+          python - <<'PY'
+          import torch
+          import onnx
+          import onnxruntime as ort
+          import onnxscript
+          import diffusers
+          import transformers
+          import huggingface_hub
+          print('torch', torch.__version__)
+          print('cuda_available', torch.cuda.is_available())
+          print('onnx', onnx.__version__)
+          print('onnxruntime', ort.__version__)
+          print('onnxscript', onnxscript.__version__)
+          print('diffusers', diffusers.__version__)
+          print('transformers', transformers.__version__)
+          print('huggingface_hub', huggingface_hub.__version__)
+          print('ort_providers', ort.get_available_providers())
+          PY
 
       - name: Self-test Bonsai script
         run: |
           python scripts/run_bonsai_onnx_probe.py --self-test
 
       - name: Run Bonsai staged check
-        env:
-          HF_HUB_ENABLE_HF_TRANSFER: "1"
         run: |
           python scripts/run_bonsai_onnx_probe.py
+
+      - name: Show report summary
+        if: always()
+        run: |
+          if [ -f reports/bonsai-onnx-smoke/report.json ]; then
+            python - <<'PY'
+            import json
+            from pathlib import Path
+            report = json.loads(Path('reports/bonsai-onnx-smoke/report.json').read_text())
+            print(json.dumps({
+              'status': report.get('status'),
+              'required_milestone': report.get('required_milestone'),
+              'milestone_reached': report.get('milestone_reached'),
+              'error_type': report.get('error_type'),
+              'error': report.get('error'),
+              'stages': [(s.get('name'), s.get('status'), s.get('error_type')) for s in report.get('stages', [])],
+            }, indent=2))
+            PY
+          fi
 
       - name: Upload Bonsai report
         if: always()
