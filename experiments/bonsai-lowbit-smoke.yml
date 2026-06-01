@@ -1,5 +1,5 @@
-id: bonsai-lowbit-smoke-v1
-purpose: inspect Bonsai low-bit metadata before attempting CPU ONNX conversion
+id: bonsai-lowbit-smoke-v2
+purpose: inspect Bonsai low-bit state dict before attempting CPU ONNX conversion
 runner: ubuntu-latest
 
 limits:
@@ -14,13 +14,14 @@ candidate:
   task: text-to-image
 
 probe:
-  required_milestone: cpu_conversion_plan
-  download_large_files: false
+  required_milestone: state_dict_inspect
+  download_large_files: true
   known_runtime: gemlite-hqq-cuda
   target_runtime: onnxruntime-cpu
   milestones:
     - pack_layout_probe
     - metadata_download
+    - state_dict_inspect
     - cpu_conversion_plan
 
 policy:
