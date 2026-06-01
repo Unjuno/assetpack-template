@@ -22,8 +22,8 @@ cpu_smoke:
       prompt: a simple bonsai tree, white background, no text
 
 export:
-  required_milestone: layout_probe
-  download_weights: false
+  required_milestone: ort_cpu_forward
+  download_weights: true
   component: vae_decoder
   milestones:
     - layout_probe
