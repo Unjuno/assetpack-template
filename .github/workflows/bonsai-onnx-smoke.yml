@@ -41,24 +41,7 @@ jobs:
 
       - name: Verify Python packages
         run: |
-          python - <<'PY'
-          import torch
-          import onnx
-          import onnxruntime as ort
-          import onnxscript
-          import diffusers
-          import transformers
-          import huggingface_hub
-          print('torch', torch.__version__)
-          print('cuda_available', torch.cuda.is_available())
-          print('onnx', onnx.__version__)
-          print('onnxruntime', ort.__version__)
-          print('onnxscript', onnxscript.__version__)
-          print('diffusers', diffusers.__version__)
-          print('transformers', transformers.__version__)
-          print('huggingface_hub', huggingface_hub.__version__)
-          print('ort_providers', ort.get_available_providers())
-          PY
+          python -c "import torch, onnx, onnxruntime as ort, onnxscript, diffusers, transformers, huggingface_hub; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('onnx', onnx.__version__); print('onnxruntime', ort.__version__); print('onnxscript', onnxscript.__version__); print('diffusers', diffusers.__version__); print('transformers', transformers.__version__); print('huggingface_hub', huggingface_hub.__version__); print('ort_providers', ort.get_available_providers())"
 
       - name: Self-test Bonsai script
         run: |
@@ -72,19 +55,7 @@ jobs:
         if: always()
         run: |
           if [ -f reports/bonsai-onnx-smoke/report.json ]; then
-            python - <<'PY'
-            import json
-            from pathlib import Path
-            report = json.loads(Path('reports/bonsai-onnx-smoke/report.json').read_text())
-            print(json.dumps({
-              'status': report.get('status'),
-              'required_milestone': report.get('required_milestone'),
-              'milestone_reached': report.get('milestone_reached'),
-              'error_type': report.get('error_type'),
-              'error': report.get('error'),
-              'stages': [(s.get('name'), s.get('status'), s.get('error_type')) for s in report.get('stages', [])],
-            }, indent=2))
-            PY
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-onnx-smoke/report.json').read_text()); print(json.dumps({'status': r.get('status'), 'required_milestone': r.get('required_milestone'), 'milestone_reached': r.get('milestone_reached'), 'error_type': r.get('error_type'), 'error': r.get('error'), 'stages': [(s.get('name'), s.get('status'), s.get('error_type')) for s in r.get('stages', [])]}, indent=2))"
           fi
 
       - name: Upload Bonsai report
