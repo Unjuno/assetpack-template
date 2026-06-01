@@ -13,7 +13,12 @@ on:
           - bk-sdm-tiny
 
 permissions:
+  actions: read
   contents: write
+
+concurrency:
+  group: asset-generate-and-store-queue
+  cancel-in-progress: false
 
 jobs:
   generate:
@@ -26,6 +31,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Observe workflow queue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run list --workflow asset-generate-and-store.yml --status queued --limit 20 || true
+          gh run list --workflow asset-generate-and-store.yml --status in_progress --limit 20 || true
+
       - run: python -m pip install --upgrade pip
       - run: pip install pyyaml pillow torch diffusers transformers accelerate safetensors
 
@@ -37,6 +49,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
           git add generated/ reports/model-results.jsonl
           git commit -m "Store generated asset result for ${{ inputs.model }}" || echo "nothing to commit"
           git push
