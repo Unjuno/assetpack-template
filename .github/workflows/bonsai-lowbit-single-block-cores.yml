@@ -28,7 +28,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir huggingface_hub
+          pip install --no-cache-dir huggingface_hub safetensors
 
       - name: Probe all low-bit single block cores
         env:
@@ -40,6 +40,10 @@ jobs:
         run: |
           python scripts/probe_bonsai_lowbit_quantized_inventory.py
 
+      - name: Probe double block inventory
+        run: |
+          python scripts/probe_bonsai_double_block_inventory.py
+
       - name: Show block cores summary
         if: always()
         run: |
@@ -48,6 +52,9 @@ jobs:
           fi
           if [ -f reports/bonsai-lowbit-quantized-inventory/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-quantized-inventory/report.json').read_text()); print(json.dumps({'quantized_prefix_count': r.get('quantized_prefix_count'), 'single_transformer_quantized_count': r.get('single_transformer_quantized_count'), 'transformer_blocks_quantized_count': r.get('transformer_blocks_quantized_count'), 'other_quantized_count': r.get('other_quantized_count'), 'all_quantized_prefixes_classified': r.get('all_quantized_prefixes_classified')}, indent=2))"
+          fi
+          if [ -f reports/bonsai-double-block-inventory/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-double-block-inventory/report.json').read_text()); print(json.dumps({'block_prefix': r.get('block_prefix'), 'static_inventory_only': r.get('static_inventory_only'), 'checkpoint_block_key_count': r.get('checkpoint_block_key_count'), 'recovered_block_key_count': r.get('recovered_block_key_count'), 'quantized_key_count': r.get('quantized_key_count'), 'passthrough_key_count': r.get('passthrough_key_count'), 'all_checkpoint_block_keys_recoverable': r.get('all_checkpoint_block_keys_recoverable')}, indent=2))"
           fi
 
       - name: Upload reports
@@ -58,4 +65,5 @@ jobs:
           path: |
             reports/bonsai-lowbit-single-block-cores/report.json
             reports/bonsai-lowbit-quantized-inventory/report.json
+            reports/bonsai-double-block-inventory/report.json
           retention-days: 7
