@@ -9,7 +9,7 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
 
@@ -28,7 +28,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir huggingface_hub safetensors
+          pip install --no-cache-dir huggingface_hub safetensors onnx onnxscript onnxruntime
 
       - name: Probe all low-bit single block cores
         env:
@@ -54,6 +54,12 @@ jobs:
         run: |
           python scripts/probe_bonsai_lowbit_double_block_cores.py
 
+      - name: Export and run all low-bit double block cores ONNX
+        env:
+          BONSAI_DOUBLE_BLOCK_CORE_ONNX_LIMIT: "0"
+        run: |
+          python scripts/export_bonsai_lowbit_double_block_cores_onnx.py
+
       - name: Show block cores summary
         if: always()
         run: |
@@ -67,10 +73,13 @@ jobs:
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-double-block-inventory/report.json').read_text()); print(json.dumps({'block_prefix': r.get('block_prefix'), 'static_inventory_only': r.get('static_inventory_only'), 'checkpoint_block_key_count': r.get('checkpoint_block_key_count'), 'recovered_block_key_count': r.get('recovered_block_key_count'), 'quantized_key_count': r.get('quantized_key_count'), 'passthrough_key_count': r.get('passthrough_key_count'), 'all_checkpoint_block_keys_recoverable': r.get('all_checkpoint_block_keys_recoverable')}, indent=2))"
           fi
           if [ -f reports/bonsai-lowbit-double-block-core/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-double-block-core/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error'), 'outputs': r.get('outputs')}, indent=2))"
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-double-block-core/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error')}, indent=2))"
           fi
           if [ -f reports/bonsai-lowbit-double-block-cores/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-double-block-cores/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'double_block_core_count': r.get('double_block_core_count'), 'failure_count': r.get('failure_count'), 'allclose_all': r.get('allclose_all'), 'max_abs_error': r.get('max_abs_error'), 'total_seconds': r.get('total_seconds')}, indent=2))"
+          fi
+          if [ -f reports/bonsai-lowbit-double-block-cores-onnx/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-double-block-cores-onnx/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'double_block_core_count': r.get('double_block_core_count'), 'failure_count': r.get('failure_count'), 'all_passed': r.get('all_passed'), 'max_abs_error': r.get('max_abs_error'), 'max_initializer_to_expanded_fp32_ratio': r.get('max_initializer_to_expanded_fp32_ratio'), 'total_seconds': r.get('total_seconds')}, indent=2))"
           fi
 
       - name: Upload reports
@@ -84,4 +93,5 @@ jobs:
             reports/bonsai-double-block-inventory/report.json
             reports/bonsai-lowbit-double-block-core/report.json
             reports/bonsai-lowbit-double-block-cores/report.json
+            reports/bonsai-lowbit-double-block-cores-onnx/report.json
           retention-days: 7
