@@ -60,6 +60,10 @@ jobs:
         run: |
           python scripts/export_bonsai_lowbit_double_block_cores_onnx.py
 
+      - name: Probe low-bit transformer core stack
+        run: |
+          python scripts/probe_bonsai_lowbit_transformer_core_stack.py
+
       - name: Show block cores summary
         if: always()
         run: |
@@ -81,6 +85,9 @@ jobs:
           if [ -f reports/bonsai-lowbit-double-block-cores-onnx/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-double-block-cores-onnx/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'double_block_core_count': r.get('double_block_core_count'), 'failure_count': r.get('failure_count'), 'all_passed': r.get('all_passed'), 'max_abs_error': r.get('max_abs_error'), 'max_initializer_to_expanded_fp32_ratio': r.get('max_initializer_to_expanded_fp32_ratio'), 'total_seconds': r.get('total_seconds')}, indent=2))"
           fi
+          if [ -f reports/bonsai-lowbit-transformer-core-stack/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-transformer-core-stack/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_transformer': r.get('not_full_diffusers_transformer'), 'double_block_count': r.get('double_block_count'), 'single_block_count': r.get('single_block_count'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error'), 'seconds': r.get('seconds')}, indent=2))"
+          fi
 
       - name: Upload reports
         if: always()
@@ -94,4 +101,5 @@ jobs:
             reports/bonsai-lowbit-double-block-core/report.json
             reports/bonsai-lowbit-double-block-cores/report.json
             reports/bonsai-lowbit-double-block-cores-onnx/report.json
+            reports/bonsai-lowbit-transformer-core-stack/report.json
           retention-days: 7
