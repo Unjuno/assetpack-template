@@ -44,6 +44,10 @@ jobs:
         run: |
           python scripts/probe_bonsai_double_block_inventory.py
 
+      - name: Probe low-bit double block core
+        run: |
+          python scripts/probe_bonsai_lowbit_double_block_core.py
+
       - name: Show block cores summary
         if: always()
         run: |
@@ -56,6 +60,9 @@ jobs:
           if [ -f reports/bonsai-double-block-inventory/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-double-block-inventory/report.json').read_text()); print(json.dumps({'block_prefix': r.get('block_prefix'), 'static_inventory_only': r.get('static_inventory_only'), 'checkpoint_block_key_count': r.get('checkpoint_block_key_count'), 'recovered_block_key_count': r.get('recovered_block_key_count'), 'quantized_key_count': r.get('quantized_key_count'), 'passthrough_key_count': r.get('passthrough_key_count'), 'all_checkpoint_block_keys_recoverable': r.get('all_checkpoint_block_keys_recoverable')}, indent=2))"
           fi
+          if [ -f reports/bonsai-lowbit-double-block-core/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-double-block-core/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error'), 'outputs': r.get('outputs')}, indent=2))"
+          fi
 
       - name: Upload reports
         if: always()
@@ -66,4 +73,5 @@ jobs:
             reports/bonsai-lowbit-single-block-cores/report.json
             reports/bonsai-lowbit-quantized-inventory/report.json
             reports/bonsai-double-block-inventory/report.json
+            reports/bonsai-lowbit-double-block-core/report.json
           retention-days: 7
