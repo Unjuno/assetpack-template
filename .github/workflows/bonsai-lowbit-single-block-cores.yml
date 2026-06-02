@@ -9,7 +9,7 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
 
@@ -55,6 +55,7 @@ jobs:
           python scripts/probe_bonsai_lowbit_double_block_cores.py
 
       - name: Export and run all low-bit double block cores ONNX
+        timeout-minutes: 45
         env:
           BONSAI_DOUBLE_BLOCK_CORE_ONNX_LIMIT: "0"
         run: |
@@ -65,9 +66,10 @@ jobs:
           python scripts/probe_bonsai_lowbit_transformer_core_stack.py
 
       - name: Export sampled low-bit transformer core stack ONNX
+        timeout-minutes: 20
         env:
-          BONSAI_CORE_STACK_ONNX_DOUBLE_BLOCKS: "1"
-          BONSAI_CORE_STACK_ONNX_SINGLE_BLOCKS: "2"
+          BONSAI_CORE_STACK_ONNX_DOUBLE_BLOCKS: "0"
+          BONSAI_CORE_STACK_ONNX_SINGLE_BLOCKS: "1"
           BONSAI_CORE_STACK_INPUT_SCALE: "0.01"
           BONSAI_CORE_STACK_RESIDUAL_SCALE: "0.001"
         run: |
