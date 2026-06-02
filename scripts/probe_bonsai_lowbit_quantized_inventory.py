@@ -35,13 +35,13 @@ def classify_prefix(prefix: str) -> str:
         return "double_block_txt_to_v"
     if re.match(r"^transformer_blocks\.\d+\.attn\.to_add_out$", prefix):
         return "double_block_txt_to_out"
-    if re.match(r"^transformer_blocks\.\d+\.ff\.net\.0\.proj$", prefix):
+    if re.match(r"^transformer_blocks\.\d+\.ff\.linear_in$", prefix):
         return "double_block_img_ff_in"
-    if re.match(r"^transformer_blocks\.\d+\.ff\.net\.2$", prefix):
+    if re.match(r"^transformer_blocks\.\d+\.ff\.linear_out$", prefix):
         return "double_block_img_ff_out"
-    if re.match(r"^transformer_blocks\.\d+\.ff_context\.net\.0\.proj$", prefix):
+    if re.match(r"^transformer_blocks\.\d+\.ff_context\.linear_in$", prefix):
         return "double_block_txt_ff_in"
-    if re.match(r"^transformer_blocks\.\d+\.ff_context\.net\.2$", prefix):
+    if re.match(r"^transformer_blocks\.\d+\.ff_context\.linear_out$", prefix):
         return "double_block_txt_ff_out"
     return "other_quantized"
 
