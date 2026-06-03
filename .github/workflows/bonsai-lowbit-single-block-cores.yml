@@ -84,6 +84,9 @@ jobs:
       - name: Probe latent step smoke
         run: python scripts/probe_bonsai_latent_step_smoke.py
 
+      - name: Probe latent preview PNG smoke
+        run: python scripts/probe_bonsai_latent_preview_png.py
+
       - name: Export sampled low-bit transformer core stack ONNX
         timeout-minutes: 20
         env:
@@ -103,10 +106,11 @@ jobs:
             reports/bonsai-lowbit-rope-smoke/report.json \
             reports/bonsai-wrapper-smoke/report.json \
             reports/bonsai-latent-step-smoke/report.json \
+            reports/bonsai-latent-preview-png/report.json \
             reports/bonsai-lowbit-transformer-core-stack-onnx/report.json; do
             if [ -f "$f" ]; then
               echo "--- $f"
-              python -c "import json,sys; r=json.load(open(sys.argv[1])); print(json.dumps({k:r.get(k) for k in ['target','uses_lowbit_source','writes_expanded_checkpoint','double_block_count','single_block_count','allclose_rtol_1e_4_atol_1e_5','allclose','all_finite','max_abs_error','failure_count','failure'] if k in r}, indent=2))" "$f"
+              python -c "import json,sys; r=json.load(open(sys.argv[1])); print(json.dumps({k:r.get(k) for k in ['target','uses_lowbit_source','writes_expanded_checkpoint','double_block_count','single_block_count','allclose_rtol_1e_4_atol_1e_5','allclose','all_finite','has_png_artifact','png_size_bytes','max_abs_error','failure_count','failure'] if k in r}, indent=2))" "$f"
             fi
           done
 
@@ -130,5 +134,7 @@ jobs:
             reports/bonsai-lowbit-rope-smoke/report.json
             reports/bonsai-wrapper-smoke/report.json
             reports/bonsai-latent-step-smoke/report.json
+            reports/bonsai-latent-preview-png/report.json
+            reports/bonsai-latent-preview-png/latent_preview.png
             reports/bonsai-lowbit-transformer-core-stack-onnx/report.json
           retention-days: 7
