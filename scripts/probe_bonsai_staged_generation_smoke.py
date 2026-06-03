@@ -5,12 +5,14 @@ import torch
 import torch.nn.functional as F
 from bonsai_lowbit_recover import LOWBIT_REF, load_lowbit_transformer_state_dict
 from probe_bonsai_wrapper_smoke import run as run_wrapper, stat
-from probe_bonsai_lowbit_rope_smoke import run_block as run_rope_double0
-from probe_bonsai_lowbit_modulated_block_cores import double_block_modulated, single_block_modulated
+from probe_bonsai_lowbit_rope_smoke import rope
+from probe_bonsai_lowbit_modulated_block_cores import explicit_attention, layer_norm_modulated, lb, modulation_chunks, rms_norm_per_head, swiglu
 
 OUT_DIR = Path('reports/bonsai-staged-generation-smoke')
 STEP_SIZE = 0.05
 STEP_COUNT = 4
+DOUBLE_BLOCKS = 5
+SINGLE_BLOCKS = 20
 
 def png_chunk(tag, data):
     return struct.pack('>I', len(data)) + tag + data + struct.pack('>I', zlib.crc32(tag + data) & 0xffffffff)
@@ -35,33 +37,83 @@ def decoder(latent, seed_value):
     img = rgb.repeat_interleave((side * side + n - 1) // n, dim=0)[:side * side]
     return (img.reshape(side, side, 3) * 255).clamp(0, 255).byte().cpu().numpy()
 
-def lin(sd, key, x):
+def lin_plain(sd, key, x):
     return F.linear(x, sd[key].to(dtype=x.dtype, device=x.device))
 
 def tmlp(sd, x):
-    a = lin(sd, 'time_guidance_embed.timestep_embedder.linear_1.weight', x)
-    return lin(sd, 'time_guidance_embed.timestep_embedder.linear_2.weight', F.silu(a))
+    a = lin_plain(sd, 'time_guidance_embed.timestep_embedder.linear_1.weight', x)
+    return lin_plain(sd, 'time_guidance_embed.timestep_embedder.linear_2.weight', F.silu(a))
 
 def final(sd, img, temb):
-    shift, scale = lin(sd, 'norm_out.linear.weight', temb).chunk(2, dim=-1)
+    shift, scale = lin_plain(sd, 'norm_out.linear.weight', temb).chunk(2, dim=-1)
     y = F.layer_norm(img.float(), (img.shape[-1],), eps=1e-6)
     y = y * (1 + scale.float().unsqueeze(1)) + shift.float().unsqueeze(1)
-    return lin(sd, 'proj_out.weight', y.to(img.dtype))
+    return lin_plain(sd, 'proj_out.weight', y.to(img.dtype))
 
 def run_stage1(sd, latent, ctx, tf):
     pred, *_ = run_wrapper(sd, latent, ctx, tf, True)
     return pred
 
-def run_stage2_rope_prefix(sd, latent, ctx, tf):
-    img = lin(sd, 'x_embedder.weight', latent)
-    txt = lin(sd, 'context_embedder.weight', ctx)
+def run_rope_double(sd, index, img, txt, temb):
+    p = f'transformer_blocks.{index}'
+    im = modulation_chunks(sd, 'double_stream_modulation_img.linear.weight', temb, 6)
+    tx = modulation_chunks(sd, 'double_stream_modulation_txt.linear.weight', temb, 6)
+    img_in = layer_norm_modulated(img, im[0], im[1])
+    txt_in = layer_norm_modulated(txt, tx[0], tx[1])
+    qi = lb(sd, f'{p}.attn.to_q', img_in)
+    ki = lb(sd, f'{p}.attn.to_k', img_in)
+    vi = lb(sd, f'{p}.attn.to_v', img_in)
+    qt = lb(sd, f'{p}.attn.add_q_proj', txt_in)
+    kt = lb(sd, f'{p}.attn.add_k_proj', txt_in)
+    vt = lb(sd, f'{p}.attn.add_v_proj', txt_in)
+    h = img.shape[-1]
+    hd = int(sd[f'{p}.attn.norm_q.weight'].numel())
+    heads = h // hd
+    def shp(x):
+        return x.view(x.shape[0], x.shape[1], heads, hd)
+    qi = rms_norm_per_head(shp(qi), sd[f'{p}.attn.norm_q.weight'])
+    ki = rms_norm_per_head(shp(ki), sd[f'{p}.attn.norm_k.weight'])
+    qt = rms_norm_per_head(shp(qt), sd[f'{p}.attn.norm_added_q.weight'])
+    kt = rms_norm_per_head(shp(kt), sd[f'{p}.attn.norm_added_k.weight'])
+    q = rope(torch.cat([qt, qi], dim=1))
+    k = rope(torch.cat([kt, ki], dim=1))
+    v = torch.cat([shp(vt), shp(vi)], dim=1)
+    y = explicit_attention(q, k, v, h, hd)
+    yt, yi = y.split([txt.shape[1], img.shape[1]], dim=1)
+    img = img + im[2].unsqueeze(1) * lb(sd, f'{p}.attn.to_out.0', yi)
+    txt = txt + tx[2].unsqueeze(1) * lb(sd, f'{p}.attn.to_add_out', yt)
+    img = img + im[5].unsqueeze(1) * lb(sd, f'{p}.ff.linear_out', swiglu(lb(sd, f'{p}.ff.linear_in', layer_norm_modulated(img, im[3], im[4]))))
+    txt = txt + tx[5].unsqueeze(1) * lb(sd, f'{p}.ff_context.linear_out', swiglu(lb(sd, f'{p}.ff_context.linear_in', layer_norm_modulated(txt, tx[3], tx[4]))))
+    return img, txt
+
+def run_rope_single(sd, index, hidden, temb):
+    p = f'single_transformer_blocks.{index}'
+    shift, scale, gate = modulation_chunks(sd, 'single_stream_modulation.linear.weight', temb, 3)
+    hidden_in = layer_norm_modulated(hidden, shift, scale)
+    fused = lb(sd, f'{p}.attn.to_qkv_mlp_proj', hidden_in)
+    h = hidden.shape[-1]
+    mlp_size = fused.shape[-1] - 3 * h
+    q, k, v, mlp = torch.split(fused, [h, h, h, mlp_size], dim=-1)
+    hd = int(sd[f'{p}.attn.norm_q.weight'].numel())
+    heads = h // hd
+    q = rms_norm_per_head(q.view(q.shape[0], q.shape[1], heads, hd), sd[f'{p}.attn.norm_q.weight'])
+    k = rms_norm_per_head(k.view(k.shape[0], k.shape[1], heads, hd), sd[f'{p}.attn.norm_k.weight'])
+    v = v.view(v.shape[0], v.shape[1], heads, hd)
+    q = rope(q)
+    k = rope(k)
+    attn = explicit_attention(q, k, v, h, hd)
+    joined = torch.cat([attn, swiglu(mlp)], dim=-1)
+    return hidden + gate.unsqueeze(1) * lb(sd, f'{p}.attn.to_out', joined)
+
+def run_stage2_full_rope(sd, latent, ctx, tf):
+    img = lin_plain(sd, 'x_embedder.weight', latent)
+    txt = lin_plain(sd, 'context_embedder.weight', ctx)
     temb = tmlp(sd, tf)
-    img, txt = run_rope_double0(sd, img, txt, temb, True)
-    for index in range(1, 5):
-        img, txt = double_block_modulated(sd, index, img, txt, temb, True)
+    for index in range(DOUBLE_BLOCKS):
+        img, txt = run_rope_double(sd, index, img, txt, temb)
     hidden = torch.cat([txt, img], dim=1)
-    for index in range(20):
-        hidden = single_block_modulated(sd, index, hidden, temb, True)
+    for index in range(SINGLE_BLOCKS):
+        hidden = run_rope_single(sd, index, hidden, temb)
     _, img_out = hidden.split([txt.shape[1], img.shape[1]], dim=1)
     return final(sd, img_out, temb)
 
@@ -104,16 +156,16 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     path, sd = load_lowbit_transformer_state_dict(LOWBIT_REF)
     stage1 = execute_stage(sd, 'stage1_wrapper_rope_1double', run_stage1, 230001)
-    stage2 = execute_stage(sd, 'stage2_rope_prefix_stack_5double_20single', run_stage2_rope_prefix, 230002)
+    stage2 = execute_stage(sd, 'stage2_full_rope_stack_5double_20single', run_stage2_full_rope, 230002)
     report = {
         'source_model_ref': LOWBIT_REF,
         'uses_lowbit_source': True,
         'writes_expanded_checkpoint': False,
-        'target': 'batched staged generation smoke with RoPE-prefix wide path, logs, and PNG artifacts',
+        'target': 'batched staged generation smoke with synthetic RoPE on all wide blocks, logs, and PNG artifacts',
         'not_vae_decode': True,
         'stages': [
             {**stage1, 'description': '1 double block RoPE wrapper path', 'rope_enabled': True, 'rope_scope': 'single_double_block_wrapper'},
-            {**stage2, 'description': '5 double + 20 single stack with RoPE on double block 0 and modulation/gating on remaining blocks', 'rope_enabled': True, 'rope_scope': 'double_block_0_only; remaining double/single blocks are modulated non-RoPE smoke'},
+            {**stage2, 'description': '5 double + 20 single stack with synthetic pairwise RoPE on every tested attention block', 'rope_enabled': True, 'rope_scope': 'double_blocks_0_4_and_single_blocks_0_19_synthetic_pairwise_rope'},
         ],
         'all_stages_passed': all(s['all_steps_finite'] and s['has_png_artifact'] and s['png_size_bytes'] > 0 for s in [stage1, stage2]),
         'lowbit_path': str(path),
