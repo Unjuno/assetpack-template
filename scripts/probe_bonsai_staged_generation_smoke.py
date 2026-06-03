@@ -5,7 +5,8 @@ import torch
 import torch.nn.functional as F
 from bonsai_lowbit_recover import LOWBIT_REF, load_lowbit_transformer_state_dict
 from probe_bonsai_wrapper_smoke import run as run_wrapper, stat
-from probe_bonsai_lowbit_modulated_block_cores import stack as run_modulated_stack
+from probe_bonsai_lowbit_rope_smoke import run_block as run_rope_double0
+from probe_bonsai_lowbit_modulated_block_cores import double_block_modulated, single_block_modulated
 
 OUT_DIR = Path('reports/bonsai-staged-generation-smoke')
 STEP_SIZE = 0.05
@@ -51,11 +52,17 @@ def run_stage1(sd, latent, ctx, tf):
     pred, *_ = run_wrapper(sd, latent, ctx, tf, True)
     return pred
 
-def run_stage2(sd, latent, ctx, tf):
+def run_stage2_rope_prefix(sd, latent, ctx, tf):
     img = lin(sd, 'x_embedder.weight', latent)
     txt = lin(sd, 'context_embedder.weight', ctx)
     temb = tmlp(sd, tf)
-    img_out, _, _ = run_modulated_stack(sd, img, txt, temb, True)
+    img, txt = run_rope_double0(sd, img, txt, temb, True)
+    for index in range(1, 5):
+        img, txt = double_block_modulated(sd, index, img, txt, temb, True)
+    hidden = torch.cat([txt, img], dim=1)
+    for index in range(20):
+        hidden = single_block_modulated(sd, index, hidden, temb, True)
+    _, img_out = hidden.split([txt.shape[1], img.shape[1]], dim=1)
     return final(sd, img_out, temb)
 
 def execute_stage(sd, name, runner, seed_value):
@@ -97,16 +104,16 @@ def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     path, sd = load_lowbit_transformer_state_dict(LOWBIT_REF)
     stage1 = execute_stage(sd, 'stage1_wrapper_rope_1double', run_stage1, 230001)
-    stage2 = execute_stage(sd, 'stage2_modulated_stack_5double_20single', run_stage2, 230002)
+    stage2 = execute_stage(sd, 'stage2_rope_prefix_stack_5double_20single', run_stage2_rope_prefix, 230002)
     report = {
         'source_model_ref': LOWBIT_REF,
         'uses_lowbit_source': True,
         'writes_expanded_checkpoint': False,
-        'target': 'batched staged generation smoke with logs and PNG artifacts',
+        'target': 'batched staged generation smoke with RoPE-prefix wide path, logs, and PNG artifacts',
         'not_vae_decode': True,
         'stages': [
-            {**stage1, 'description': '1 double block RoPE wrapper path'},
-            {**stage2, 'description': '5 double + 20 single modulated stack path; no RoPE in full stack yet'},
+            {**stage1, 'description': '1 double block RoPE wrapper path', 'rope_enabled': True, 'rope_scope': 'single_double_block_wrapper'},
+            {**stage2, 'description': '5 double + 20 single stack with RoPE on double block 0 and modulation/gating on remaining blocks', 'rope_enabled': True, 'rope_scope': 'double_block_0_only; remaining double/single blocks are modulated non-RoPE smoke'},
         ],
         'all_stages_passed': all(s['all_steps_finite'] and s['has_png_artifact'] and s['png_size_bytes'] > 0 for s in [stage1, stage2]),
         'lowbit_path': str(path),
