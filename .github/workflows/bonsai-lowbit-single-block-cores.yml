@@ -2,6 +2,15 @@ name: bonsai-lowbit-single-block-cores
 
 on:
   workflow_dispatch:
+    inputs:
+      run_reference_probes:
+        description: "Run unpacked reference-model probes. Set true only when HF rate limits are acceptable."
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 permissions:
   contents: read
@@ -30,32 +39,40 @@ jobs:
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
           pip install --no-cache-dir huggingface_hub safetensors onnx onnxscript onnxruntime
 
-      - name: Probe full transformer static inventory optional
+      - name: Write skipped reference probe reports
+        if: ${{ inputs.run_reference_probes != 'true' }}
         run: |
-          python scripts/probe_bonsai_full_transformer_inventory.py || python - <<'PY'
+          python - <<'PY'
           import json
           from pathlib import Path
-          p=Path('reports/bonsai-full-transformer-inventory'); p.mkdir(parents=True, exist_ok=True)
-          (p/'report.json').write_text(json.dumps({'target':'full transformer static inventory','skipped':True,'skip_reason':'reference_model_download_failed_or_hf_rate_limited','uses_lowbit_source':True,'writes_expanded_checkpoint':False}, indent=2)+'\n')
+          reports = {
+            'bonsai-full-transformer-inventory': 'full transformer static inventory',
+            'bonsai-passthrough-value-equivalence': 'passthrough tensor value equivalence',
+            'bonsai-passthrough-operation-equivalence': 'passthrough operation equivalence',
+          }
+          for dirname, target in reports.items():
+              p = Path('reports') / dirname
+              p.mkdir(parents=True, exist_ok=True)
+              (p / 'report.json').write_text(json.dumps({
+                  'target': target,
+                  'skipped': True,
+                  'skip_reason': 'reference_probes_disabled_by_default_to_avoid_hf_429',
+                  'uses_lowbit_source': True,
+                  'writes_expanded_checkpoint': False,
+              }, indent=2) + '\n')
           PY
 
-      - name: Probe passthrough tensor value equivalence optional
-        run: |
-          python scripts/probe_bonsai_passthrough_value_equivalence.py || python - <<'PY'
-          import json
-          from pathlib import Path
-          p=Path('reports/bonsai-passthrough-value-equivalence'); p.mkdir(parents=True, exist_ok=True)
-          (p/'report.json').write_text(json.dumps({'target':'passthrough tensor value equivalence','skipped':True,'skip_reason':'reference_model_download_failed_or_hf_rate_limited','uses_lowbit_source':True,'writes_expanded_checkpoint':False}, indent=2)+'\n')
-          PY
+      - name: Probe full transformer static inventory
+        if: ${{ inputs.run_reference_probes == 'true' }}
+        run: python scripts/probe_bonsai_full_transformer_inventory.py
 
-      - name: Probe passthrough operation equivalence optional
-        run: |
-          python scripts/probe_bonsai_passthrough_operation_equivalence.py || python - <<'PY'
-          import json
-          from pathlib import Path
-          p=Path('reports/bonsai-passthrough-operation-equivalence'); p.mkdir(parents=True, exist_ok=True)
-          (p/'report.json').write_text(json.dumps({'target':'passthrough operation equivalence','skipped':True,'skip_reason':'reference_model_download_failed_or_hf_rate_limited','uses_lowbit_source':True,'writes_expanded_checkpoint':False}, indent=2)+'\n')
-          PY
+      - name: Probe passthrough tensor value equivalence
+        if: ${{ inputs.run_reference_probes == 'true' }}
+        run: python scripts/probe_bonsai_passthrough_value_equivalence.py
+
+      - name: Probe passthrough operation equivalence
+        if: ${{ inputs.run_reference_probes == 'true' }}
+        run: python scripts/probe_bonsai_passthrough_operation_equivalence.py
 
       - name: Probe all low-bit single block cores
         env:
