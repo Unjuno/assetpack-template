@@ -8,9 +8,7 @@ on:
         required: false
         default: "false"
         type: choice
-        options:
-          - "false"
-          - "true"
+        options: ["false", "true"]
 
 permissions:
   contents: read
@@ -23,7 +21,6 @@ jobs:
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -47,12 +44,11 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          reports = {
-            'bonsai-full-transformer-inventory': 'full transformer static inventory',
-            'bonsai-passthrough-value-equivalence': 'passthrough tensor value equivalence',
-            'bonsai-passthrough-operation-equivalence': 'passthrough operation equivalence',
-          }
-          for dirname, target in reports.items():
+          for dirname, target in {
+              'bonsai-full-transformer-inventory': 'full transformer static inventory',
+              'bonsai-passthrough-value-equivalence': 'passthrough tensor value equivalence',
+              'bonsai-passthrough-operation-equivalence': 'passthrough operation equivalence',
+          }.items():
               p = Path('reports') / dirname
               p.mkdir(parents=True, exist_ok=True)
               (p / 'report.json').write_text(json.dumps({
@@ -64,15 +60,15 @@ jobs:
               }, indent=2) + '\n')
           PY
 
-      - name: Probe full transformer static inventory
+      - name: Probe reference inventory
         if: ${{ inputs.run_reference_probes == 'true' }}
         run: python scripts/probe_bonsai_full_transformer_inventory.py
 
-      - name: Probe passthrough tensor value equivalence
+      - name: Probe reference passthrough values
         if: ${{ inputs.run_reference_probes == 'true' }}
         run: python scripts/probe_bonsai_passthrough_value_equivalence.py
 
-      - name: Probe passthrough operation equivalence
+      - name: Probe reference passthrough operations
         if: ${{ inputs.run_reference_probes == 'true' }}
         run: python scripts/probe_bonsai_passthrough_operation_equivalence.py
 
@@ -140,25 +136,12 @@ jobs:
           BONSAI_CORE_STACK_RESIDUAL_SCALE: "0.001"
         run: python scripts/export_bonsai_lowbit_transformer_core_stack_onnx.py
 
-      - name: Show block cores summary
+      - name: Show report summaries
         if: always()
         run: |
-          for f in \
-            reports/bonsai-full-transformer-inventory/report.json \
-            reports/bonsai-passthrough-value-equivalence/report.json \
-            reports/bonsai-passthrough-operation-equivalence/report.json \
-            reports/bonsai-lowbit-modulated-block-cores/report.json \
-            reports/bonsai-lowbit-rope-smoke/report.json \
-            reports/bonsai-wrapper-smoke/report.json \
-            reports/bonsai-latent-step-smoke/report.json \
-            reports/bonsai-latent-preview-png/report.json \
-            reports/bonsai-simple-decoder-png/report.json \
-            reports/bonsai-staged-generation-smoke/report.json \
-            reports/bonsai-lowbit-transformer-core-stack-onnx/report.json; do
-            if [ -f "$f" ]; then
-              echo "--- $f"
-              python -c "import json,sys; r=json.load(open(sys.argv[1])); print(json.dumps({k:r.get(k) for k in ['target','skipped','skip_reason','uses_lowbit_source','writes_expanded_checkpoint','double_block_count','single_block_count','step_count','all_steps_finite','all_stages_passed','allclose_rtol_1e_4_atol_1e_5','allclose','all_finite','has_png_artifact','png_size_bytes','decoder','not_vae_decode','max_abs_error','failure_count','failure'] if k in r}, indent=2))" "$f"
-            fi
+          find reports -name report.json -print | sort | while read -r f; do
+            echo "--- $f"
+            python -c "import json,sys; r=json.load(open(sys.argv[1])); keys=['target','skipped','skip_reason','uses_lowbit_source','writes_expanded_checkpoint','step_count','all_steps_finite','all_stages_passed','allclose_rtol_1e_4_atol_1e_5','all_finite','has_png_artifact','png_size_bytes','not_vae_decode','max_abs_error','failure']; print(json.dumps({k:r.get(k) for k in keys if k in r}, indent=2))" "$f"
           done
 
       - name: Upload reports
@@ -167,26 +150,6 @@ jobs:
         with:
           name: bonsai-lowbit-single-block-cores-report
           path: |
-            reports/bonsai-full-transformer-inventory/report.json
-            reports/bonsai-passthrough-value-equivalence/report.json
-            reports/bonsai-passthrough-operation-equivalence/report.json
-            reports/bonsai-lowbit-single-block-cores/report.json
-            reports/bonsai-lowbit-quantized-inventory/report.json
-            reports/bonsai-double-block-inventory/report.json
-            reports/bonsai-lowbit-double-block-core/report.json
-            reports/bonsai-lowbit-double-block-cores/report.json
-            reports/bonsai-lowbit-double-block-cores-onnx/report.json
-            reports/bonsai-lowbit-transformer-core-stack/report.json
-            reports/bonsai-lowbit-modulated-block-cores/report.json
-            reports/bonsai-lowbit-rope-smoke/report.json
-            reports/bonsai-wrapper-smoke/report.json
-            reports/bonsai-latent-step-smoke/report.json
-            reports/bonsai-latent-preview-png/report.json
-            reports/bonsai-latent-preview-png/latent_preview.png
-            reports/bonsai-simple-decoder-png/report.json
-            reports/bonsai-simple-decoder-png/simple_decoder_preview.png
-            reports/bonsai-staged-generation-smoke/report.json
-            reports/bonsai-staged-generation-smoke/stage1_wrapper_rope_1double.png
-            reports/bonsai-staged-generation-smoke/stage2_modulated_stack_5double_20single.png
-            reports/bonsai-lowbit-transformer-core-stack-onnx/report.json
+            reports/**/report.json
+            reports/**/*.png
           retention-days: 7
