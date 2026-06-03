@@ -77,6 +77,15 @@ jobs:
         run: |
           python scripts/probe_bonsai_lowbit_transformer_core_stack.py
 
+      - name: Probe low-bit modulated gated block cores
+        env:
+          BONSAI_MODULATED_DOUBLE_BLOCKS: "5"
+          BONSAI_MODULATED_SINGLE_BLOCKS: "20"
+          BONSAI_MODULATED_INPUT_SCALE: "0.01"
+          BONSAI_MODULATED_TEMB_SCALE: "0.01"
+        run: |
+          python scripts/probe_bonsai_lowbit_modulated_block_cores.py
+
       - name: Export sampled low-bit transformer core stack ONNX
         timeout-minutes: 20
         env:
@@ -93,35 +102,14 @@ jobs:
           if [ -f reports/bonsai-full-transformer-inventory/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-full-transformer-inventory/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'reference_key_count': r.get('reference_key_count'), 'recovered_key_count': r.get('recovered_key_count'), 'quantized_prefix_count': r.get('quantized_prefix_count'), 'missing_recovered_count': r.get('missing_recovered_count'), 'shape_mismatch_count': r.get('shape_mismatch_count'), 'all_reference_keys_recoverable': r.get('all_reference_keys_recoverable')}, indent=2))"
           fi
-          if [ -f reports/bonsai-passthrough-value-equivalence/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-passthrough-value-equivalence/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'passthrough_key_count': r.get('passthrough_key_count'), 'failure_count': r.get('failure_count'), 'exact_match_count': r.get('exact_match_count'), 'all_passthrough_tensors_exact': r.get('all_passthrough_tensors_exact'), 'max_abs_error': r.get('max_abs_error')}, indent=2))"
-          fi
           if [ -f reports/bonsai-passthrough-operation-equivalence/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-passthrough-operation-equivalence/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'component_count': r.get('component_count'), 'failure_count': r.get('failure_count'), 'all_components_exact': r.get('all_components_exact'), 'max_abs_error': r.get('max_abs_error')}, indent=2))"
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-passthrough-operation-equivalence/report.json').read_text()); print(json.dumps({'component_count': r.get('component_count'), 'failure_count': r.get('failure_count'), 'all_components_exact': r.get('all_components_exact'), 'max_abs_error': r.get('max_abs_error')}, indent=2))"
           fi
-          if [ -f reports/bonsai-lowbit-single-block-cores/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-single-block-cores/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'block_core_count': r.get('block_core_count'), 'failure_count': r.get('failure_count'), 'allclose_all': r.get('allclose_all'), 'max_abs_error': r.get('max_abs_error'), 'total_seconds': r.get('total_seconds')}, indent=2))"
-          fi
-          if [ -f reports/bonsai-lowbit-quantized-inventory/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-quantized-inventory/report.json').read_text()); print(json.dumps({'quantized_prefix_count': r.get('quantized_prefix_count'), 'single_transformer_quantized_count': r.get('single_transformer_quantized_count'), 'transformer_blocks_quantized_count': r.get('transformer_blocks_quantized_count'), 'other_quantized_count': r.get('other_quantized_count'), 'all_quantized_prefixes_classified': r.get('all_quantized_prefixes_classified')}, indent=2))"
-          fi
-          if [ -f reports/bonsai-double-block-inventory/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-double-block-inventory/report.json').read_text()); print(json.dumps({'block_prefix': r.get('block_prefix'), 'static_inventory_only': r.get('static_inventory_only'), 'checkpoint_block_key_count': r.get('checkpoint_block_key_count'), 'recovered_block_key_count': r.get('recovered_block_key_count'), 'quantized_key_count': r.get('quantized_key_count'), 'passthrough_key_count': r.get('passthrough_key_count'), 'all_checkpoint_block_keys_recoverable': r.get('all_checkpoint_block_keys_recoverable')}, indent=2))"
-          fi
-          if [ -f reports/bonsai-lowbit-double-block-core/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-double-block-core/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error')}, indent=2))"
-          fi
-          if [ -f reports/bonsai-lowbit-double-block-cores/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-double-block-cores/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'double_block_core_count': r.get('double_block_core_count'), 'failure_count': r.get('failure_count'), 'allclose_all': r.get('allclose_all'), 'max_abs_error': r.get('max_abs_error'), 'total_seconds': r.get('total_seconds')}, indent=2))"
-          fi
-          if [ -f reports/bonsai-lowbit-double-block-cores-onnx/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-double-block-cores-onnx/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'double_block_core_count': r.get('double_block_core_count'), 'failure_count': r.get('failure_count'), 'all_passed': r.get('all_passed'), 'max_abs_error': r.get('max_abs_error'), 'max_initializer_to_expanded_fp32_ratio': r.get('max_initializer_to_expanded_fp32_ratio'), 'total_seconds': r.get('total_seconds')}, indent=2))"
-          fi
-          if [ -f reports/bonsai-lowbit-transformer-core-stack/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-transformer-core-stack/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_transformer': r.get('not_full_diffusers_transformer'), 'double_block_count': r.get('double_block_count'), 'single_block_count': r.get('single_block_count'), 'all_finite': r.get('all_finite'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error'), 'seconds': r.get('seconds')}, indent=2))"
+          if [ -f reports/bonsai-lowbit-modulated-block-cores/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-modulated-block-cores/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'double_block_count': r.get('double_block_count'), 'single_block_count': r.get('single_block_count'), 'all_finite': r.get('all_finite'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error'), 'seconds': r.get('seconds')}, indent=2))"
           fi
           if [ -f reports/bonsai-lowbit-transformer-core-stack-onnx/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-transformer-core-stack-onnx/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_transformer': r.get('not_full_diffusers_transformer'), 'double_block_count': r.get('double_block_count'), 'single_block_count': r.get('single_block_count'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error'), 'initializer_to_expanded_fp32_ratio': r.get('initializer_to_expanded_fp32_ratio'), 'export_seconds': r.get('export_seconds'), 'ort_seconds': r.get('ort_seconds')}, indent=2))"
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-transformer-core-stack-onnx/report.json').read_text()); print(json.dumps({'double_block_count': r.get('double_block_count'), 'single_block_count': r.get('single_block_count'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error'), 'initializer_to_expanded_fp32_ratio': r.get('initializer_to_expanded_fp32_ratio')}, indent=2))"
           fi
 
       - name: Upload reports
@@ -140,5 +128,6 @@ jobs:
             reports/bonsai-lowbit-double-block-cores/report.json
             reports/bonsai-lowbit-double-block-cores-onnx/report.json
             reports/bonsai-lowbit-transformer-core-stack/report.json
+            reports/bonsai-lowbit-modulated-block-cores/report.json
             reports/bonsai-lowbit-transformer-core-stack-onnx/report.json
           retention-days: 7
