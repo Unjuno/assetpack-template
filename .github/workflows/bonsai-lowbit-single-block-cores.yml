@@ -81,6 +81,9 @@ jobs:
       - name: Probe wrapper smoke
         run: python scripts/probe_bonsai_wrapper_smoke.py
 
+      - name: Probe latent step smoke
+        run: python scripts/probe_bonsai_latent_step_smoke.py
+
       - name: Export sampled low-bit transformer core stack ONNX
         timeout-minutes: 20
         env:
@@ -99,6 +102,7 @@ jobs:
             reports/bonsai-lowbit-modulated-block-cores/report.json \
             reports/bonsai-lowbit-rope-smoke/report.json \
             reports/bonsai-wrapper-smoke/report.json \
+            reports/bonsai-latent-step-smoke/report.json \
             reports/bonsai-lowbit-transformer-core-stack-onnx/report.json; do
             if [ -f "$f" ]; then
               echo "--- $f"
@@ -125,5 +129,6 @@ jobs:
             reports/bonsai-lowbit-modulated-block-cores/report.json
             reports/bonsai-lowbit-rope-smoke/report.json
             reports/bonsai-wrapper-smoke/report.json
+            reports/bonsai-latent-step-smoke/report.json
             reports/bonsai-lowbit-transformer-core-stack-onnx/report.json
           retention-days: 7
