@@ -36,7 +36,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir huggingface_hub safetensors onnx onnxscript onnxruntime diffusers
+          pip install --no-cache-dir huggingface_hub safetensors onnx onnxscript onnxruntime diffusers pillow
 
       - name: Write skipped reference probe reports
         if: ${{ inputs.run_reference_probes != 'true' }}
@@ -91,6 +91,11 @@ jobs:
           (out_dir / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
           print(json.dumps({'ok': report['ok'], 'has_any_vae_like_files': report['has_any_vae_like_files']}, indent=2))
           PY
+
+      - name: Probe VAE decode smoke attempt
+        timeout-minutes: 30
+        continue-on-error: true
+        run: python scripts/probe_bonsai_vae_decode_smoke.py
 
       - name: Probe reference inventory
         if: ${{ inputs.run_reference_probes == 'true' }}
@@ -205,7 +210,7 @@ jobs:
         run: |
           find reports -name report.json -print | sort | while read -r f; do
             echo "--- $f"
-            python -c "import json,sys; r=json.load(open(sys.argv[1])); keys=['target','ok','skipped','skip_reason','has_any_vae_like_files','uses_lowbit_source','writes_expanded_checkpoint','step_count','all_steps_finite','all_stages_passed','allclose_rtol_1e_6_atol_1e_7','allclose_rtol_1e_4_atol_1e_5','all_finite','has_png_artifact','png_size_bytes','not_vae_decode','matched_candidates','max_abs_error','failure','error']; print(json.dumps({k:r.get(k) for k in keys if k in r}, indent=2))" "$f"
+            python -c "import json,sys; r=json.load(open(sys.argv[1])); keys=['target','ok','skipped','skip_reason','has_any_vae_like_files','vae_decode_success','uses_lowbit_source','writes_expanded_checkpoint','step_count','all_steps_finite','all_stages_passed','allclose_rtol_1e_6_atol_1e_7','allclose_rtol_1e_4_atol_1e_5','all_finite','has_png_artifact','png_size_bytes','not_vae_decode','matched_candidates','max_abs_error','failure','error']; print(json.dumps({k:r.get(k) for k in keys if k in r}, indent=2))" "$f"
           done
 
       - name: Upload reports
