@@ -87,10 +87,6 @@ def swiglu(x: torch.Tensor) -> torch.Tensor:
     return F.silu(a) * b
 
 
-def gelu_tanh(x: torch.Tensor) -> torch.Tensor:
-    return F.gelu(x, approximate="tanh")
-
-
 def modulation_chunks(sd: dict[str, Any], key: str, temb: torch.Tensor, chunks: int) -> tuple[torch.Tensor, ...]:
     return pt_linear(sd, key, temb).chunk(chunks, dim=-1)
 
@@ -161,7 +157,7 @@ def single_block_modulated(sd: dict[str, Any], block_index: int, hidden: torch.T
     k = rms_norm_per_head(k.view(k.shape[0], k.shape[1], heads, head_dim), sd[f"{prefix}.attn.norm_k.weight"])
     v = v.view(v.shape[0], v.shape[1], heads, head_dim)
     attn = explicit_attention(q, k, v, hidden_size, head_dim)
-    joined = torch.cat([attn, gelu_tanh(mlp)], dim=-1)
+    joined = torch.cat([attn, swiglu(mlp)], dim=-1)
     return hidden + gate.unsqueeze(1) * lin(sd, f"{prefix}.attn.to_out", joined)
 
 
@@ -189,50 +185,75 @@ def stat(x: torch.Tensor) -> dict[str, Any]:
     }
 
 
-def main() -> int:
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    lowbit_path, sd = load_lowbit_transformer_state_dict(LOWBIT_REF)
-    hidden_size = [int(v) for v in sd["transformer_blocks.0.attn.to_q.orig_shape"].tolist()][1]
-    generator = torch.Generator(device="cpu")
-    generator.manual_seed(150_000)
-    img = torch.randn((1, 2, hidden_size), generator=generator, dtype=torch.float32) * INPUT_SCALE
-    txt = torch.randn((1, 3, hidden_size), generator=generator, dtype=torch.float32) * INPUT_SCALE
-    temb = torch.randn((1, hidden_size), generator=generator, dtype=torch.float32) * TEMB_SCALE
-    started = time.time()
-    with torch.inference_mode():
-        img_runtime, txt_runtime, hidden_runtime = stack(sd, img, txt, temb, runtime=True)
-        img_ref, txt_ref, hidden_ref = stack(sd, img, txt, temb, runtime=False)
-    seconds = round(time.time() - started, 3)
-    img_diff = img_runtime - img_ref
-    txt_diff = txt_runtime - txt_ref
-    hidden_diff = hidden_runtime - hidden_ref
-    all_finite = all(bool(torch.isfinite(t).all()) for t in [img_runtime, txt_runtime, hidden_runtime, img_ref, txt_ref, hidden_ref])
-    allclose = bool(
-        all_finite
-        and torch.allclose(img_runtime, img_ref, rtol=1e-4, atol=1e-5)
-        and torch.allclose(txt_runtime, txt_ref, rtol=1e-4, atol=1e-5)
-        and torch.allclose(hidden_runtime, hidden_ref, rtol=1e-4, atol=1e-5)
-    )
-    report = {
+def failure_report(error: BaseException, lowbit_path: str | None = None) -> dict[str, Any]:
+    return {
         "source_model_ref": LOWBIT_REF,
         "uses_lowbit_source": True,
         "writes_expanded_checkpoint": False,
         "target": "modulated gated transformer block cores: 5 double + 20 single",
         "not_full_diffusers_transformer": True,
-        "missing_full_features": ["rotary positional embedding", "exact Diffusers forward wrapper", "patchify/unpatchify pipeline"],
         "double_block_count": DOUBLE_BLOCK_COUNT,
         "single_block_count": SINGLE_BLOCK_COUNT,
         "input_scale": INPUT_SCALE,
         "temb_scale": TEMB_SCALE,
-        "seconds": seconds,
-        "inputs": {"img": stat(img), "txt": stat(txt), "temb": stat(temb)},
-        "outputs": {"img": stat(img_runtime), "txt": stat(txt_runtime), "hidden": stat(hidden_runtime)},
-        "all_finite": all_finite,
-        "mean_abs_error": max(float(img_diff.abs().mean()), float(txt_diff.abs().mean()), float(hidden_diff.abs().mean())),
-        "max_abs_error": max(float(img_diff.abs().max()), float(txt_diff.abs().max()), float(hidden_diff.abs().max())),
-        "allclose_rtol_1e_4_atol_1e_5": allclose,
-        "lowbit_path": str(lowbit_path),
+        "all_finite": False,
+        "allclose_rtol_1e_4_atol_1e_5": False,
+        "failure": {"error_type": type(error).__name__, "error": str(error)[:2000]},
+        "lowbit_path": lowbit_path,
     }
+
+
+def main() -> int:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    lowbit_path: str | None = None
+    try:
+        loaded_path, sd = load_lowbit_transformer_state_dict(LOWBIT_REF)
+        lowbit_path = str(loaded_path)
+        hidden_size = [int(v) for v in sd["transformer_blocks.0.attn.to_q.orig_shape"].tolist()][1]
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(150_000)
+        img = torch.randn((1, 2, hidden_size), generator=generator, dtype=torch.float32) * INPUT_SCALE
+        txt = torch.randn((1, 3, hidden_size), generator=generator, dtype=torch.float32) * INPUT_SCALE
+        temb = torch.randn((1, hidden_size), generator=generator, dtype=torch.float32) * TEMB_SCALE
+        started = time.time()
+        with torch.inference_mode():
+            img_runtime, txt_runtime, hidden_runtime = stack(sd, img, txt, temb, runtime=True)
+            img_ref, txt_ref, hidden_ref = stack(sd, img, txt, temb, runtime=False)
+        seconds = round(time.time() - started, 3)
+        img_diff = img_runtime - img_ref
+        txt_diff = txt_runtime - txt_ref
+        hidden_diff = hidden_runtime - hidden_ref
+        all_finite = all(bool(torch.isfinite(t).all()) for t in [img_runtime, txt_runtime, hidden_runtime, img_ref, txt_ref, hidden_ref])
+        allclose = bool(
+            all_finite
+            and torch.allclose(img_runtime, img_ref, rtol=1e-4, atol=1e-5)
+            and torch.allclose(txt_runtime, txt_ref, rtol=1e-4, atol=1e-5)
+            and torch.allclose(hidden_runtime, hidden_ref, rtol=1e-4, atol=1e-5)
+        )
+        report = {
+            "source_model_ref": LOWBIT_REF,
+            "uses_lowbit_source": True,
+            "writes_expanded_checkpoint": False,
+            "target": "modulated gated transformer block cores: 5 double + 20 single",
+            "not_full_diffusers_transformer": True,
+            "missing_full_features": ["rotary positional embedding", "exact Diffusers forward wrapper", "patchify/unpatchify pipeline"],
+            "double_block_count": DOUBLE_BLOCK_COUNT,
+            "single_block_count": SINGLE_BLOCK_COUNT,
+            "input_scale": INPUT_SCALE,
+            "temb_scale": TEMB_SCALE,
+            "seconds": seconds,
+            "inputs": {"img": stat(img), "txt": stat(txt), "temb": stat(temb)},
+            "outputs": {"img": stat(img_runtime), "txt": stat(txt_runtime), "hidden": stat(hidden_runtime)},
+            "all_finite": all_finite,
+            "mean_abs_error": max(float(img_diff.abs().mean()), float(txt_diff.abs().mean()), float(hidden_diff.abs().mean())),
+            "max_abs_error": max(float(img_diff.abs().max()), float(txt_diff.abs().max()), float(hidden_diff.abs().max())),
+            "allclose_rtol_1e_4_atol_1e_5": allclose,
+            "failure": None,
+            "lowbit_path": lowbit_path,
+        }
+    except Exception as exc:
+        report = failure_report(exc, lowbit_path=lowbit_path)
+
     (OUT_DIR / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "uses_lowbit_source": report["uses_lowbit_source"],
@@ -242,10 +263,11 @@ def main() -> int:
         "single_block_count": report["single_block_count"],
         "all_finite": report["all_finite"],
         "allclose": report["allclose_rtol_1e_4_atol_1e_5"],
-        "max_abs_error": report["max_abs_error"],
-        "seconds": report["seconds"],
+        "max_abs_error": report.get("max_abs_error"),
+        "seconds": report.get("seconds"),
+        "failure": report.get("failure"),
     }, indent=2))
-    return 0 if allclose else 1
+    return 0 if report["allclose_rtol_1e_4_atol_1e_5"] else 1
 
 
 if __name__ == "__main__":
