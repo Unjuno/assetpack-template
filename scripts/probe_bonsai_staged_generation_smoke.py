@@ -13,6 +13,8 @@ STEP_SIZE = 0.05
 STEP_COUNT = 4
 DOUBLE_BLOCKS = 5
 SINGLE_BLOCKS = 20
+ROPE_FREQUENCY_SOURCE = 'diffusers.get_1d_rotary_pos_embed(pos * 0.01, dim=head_dim, theta=10000, use_real=True, repeat_interleave_real=True)'
+ROPE_APPLICATION_SOURCE = 'diffusers.apply_rotary_emb tuple_full_dim_repeat_interleave equivalent'
 
 def png_chunk(tag, data):
     return struct.pack('>I', len(data)) + tag + data + struct.pack('>I', zlib.crc32(tag + data) & 0xffffffff)
@@ -161,17 +163,20 @@ def main():
         'source_model_ref': LOWBIT_REF,
         'uses_lowbit_source': True,
         'writes_expanded_checkpoint': False,
-        'target': 'batched staged generation smoke with synthetic RoPE on all wide blocks, logs, and PNG artifacts',
+        'target': 'batched staged generation smoke with Diffusers-equivalent scaled-position RoPE on all wide blocks, logs, and PNG artifacts',
         'not_vae_decode': True,
+        'rope_application_source': ROPE_APPLICATION_SOURCE,
+        'rope_frequency_source': ROPE_FREQUENCY_SOURCE,
+        'rope_frequency_equivalence_report': 'reports/bonsai-diffusers-rope-equivalence/report.json',
         'stages': [
-            {**stage1, 'description': '1 double block RoPE wrapper path', 'rope_enabled': True, 'rope_scope': 'single_double_block_wrapper'},
-            {**stage2, 'description': '5 double + 20 single stack with synthetic pairwise RoPE on every tested attention block', 'rope_enabled': True, 'rope_scope': 'double_blocks_0_4_and_single_blocks_0_19_synthetic_pairwise_rope'},
+            {**stage1, 'description': '1 double block RoPE wrapper path', 'rope_enabled': True, 'rope_scope': 'single_double_block_wrapper', 'rope_application_source': ROPE_APPLICATION_SOURCE, 'rope_frequency_source': ROPE_FREQUENCY_SOURCE},
+            {**stage2, 'description': '5 double + 20 single stack with Diffusers-equivalent scaled-position pairwise RoPE on every tested attention block', 'rope_enabled': True, 'rope_scope': 'double_blocks_0_4_and_single_blocks_0_19_diffusers_equivalent_scaled_position_rope', 'rope_application_source': ROPE_APPLICATION_SOURCE, 'rope_frequency_source': ROPE_FREQUENCY_SOURCE},
         ],
         'all_stages_passed': all(s['all_steps_finite'] and s['has_png_artifact'] and s['png_size_bytes'] > 0 for s in [stage1, stage2]),
         'lowbit_path': str(path),
     }
     (OUT_DIR / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
-    print(json.dumps({'all_stages_passed': report['all_stages_passed'], 'stage_count': len(report['stages']), 'pngs': [s['png_name'] for s in report['stages']]}, indent=2))
+    print(json.dumps({'all_stages_passed': report['all_stages_passed'], 'stage_count': len(report['stages']), 'rope_frequency_source': ROPE_FREQUENCY_SOURCE, 'pngs': [s['png_name'] for s in report['stages']]}, indent=2))
     return 0 if report['all_stages_passed'] else 1
 
 if __name__ == '__main__':
