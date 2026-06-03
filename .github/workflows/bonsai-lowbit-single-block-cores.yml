@@ -114,6 +114,35 @@ jobs:
       - name: Probe Diffusers RoPE equivalence
         run: python scripts/probe_bonsai_diffusers_rope_equivalence.py
 
+      - name: Probe Flux position embedding inventory
+        run: |
+          python - <<'PY'
+          import inspect, json
+          from pathlib import Path
+          import torch
+          out_dir = Path('reports/bonsai-flux-pos-embed-inventory')
+          out_dir.mkdir(parents=True, exist_ok=True)
+          r = {'target': 'Flux position embedding inventory'}
+          try:
+              import diffusers
+              from diffusers.models.embeddings import FluxPosEmbed, get_1d_rotary_pos_embed
+              r['diffusers_version'] = getattr(diffusers, '__version__', None)
+              r['FluxPosEmbed_signature'] = str(inspect.signature(FluxPosEmbed))
+              r['FluxPosEmbed_forward_signature'] = str(inspect.signature(FluxPosEmbed.forward))
+              r['get_1d_rotary_pos_embed_signature'] = str(inspect.signature(get_1d_rotary_pos_embed))
+              pos = torch.arange(5, dtype=torch.float32)
+              y = get_1d_rotary_pos_embed(dim=128, pos=pos, theta=10000, use_real=True)
+              r['get_1d_output_type'] = type(y).__name__
+              r['get_1d_output_shapes'] = [list(v.shape) for v in y] if isinstance(y, tuple) else (list(y.shape) if torch.is_tensor(y) else None)
+              r['ok'] = True
+          except Exception as e:
+              r['ok'] = False
+              r['error'] = type(e).__name__ + ': ' + str(e)[:800]
+          (out_dir / 'report.json').write_text(json.dumps(r, indent=2) + '\n')
+          print(json.dumps({'ok': r['ok'], 'error': r.get('error')}, indent=2))
+          raise SystemExit(0 if r['ok'] else 1)
+          PY
+
       - name: Probe wrapper smoke
         run: python scripts/probe_bonsai_wrapper_smoke.py
 
@@ -144,7 +173,7 @@ jobs:
         run: |
           find reports -name report.json -print | sort | while read -r f; do
             echo "--- $f"
-            python -c "import json,sys; r=json.load(open(sys.argv[1])); keys=['target','skipped','skip_reason','uses_lowbit_source','writes_expanded_checkpoint','step_count','all_steps_finite','all_stages_passed','allclose_rtol_1e_4_atol_1e_7','allclose_rtol_1e_6_atol_1e_7','allclose_rtol_1e_4_atol_1e_5','all_finite','has_png_artifact','png_size_bytes','not_vae_decode','matched_candidates','max_abs_error','failure']; print(json.dumps({k:r.get(k) for k in keys if k in r}, indent=2))" "$f"
+            python -c "import json,sys; r=json.load(open(sys.argv[1])); keys=['target','ok','skipped','skip_reason','uses_lowbit_source','writes_expanded_checkpoint','step_count','all_steps_finite','all_stages_passed','allclose_rtol_1e_6_atol_1e_7','allclose_rtol_1e_4_atol_1e_5','all_finite','has_png_artifact','png_size_bytes','not_vae_decode','matched_candidates','max_abs_error','failure','error']; print(json.dumps({k:r.get(k) for k in keys if k in r}, indent=2))" "$f"
           done
 
       - name: Upload reports
