@@ -38,6 +38,10 @@ jobs:
         run: |
           python scripts/probe_bonsai_passthrough_value_equivalence.py
 
+      - name: Probe passthrough operation equivalence
+        run: |
+          python scripts/probe_bonsai_passthrough_operation_equivalence.py
+
       - name: Probe all low-bit single block cores
         env:
           BONSAI_SINGLE_BLOCK_CORE_LIMIT: "0"
@@ -92,6 +96,9 @@ jobs:
           if [ -f reports/bonsai-passthrough-value-equivalence/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-passthrough-value-equivalence/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'passthrough_key_count': r.get('passthrough_key_count'), 'failure_count': r.get('failure_count'), 'exact_match_count': r.get('exact_match_count'), 'all_passthrough_tensors_exact': r.get('all_passthrough_tensors_exact'), 'max_abs_error': r.get('max_abs_error')}, indent=2))"
           fi
+          if [ -f reports/bonsai-passthrough-operation-equivalence/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-passthrough-operation-equivalence/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'component_count': r.get('component_count'), 'failure_count': r.get('failure_count'), 'all_components_exact': r.get('all_components_exact'), 'max_abs_error': r.get('max_abs_error')}, indent=2))"
+          fi
           if [ -f reports/bonsai-lowbit-single-block-cores/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-single-block-cores/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'block_core_count': r.get('block_core_count'), 'failure_count': r.get('failure_count'), 'allclose_all': r.get('allclose_all'), 'max_abs_error': r.get('max_abs_error'), 'total_seconds': r.get('total_seconds')}, indent=2))"
           fi
@@ -125,6 +132,7 @@ jobs:
           path: |
             reports/bonsai-full-transformer-inventory/report.json
             reports/bonsai-passthrough-value-equivalence/report.json
+            reports/bonsai-passthrough-operation-equivalence/report.json
             reports/bonsai-lowbit-single-block-cores/report.json
             reports/bonsai-lowbit-quantized-inventory/report.json
             reports/bonsai-double-block-inventory/report.json
