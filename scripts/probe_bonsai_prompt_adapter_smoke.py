@@ -12,6 +12,4 @@ def main():
         'ok': True,
         'skipped': True,
         'skip_reason': 'safe_stub_after_interrupted_file_write',
-        'adapter_success': False,
-    }
-    (OUT_DIR / 'report
+        'adapter_success': False
