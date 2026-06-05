@@ -14,5 +14,4 @@ def main():
         'skip_reason': 'disabled_until_prompt_conditioning_adapter_is_split_into_safe_small_scripts',
         'not_full_prompt_pipeline': True,
     }
-    (OUT_DIR / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
-    print(json.dumps({'ok': True, 'skipped
+    (OUT_DIR / 'report.json').
