@@ -13,5 +13,3 @@ def main():
         'skipped': True,
         'skip_reason': 'disabled_until_prompt_conditioning_adapter_is_split_into_safe_small_scripts',
         'not_full_prompt_pipeline': True,
-    }
-    (OUT_DIR / 'report.json').
