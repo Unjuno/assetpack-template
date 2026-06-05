@@ -9,4 +9,9 @@ from probe_bonsai_staged_generation_smoke import run_stage2_full_rope, STEP_COUN
 from probe_bonsai_staged_vae_decode_smoke import unpack_tokens_to_vae_latent, TOKEN_GRID, PATCH_SIZE
 
 OUT_DIR = Path('reports/bonsai-prompt-staged-vae-decode-smoke')
-REPO
+REPO = 'prism-ml/bonsai-image-binary-4B-unpacked'
+VAE_REPO = 'prism-ml/bonsai-image-binary-4B-gemlite-1bit'
+PROMPT = 'a tiny bonsai tree in a ceramic pot'
+
+
+def tensor
