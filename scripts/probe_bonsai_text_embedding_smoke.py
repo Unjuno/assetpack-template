@@ -1,23 +1,16 @@
 #!/usr/bin/env python3
-import json
+import json, os, time
 from pathlib import Path
+import torch
 
 OUT_DIR = Path('reports/bonsai-text-embedding-smoke')
+PROMPTS = ['a tiny bonsai tree in a ceramic pot', '赤い鉢に入った小さな盆栽']
+REPO = 'prism-ml/bonsai-image-binary-4B-unpacked'
 
 
-def main():
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    report = {
-        'target': 'text embedding smoke',
-        'ok': True,
-        'embedding_success': False,
-        'skipped': True,
-        'skip_reason': 'safe_placeholder_after_interrupted_write'
-    }
-    (OUT_DIR / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
-    print(json.dumps({'ok': True, 'skipped': True}))
-    return 0
-
-
-if __name__ == '__main__':
-    raise SystemExit(main())
+def stat(x):
+    y = x.detach().float()
+    return {
+        'shape': list(x.shape),
+        'dtype': str(x.dtype),
+        'finite': bool(torch.isfinite(y).all
