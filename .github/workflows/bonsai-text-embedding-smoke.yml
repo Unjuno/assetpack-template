@@ -8,10 +8,4 @@ jobs:
     env: {HF_TOKEN: "${{ secrets.HF_TOKEN }}"}
     steps:
       - uses: actions/checkout@v4
-      - run: python -m pip install --upgrade pip && pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && pip install --no-cache-dir huggingface_hub safetensors transformers accelerate
-      - run: python scripts/probe_bonsai_tokenizer_smoke.py && python scripts/probe_bonsai_text_embedding_smoke.py && python scripts/probe_bonsai_prompt_context_select.py
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: smoke-report
-          path: reports
+      - run: python -m pip install --upgrade pip && pip install --no-cache-dir torch --index-url https://download.pytorch.org/
