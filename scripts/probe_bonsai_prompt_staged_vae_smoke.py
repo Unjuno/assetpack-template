@@ -7,4 +7,3 @@ p.mkdir(parents=True,exist_ok=True)
 r=add_meta({'ok':True,'implemented':True})
 r.update(run(p))
 (p/'report.json').write_text(json.dumps(r,indent=2)+'\n')
-print(json.dumps({'ok':r.get('ok'),'decode_success':r
