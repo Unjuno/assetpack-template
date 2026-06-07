@@ -1,3 +1,4 @@
+from pathlib import Path
 from bonsai_ctx3 import ctx3
 
 
@@ -7,3 +8,9 @@ def make_randn(orig):
             return ctx3().float()
         return orig(shape,*a,**k)
     return f
+
+
+def run(m):
+    m.torch.randn=make_randn(m.torch.randn)
+    m.OUT_DIR=Path('reports/bonsai-prompt-staged-vae-smoke')
+    return m.main()
