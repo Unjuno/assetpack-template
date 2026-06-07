@@ -2,4 +2,4 @@ from bonsai_ctx3 import ctx3
 
 
 def ctx_like(x):
-    return ctx3().to(x.dtype)
+    return ctx3().to(device=x.device,dtype=x.dtype)
