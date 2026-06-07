@@ -1,2 +1,2 @@
 def vae_sample(v,z,s):
-    return v.decode(z/s).sample
+    return v.decode(z.detach().float()/s).sample
