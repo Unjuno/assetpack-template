@@ -10,4 +10,4 @@ def prompt_loop():
     for _ in range(STEP_COUNT):
         p=step(sd,z,c,t)
         z=apply_delta(z,p,STEP_SIZE)
-    return
+    return z,c,p
