@@ -1,4 +1,4 @@
-def _check(hidden):
+def adapt_prompt_hidden(hidden):
     from bonsai_text_consts import BONSAI_CONTEXT_DIM, TEXT_HIDDEN_DIM
     if hidden.ndim != 3:
         raise ValueError('hidden rank')
@@ -6,7 +6,5 @@ def _check(hidden):
         raise ValueError('hidden dim')
     if BONSAI_CONTEXT_DIM % TEXT_HIDDEN_DIM != 0:
         raise ValueError('adapter dims')
-
-
-def _repeat(hidden):
-    from bonsai_text_consts import BONSAI_CONTEXT_DIM, TEXT
+    factor = BONSAI_CONTEXT_DIM // TEXT_HIDDEN_DIM
+    return hidden.repeat_interleave(factor, dim=-1)
