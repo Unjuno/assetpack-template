@@ -7,4 +7,5 @@ python scripts/probe_bonsai_tokenizer_smoke.py
 python scripts/probe_bonsai_text_embedding_smoke.py
 python scripts/probe_bonsai_prompt_context_select.py
 bash scripts/ci_prompt_staged.sh
+python scripts/validate_bonsai_smoke_artifacts.py
 exit 0
