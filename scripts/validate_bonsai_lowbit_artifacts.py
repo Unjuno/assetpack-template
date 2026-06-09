@@ -18,6 +18,7 @@ RUNTIME_LINEAR_ONNX = ROOT / 'bonsai-lowbit-runtime-linear-onnx' / 'report.json'
 MULTI_LINEAR_ONNX = ROOT / 'bonsai-lowbit-multi-linear-onnx' / 'report.json'
 SAME_BLOCK_PROJECTION_ONNX = ROOT / 'bonsai-lowbit-same-block-projection-onnx' / 'report.json'
 QKV_MLP_SPLIT_ONNX = ROOT / 'bonsai-lowbit-qkv-mlp-split-onnx' / 'report.json'
+QKV_HEAD_RESHAPE_ONNX = ROOT / 'bonsai-lowbit-qkv-head-reshape-onnx' / 'report.json'
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -75,6 +76,7 @@ def main() -> None:
     multi_linear_onnx = load(MULTI_LINEAR_ONNX)
     same_block_projection_onnx = load(SAME_BLOCK_PROJECTION_ONNX)
     qkv_mlp_split_onnx = load(QKV_MLP_SPLIT_ONNX)
+    qkv_head_reshape_onnx = load(QKV_HEAD_RESHAPE_ONNX)
 
     require(lowbit.get('status') == 'passed', f'lowbit probe did not pass: {lowbit}')
     require(lowbit.get('milestone_reached') in {'state_dict_inspect', 'cpu_conversion_plan'}, f'lowbit milestone too early: {lowbit}')
@@ -126,6 +128,34 @@ def main() -> None:
     require(int(split_schema.get('sum', 0)) == projection_output_dim, f'qkv split sum mismatch: {qkv_mlp_split_onnx}')
     validate_multi_output_report(qkv_mlp_split_onnx, 'qkv-mlp-split')
 
+    validate_runtime_lowbit_metadata(qkv_head_reshape_onnx, 'qkv-head-reshape')
+    require(qkv_head_reshape_onnx.get('graph_kind') == 'qkv_projection_split_and_head_reshape', f'qkv head unexpected graph kind: {qkv_head_reshape_onnx}')
+    require(qkv_head_reshape_onnx.get('is_attention') is False, f'qkv head must not claim attention: {qkv_head_reshape_onnx}')
+    require(qkv_head_reshape_onnx.get('is_real_transformer_block') is False, f'qkv head must not claim real transformer block: {qkv_head_reshape_onnx}')
+    require(int(qkv_head_reshape_onnx.get('block_index', -1)) == 0, f'qkv head unexpected block index: {qkv_head_reshape_onnx}')
+    require(qkv_head_reshape_onnx.get('layer') == 'single_transformer_blocks.0.attn.to_qkv_mlp_proj', f'qkv head unexpected layer: {qkv_head_reshape_onnx}')
+    head_hidden_dim = int(qkv_head_reshape_onnx.get('hidden_dim', 0))
+    head_projection_output_dim = int(qkv_head_reshape_onnx.get('projection_output_dim', 0))
+    head_schema = qkv_head_reshape_onnx.get('head_schema', {})
+    head_split_schema = qkv_head_reshape_onnx.get('split_schema', {})
+    head_sizes = head_split_schema.get('sizes', {}) if isinstance(head_split_schema, dict) else {}
+    num_heads = int(head_schema.get('num_heads', 0)) if isinstance(head_schema, dict) else 0
+    head_dim = int(head_schema.get('head_dim', 0)) if isinstance(head_schema, dict) else 0
+    require(head_hidden_dim == hidden_dim, f'qkv head hidden_dim mismatch against split probe: {qkv_head_reshape_onnx}')
+    require(head_projection_output_dim == projection_output_dim, f'qkv head output_dim mismatch against split probe: {qkv_head_reshape_onnx}')
+    require(num_heads > 0 and head_dim > 0, f'qkv head missing head schema: {qkv_head_reshape_onnx}')
+    require(num_heads * head_dim == head_hidden_dim, f'qkv head num_heads*head_dim mismatch: {qkv_head_reshape_onnx}')
+    require(head_sizes.get('q') == head_hidden_dim, f'qkv head q size mismatch: {qkv_head_reshape_onnx}')
+    require(head_sizes.get('k') == head_hidden_dim, f'qkv head k size mismatch: {qkv_head_reshape_onnx}')
+    require(head_sizes.get('v') == head_hidden_dim, f'qkv head v size mismatch: {qkv_head_reshape_onnx}')
+    require(int(head_sizes.get('mlp', 0)) == head_projection_output_dim - head_hidden_dim * 3, f'qkv head mlp size mismatch: {qkv_head_reshape_onnx}')
+    outputs = qkv_head_reshape_onnx.get('outputs', [])
+    by_name = {item.get('name'): item for item in outputs if isinstance(item, dict)}
+    require(by_name.get('q_heads', {}).get('expected_shape') == by_name.get('q_heads', {}).get('output_shape'), f'q heads output shape mismatch: {qkv_head_reshape_onnx}')
+    require(by_name.get('k_heads', {}).get('expected_shape') == by_name.get('k_heads', {}).get('output_shape'), f'k heads output shape mismatch: {qkv_head_reshape_onnx}')
+    require(by_name.get('v_heads', {}).get('expected_shape') == by_name.get('v_heads', {}).get('output_shape'), f'v heads output shape mismatch: {qkv_head_reshape_onnx}')
+    validate_multi_output_report(qkv_head_reshape_onnx, 'qkv-head-reshape')
+
     summary = {
         'ok': True,
         'lowbit_milestone_reached': lowbit.get('milestone_reached'),
@@ -147,7 +177,11 @@ def main() -> None:
         'qkv_mlp_split_projection_output_dim': qkv_mlp_split_onnx.get('projection_output_dim'),
         'qkv_mlp_split_schema': qkv_mlp_split_onnx.get('split_schema'),
         'qkv_mlp_split_max_abs_error': qkv_mlp_split_onnx.get('max_abs_error'),
-        'claim': 'qkv_mlp_projection_shape_split_onnxruntime_cpu_verified_not_attention_or_transformer_block_or_full_bonsai_pipeline',
+        'qkv_head_reshape_graph_kind': qkv_head_reshape_onnx.get('graph_kind'),
+        'qkv_head_reshape_head_schema': qkv_head_reshape_onnx.get('head_schema'),
+        'qkv_head_reshape_split_schema': qkv_head_reshape_onnx.get('split_schema'),
+        'qkv_head_reshape_max_abs_error': qkv_head_reshape_onnx.get('max_abs_error'),
+        'claim': 'qkv_projection_head_reshape_onnxruntime_cpu_verified_not_attention_or_transformer_block_or_full_bonsai_pipeline',
     }
     out = ROOT / 'bonsai-lowbit-validation'
     out.mkdir(parents=True, exist_ok=True)
