@@ -11,6 +11,7 @@ REQUIRED_REPORTS = [
     'bonsai-prompt-projection-contract/report.json',
     'bonsai-prompt-projection-shape-contract/report.json',
     'bonsai-prompt-projection-load-contract/report.json',
+    'bonsai-prompt-projection-load-fixture-contract/report.json',
     'bonsai-prompt-adapter-contract/report.json',
     'bonsai-prompt-staged-smoke/report.json',
     'bonsai-prompt-staged-vae-smoke/report.json',
@@ -70,6 +71,16 @@ def main():
     if load.get('used_in_generation_path') is not False:
         raise AssertionError(f'projection load contract unexpectedly used in generation path: {load}')
 
+    fixture = reports['bonsai-prompt-projection-load-fixture-contract/report.json']
+    if fixture.get('load_available') is not True:
+        raise AssertionError(f'projection load fixture was not available: {fixture}')
+    if fixture.get('load_attempted') is not True:
+        raise AssertionError(f'projection load fixture was not attempted: {fixture}')
+    if fixture.get('projection_wired') is not False:
+        raise AssertionError(f'projection load fixture unexpectedly wired: {fixture}')
+    if fixture.get('used_in_generation_path') is not False:
+        raise AssertionError(f'projection load fixture unexpectedly used in generation path: {fixture}')
+
     print(json.dumps({
         'ok': True,
         'reports_checked': sorted(REQUIRED_REPORTS),
@@ -78,6 +89,7 @@ def main():
         'projection_wired': projection.get('projection_wired'),
         'projection_shape': shape.get('shape'),
         'projection_load_available': load.get('load_available'),
+        'projection_load_fixture_available': fixture.get('load_available'),
     }, sort_keys=True))
 
 
