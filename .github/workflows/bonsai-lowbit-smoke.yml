@@ -70,6 +70,10 @@ jobs:
         run: |
           python scripts/export_bonsai_lowbit_layer_onnx.py
 
+      - name: Validate low-bit reports
+        run: |
+          python scripts/validate_bonsai_lowbit_artifacts.py
+
       - name: Show low-bit report summary
         if: always()
         run: |
@@ -91,6 +95,9 @@ jobs:
           if [ -f reports/bonsai-lowbit-layer-onnx/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-layer-onnx/report.json').read_text()); print(json.dumps({'layer': r.get('layer'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'external_data_size_bytes': r.get('external_data_size_bytes'), 'total_onnx_artifact_size_bytes': r.get('total_onnx_artifact_size_bytes'), 'mae': r.get('mean_abs_error'), 'max_abs_error': r.get('max_abs_error'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5')}, indent=2))"
           fi
+          if [ -f reports/bonsai-lowbit-validation/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-validation/report.json').read_text()); print(json.dumps(r, indent=2))"
+          fi
 
       - name: Upload low-bit reports
         if: always()
@@ -104,4 +111,5 @@ jobs:
             reports/bonsai-lowbit-compare-layers/
             reports/bonsai-lowbit-compare-all-layers/
             reports/bonsai-lowbit-layer-onnx/
+            reports/bonsai-lowbit-validation/
           retention-days: 7
