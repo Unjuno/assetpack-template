@@ -15,6 +15,7 @@ COMPARE_LAYERS = ROOT / 'bonsai-lowbit-compare-layers' / 'report.json'
 COMPARE_ALL = ROOT / 'bonsai-lowbit-compare-all-layers' / 'report.json'
 LAYER_ONNX = ROOT / 'bonsai-lowbit-layer-onnx' / 'report.json'
 RUNTIME_LINEAR_ONNX = ROOT / 'bonsai-lowbit-runtime-linear-onnx' / 'report.json'
+MULTI_LINEAR_ONNX = ROOT / 'bonsai-lowbit-multi-linear-onnx' / 'report.json'
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -42,6 +43,15 @@ def validate_onnx_report(report: dict[str, Any], label: str) -> None:
     require(onnx_path.is_file(), f'{label} onnx file missing from workspace: {onnx_path}')
 
 
+def validate_runtime_lowbit_metadata(report: dict[str, Any], label: str) -> None:
+    require(report.get('uses_lowbit_source') is True, f'{label} did not use lowbit source: {report}')
+    require(report.get('writes_expanded_checkpoint') is False, f'{label} wrote expanded checkpoint: {report}')
+    require(report.get('constant_folding_disabled') is True, f'{label} constant folding not disabled: {report}')
+    require(report.get('unpack_lowering') == 'arithmetic_floor_div_mod_no_bitshift', f'{label} unexpected unpack lowering: {report}')
+    require(int(report.get('packed_nbytes', 0)) > 0, f'{label} missing packed bytes: {report}')
+    require(int(report.get('expanded_fp32_weight_nbytes', 0)) > int(report.get('packed_nbytes', 0)), f'{label} packed bytes not smaller than expanded fp32: {report}')
+
+
 def main() -> None:
     lowbit = load(LOWBIT)
     layer = load(LAYER)
@@ -50,6 +60,7 @@ def main() -> None:
     compare_all = load(COMPARE_ALL)
     layer_onnx = load(LAYER_ONNX)
     runtime_linear_onnx = load(RUNTIME_LINEAR_ONNX)
+    multi_linear_onnx = load(MULTI_LINEAR_ONNX)
 
     require(lowbit.get('status') == 'passed', f'lowbit probe did not pass: {lowbit}')
     require(lowbit.get('milestone_reached') in {'state_dict_inspect', 'cpu_conversion_plan'}, f'lowbit milestone too early: {lowbit}')
@@ -65,13 +76,17 @@ def main() -> None:
 
     validate_onnx_report(layer_onnx, 'recovered-layer')
 
-    require(runtime_linear_onnx.get('uses_lowbit_source') is True, f'runtime linear did not use lowbit source: {runtime_linear_onnx}')
-    require(runtime_linear_onnx.get('writes_expanded_checkpoint') is False, f'runtime linear wrote expanded checkpoint: {runtime_linear_onnx}')
-    require(runtime_linear_onnx.get('constant_folding_disabled') is True, f'runtime linear constant folding not disabled: {runtime_linear_onnx}')
-    require(runtime_linear_onnx.get('unpack_lowering') == 'arithmetic_floor_div_mod_no_bitshift', f'runtime linear unexpected unpack lowering: {runtime_linear_onnx}')
-    require(int(runtime_linear_onnx.get('packed_nbytes', 0)) > 0, f'runtime linear missing packed bytes: {runtime_linear_onnx}')
-    require(int(runtime_linear_onnx.get('expanded_fp32_weight_nbytes', 0)) > int(runtime_linear_onnx.get('packed_nbytes', 0)), f'runtime linear packed bytes not smaller than expanded fp32: {runtime_linear_onnx}')
+    validate_runtime_lowbit_metadata(runtime_linear_onnx, 'runtime-lowbit-linear')
     validate_onnx_report(runtime_linear_onnx, 'runtime-lowbit-linear')
+
+    validate_runtime_lowbit_metadata(multi_linear_onnx, 'multi-runtime-lowbit-linear')
+    require(multi_linear_onnx.get('block_kind') == 'multi_runtime_lowbit_linear_bundle', f'multi-linear unexpected block kind: {multi_linear_onnx}')
+    require(int(multi_linear_onnx.get('layer_count', 0)) >= 2, f'multi-linear layer_count too small: {multi_linear_onnx}')
+    require(multi_linear_onnx.get('all_outputs_allclose_rtol_1e_4_atol_1e_5') is True, f'multi-linear outputs not allclose: {multi_linear_onnx}')
+    require(float(multi_linear_onnx.get('max_abs_error', 1.0)) <= 1e-3, f'multi-linear max_abs_error too high: {multi_linear_onnx}')
+    require(int(multi_linear_onnx.get('onnx_size_bytes', 0)) > 0, f'multi-linear empty onnx file: {multi_linear_onnx}')
+    multi_onnx_path = Path(str(multi_linear_onnx.get('onnx_path', '')))
+    require(multi_onnx_path.is_file(), f'multi-linear onnx file missing from workspace: {multi_onnx_path}')
 
     summary = {
         'ok': True,
@@ -81,7 +96,6 @@ def main() -> None:
         'recovered_onnx_layer': layer_onnx.get('layer'),
         'recovered_onnx_output_shape': layer_onnx.get('output_shape'),
         'recovered_onnx_max_abs_error': layer_onnx.get('max_abs_error'),
-        'recovered_onnx_total_artifact_size_bytes': layer_onnx.get('total_onnx_artifact_size_bytes'),
         'runtime_linear_onnx_layer': runtime_linear_onnx.get('layer'),
         'runtime_linear_uses_lowbit_source': runtime_linear_onnx.get('uses_lowbit_source'),
         'runtime_linear_writes_expanded_checkpoint': runtime_linear_onnx.get('writes_expanded_checkpoint'),
@@ -90,7 +104,15 @@ def main() -> None:
         'runtime_linear_packed_nbytes': runtime_linear_onnx.get('packed_nbytes'),
         'runtime_linear_expanded_fp32_weight_nbytes': runtime_linear_onnx.get('expanded_fp32_weight_nbytes'),
         'runtime_linear_onnx_max_abs_error': runtime_linear_onnx.get('max_abs_error'),
-        'claim': 'single_recovered_layer_and_single_runtime_lowbit_linear_onnxruntime_cpu_verified_not_full_bonsai_pipeline',
+        'multi_linear_block_kind': multi_linear_onnx.get('block_kind'),
+        'multi_linear_layer_count': multi_linear_onnx.get('layer_count'),
+        'multi_linear_layers': multi_linear_onnx.get('layers'),
+        'multi_linear_onnx_size_bytes': multi_linear_onnx.get('onnx_size_bytes'),
+        'multi_linear_external_data_size_bytes': multi_linear_onnx.get('external_data_size_bytes'),
+        'multi_linear_packed_nbytes': multi_linear_onnx.get('packed_nbytes'),
+        'multi_linear_expanded_fp32_weight_nbytes': multi_linear_onnx.get('expanded_fp32_weight_nbytes'),
+        'multi_linear_max_abs_error': multi_linear_onnx.get('max_abs_error'),
+        'claim': 'multi_runtime_lowbit_linear_bundle_onnxruntime_cpu_verified_not_transformer_block_or_full_bonsai_pipeline',
     }
     out = ROOT / 'bonsai-lowbit-validation'
     out.mkdir(parents=True, exist_ok=True)
