@@ -80,6 +80,12 @@ def main():
         raise AssertionError(f'projection load fixture unexpectedly wired: {fixture}')
     if fixture.get('used_in_generation_path') is not False:
         raise AssertionError(f'projection load fixture unexpectedly used in generation path: {fixture}')
+    if fixture.get('project_prompt_hidden_checked') is not True:
+        raise AssertionError(f'projection fixture did not check project_prompt_hidden: {fixture}')
+    if fixture.get('project_prompt_hidden_shape') != [2, 3, 7680]:
+        raise AssertionError(f'projection fixture project_prompt_hidden shape mismatch: {fixture}')
+    if fixture.get('project_prompt_hidden_finite') is not True:
+        raise AssertionError(f'projection fixture project_prompt_hidden not finite: {fixture}')
 
     print(json.dumps({
         'ok': True,
@@ -90,6 +96,7 @@ def main():
         'projection_shape': shape.get('shape'),
         'projection_load_available': load.get('load_available'),
         'projection_load_fixture_available': fixture.get('load_available'),
+        'project_prompt_hidden_fixture_shape': fixture.get('project_prompt_hidden_shape'),
     }, sort_keys=True))
 
 
