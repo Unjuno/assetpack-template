@@ -86,6 +86,10 @@ jobs:
         run: |
           python scripts/export_bonsai_lowbit_qkv_mlp_split_onnx.py
 
+      - name: Export qkv head reshape to ONNX
+        run: |
+          python scripts/export_bonsai_lowbit_qkv_head_reshape_onnx.py
+
       - name: Validate low-bit reports
         run: |
           python scripts/validate_bonsai_lowbit_artifacts.py
@@ -123,6 +127,9 @@ jobs:
           if [ -f reports/bonsai-lowbit-qkv-mlp-split-onnx/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-qkv-mlp-split-onnx/report.json').read_text()); print(json.dumps({'graph_kind': r.get('graph_kind'), 'block_index': r.get('block_index'), 'hidden_dim': r.get('hidden_dim'), 'projection_output_dim': r.get('projection_output_dim'), 'split_schema': r.get('split_schema'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'external_data_size_bytes': r.get('external_data_size_bytes'), 'packed_nbytes': r.get('packed_nbytes'), 'expanded_fp32_weight_nbytes': r.get('expanded_fp32_weight_nbytes'), 'max_abs_error': r.get('max_abs_error'), 'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5')}, indent=2))"
           fi
+          if [ -f reports/bonsai-lowbit-qkv-head-reshape-onnx/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-qkv-head-reshape-onnx/report.json').read_text()); print(json.dumps({'graph_kind': r.get('graph_kind'), 'block_index': r.get('block_index'), 'hidden_dim': r.get('hidden_dim'), 'projection_output_dim': r.get('projection_output_dim'), 'head_schema': r.get('head_schema'), 'split_schema': r.get('split_schema'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'external_data_size_bytes': r.get('external_data_size_bytes'), 'packed_nbytes': r.get('packed_nbytes'), 'expanded_fp32_weight_nbytes': r.get('expanded_fp32_weight_nbytes'), 'max_abs_error': r.get('max_abs_error'), 'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5')}, indent=2))"
+          fi
           if [ -f reports/bonsai-lowbit-validation/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-validation/report.json').read_text()); print(json.dumps(r, indent=2))"
           fi
@@ -143,5 +150,6 @@ jobs:
             reports/bonsai-lowbit-multi-linear-onnx/
             reports/bonsai-lowbit-same-block-projection-onnx/
             reports/bonsai-lowbit-qkv-mlp-split-onnx/
+            reports/bonsai-lowbit-qkv-head-reshape-onnx/
             reports/bonsai-lowbit-validation/
           retention-days: 7
