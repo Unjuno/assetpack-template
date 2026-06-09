@@ -17,6 +17,7 @@ LAYER_ONNX = ROOT / 'bonsai-lowbit-layer-onnx' / 'report.json'
 RUNTIME_LINEAR_ONNX = ROOT / 'bonsai-lowbit-runtime-linear-onnx' / 'report.json'
 MULTI_LINEAR_ONNX = ROOT / 'bonsai-lowbit-multi-linear-onnx' / 'report.json'
 SAME_BLOCK_PROJECTION_ONNX = ROOT / 'bonsai-lowbit-same-block-projection-onnx' / 'report.json'
+QKV_MLP_SPLIT_ONNX = ROOT / 'bonsai-lowbit-qkv-mlp-split-onnx' / 'report.json'
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -73,6 +74,7 @@ def main() -> None:
     runtime_linear_onnx = load(RUNTIME_LINEAR_ONNX)
     multi_linear_onnx = load(MULTI_LINEAR_ONNX)
     same_block_projection_onnx = load(SAME_BLOCK_PROJECTION_ONNX)
+    qkv_mlp_split_onnx = load(QKV_MLP_SPLIT_ONNX)
 
     require(lowbit.get('status') == 'passed', f'lowbit probe did not pass: {lowbit}')
     require(lowbit.get('milestone_reached') in {'state_dict_inspect', 'cpu_conversion_plan'}, f'lowbit milestone too early: {lowbit}')
@@ -105,40 +107,47 @@ def main() -> None:
     require('single_transformer_blocks.0.attn.to_out' in same_block_projection_onnx.get('layers', []), f'same-block missing to_out: {same_block_projection_onnx}')
     validate_multi_output_report(same_block_projection_onnx, 'same-block-projection')
 
+    validate_runtime_lowbit_metadata(qkv_mlp_split_onnx, 'qkv-mlp-split')
+    require(qkv_mlp_split_onnx.get('graph_kind') == 'qkv_mlp_projection_and_shape_derived_split', f'qkv/mlp split unexpected graph kind: {qkv_mlp_split_onnx}')
+    require(qkv_mlp_split_onnx.get('is_attention') is False, f'qkv/mlp split must not claim attention: {qkv_mlp_split_onnx}')
+    require(qkv_mlp_split_onnx.get('is_real_transformer_block') is False, f'qkv/mlp split must not claim real transformer block: {qkv_mlp_split_onnx}')
+    require(int(qkv_mlp_split_onnx.get('block_index', -1)) == 0, f'qkv/mlp split unexpected block index: {qkv_mlp_split_onnx}')
+    require(qkv_mlp_split_onnx.get('layer') == 'single_transformer_blocks.0.attn.to_qkv_mlp_proj', f'qkv/mlp split unexpected layer: {qkv_mlp_split_onnx}')
+    hidden_dim = int(qkv_mlp_split_onnx.get('hidden_dim', 0))
+    projection_output_dim = int(qkv_mlp_split_onnx.get('projection_output_dim', 0))
+    split_schema = qkv_mlp_split_onnx.get('split_schema', {})
+    sizes = split_schema.get('sizes', {}) if isinstance(split_schema, dict) else {}
+    require(hidden_dim > 0, f'qkv/mlp split missing hidden_dim: {qkv_mlp_split_onnx}')
+    require(projection_output_dim > hidden_dim * 3, f'qkv/mlp split output too small: {qkv_mlp_split_onnx}')
+    require(sizes.get('q') == hidden_dim, f'qkv split q size mismatch: {qkv_mlp_split_onnx}')
+    require(sizes.get('k') == hidden_dim, f'qkv split k size mismatch: {qkv_mlp_split_onnx}')
+    require(sizes.get('v') == hidden_dim, f'qkv split v size mismatch: {qkv_mlp_split_onnx}')
+    require(int(sizes.get('mlp', 0)) == projection_output_dim - hidden_dim * 3, f'qkv split mlp size mismatch: {qkv_mlp_split_onnx}')
+    require(int(split_schema.get('sum', 0)) == projection_output_dim, f'qkv split sum mismatch: {qkv_mlp_split_onnx}')
+    validate_multi_output_report(qkv_mlp_split_onnx, 'qkv-mlp-split')
+
     summary = {
         'ok': True,
         'lowbit_milestone_reached': lowbit.get('milestone_reached'),
         'compared_layers': compare_all.get('total_compared_layers'),
         'all_layers_exact_equal': compare_all.get('all_exact_equal'),
-        'recovered_onnx_layer': layer_onnx.get('layer'),
-        'recovered_onnx_output_shape': layer_onnx.get('output_shape'),
-        'recovered_onnx_max_abs_error': layer_onnx.get('max_abs_error'),
         'runtime_linear_onnx_layer': runtime_linear_onnx.get('layer'),
-        'runtime_linear_uses_lowbit_source': runtime_linear_onnx.get('uses_lowbit_source'),
-        'runtime_linear_writes_expanded_checkpoint': runtime_linear_onnx.get('writes_expanded_checkpoint'),
-        'runtime_linear_unpack_lowering': runtime_linear_onnx.get('unpack_lowering'),
-        'runtime_linear_onnx_size_bytes': runtime_linear_onnx.get('onnx_size_bytes'),
-        'runtime_linear_packed_nbytes': runtime_linear_onnx.get('packed_nbytes'),
-        'runtime_linear_expanded_fp32_weight_nbytes': runtime_linear_onnx.get('expanded_fp32_weight_nbytes'),
         'runtime_linear_onnx_max_abs_error': runtime_linear_onnx.get('max_abs_error'),
         'multi_linear_block_kind': multi_linear_onnx.get('block_kind'),
         'multi_linear_layer_count': multi_linear_onnx.get('layer_count'),
-        'multi_linear_layers': multi_linear_onnx.get('layers'),
-        'multi_linear_onnx_size_bytes': multi_linear_onnx.get('onnx_size_bytes'),
-        'multi_linear_external_data_size_bytes': multi_linear_onnx.get('external_data_size_bytes'),
-        'multi_linear_packed_nbytes': multi_linear_onnx.get('packed_nbytes'),
-        'multi_linear_expanded_fp32_weight_nbytes': multi_linear_onnx.get('expanded_fp32_weight_nbytes'),
         'multi_linear_max_abs_error': multi_linear_onnx.get('max_abs_error'),
         'same_block_projection_bundle_kind': same_block_projection_onnx.get('bundle_kind'),
         'same_block_projection_block_index': same_block_projection_onnx.get('block_index'),
         'same_block_projection_is_real_transformer_block': same_block_projection_onnx.get('is_real_transformer_block'),
         'same_block_projection_layers': same_block_projection_onnx.get('layers'),
-        'same_block_projection_onnx_size_bytes': same_block_projection_onnx.get('onnx_size_bytes'),
-        'same_block_projection_external_data_size_bytes': same_block_projection_onnx.get('external_data_size_bytes'),
-        'same_block_projection_packed_nbytes': same_block_projection_onnx.get('packed_nbytes'),
-        'same_block_projection_expanded_fp32_weight_nbytes': same_block_projection_onnx.get('expanded_fp32_weight_nbytes'),
         'same_block_projection_max_abs_error': same_block_projection_onnx.get('max_abs_error'),
-        'claim': 'same_block_lowbit_projection_bundle_onnxruntime_cpu_verified_not_attention_or_transformer_block_or_full_bonsai_pipeline',
+        'qkv_mlp_split_graph_kind': qkv_mlp_split_onnx.get('graph_kind'),
+        'qkv_mlp_split_layer': qkv_mlp_split_onnx.get('layer'),
+        'qkv_mlp_split_hidden_dim': qkv_mlp_split_onnx.get('hidden_dim'),
+        'qkv_mlp_split_projection_output_dim': qkv_mlp_split_onnx.get('projection_output_dim'),
+        'qkv_mlp_split_schema': qkv_mlp_split_onnx.get('split_schema'),
+        'qkv_mlp_split_max_abs_error': qkv_mlp_split_onnx.get('max_abs_error'),
+        'claim': 'qkv_mlp_projection_shape_split_onnxruntime_cpu_verified_not_attention_or_transformer_block_or_full_bonsai_pipeline',
     }
     out = ROOT / 'bonsai-lowbit-validation'
     out.mkdir(parents=True, exist_ok=True)
