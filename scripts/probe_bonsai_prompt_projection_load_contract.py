@@ -7,13 +7,18 @@ import torch
 
 from bonsai_text_consts import BONSAI_CONTEXT_DIM, TEXT_HIDDEN_DIM
 
-OUT = Path('reports/bonsai-prompt-projection-load-contract')
+DEFAULT_OUT = Path('reports/bonsai-prompt-projection-load-contract')
 DEFAULT_PATH = Path('artifacts/bonsai_prompt_projection.pt')
 
 
+def report_dir():
+    return Path(os.environ.get('BONSAI_PROMPT_PROJECTION_REPORT_DIR', str(DEFAULT_OUT)))
+
+
 def write_report(data):
-    OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / 'report.json').write_text(json.dumps(data, sort_keys=True) + '\n')
+    out = report_dir()
+    out.mkdir(parents=True, exist_ok=True)
+    (out / 'report.json').write_text(json.dumps(data, sort_keys=True) + '\n')
 
 
 def tensor_shape(obj):
