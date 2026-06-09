@@ -16,6 +16,7 @@ COMPARE_ALL = ROOT / 'bonsai-lowbit-compare-all-layers' / 'report.json'
 LAYER_ONNX = ROOT / 'bonsai-lowbit-layer-onnx' / 'report.json'
 RUNTIME_LINEAR_ONNX = ROOT / 'bonsai-lowbit-runtime-linear-onnx' / 'report.json'
 MULTI_LINEAR_ONNX = ROOT / 'bonsai-lowbit-multi-linear-onnx' / 'report.json'
+SAME_BLOCK_PROJECTION_ONNX = ROOT / 'bonsai-lowbit-same-block-projection-onnx' / 'report.json'
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -35,12 +36,16 @@ def require(condition: bool, message: str) -> None:
         raise AssertionError(message)
 
 
-def validate_onnx_report(report: dict[str, Any], label: str) -> None:
-    require(report.get('allclose_rtol_1e_4_atol_1e_5') is True, f'{label} onnxruntime output not close to pytorch: {report}')
-    require(float(report.get('max_abs_error', 1.0)) <= 1e-3, f'{label} max_abs_error too high: {report}')
+def require_onnx_file(report: dict[str, Any], label: str) -> None:
     require(int(report.get('onnx_size_bytes', 0)) > 0, f'{label} empty onnx file: {report}')
     onnx_path = Path(str(report.get('onnx_path', '')))
     require(onnx_path.is_file(), f'{label} onnx file missing from workspace: {onnx_path}')
+
+
+def validate_onnx_report(report: dict[str, Any], label: str) -> None:
+    require(report.get('allclose_rtol_1e_4_atol_1e_5') is True, f'{label} onnxruntime output not close to pytorch: {report}')
+    require(float(report.get('max_abs_error', 1.0)) <= 1e-3, f'{label} max_abs_error too high: {report}')
+    require_onnx_file(report, label)
 
 
 def validate_runtime_lowbit_metadata(report: dict[str, Any], label: str) -> None:
@@ -52,6 +57,12 @@ def validate_runtime_lowbit_metadata(report: dict[str, Any], label: str) -> None
     require(int(report.get('expanded_fp32_weight_nbytes', 0)) > int(report.get('packed_nbytes', 0)), f'{label} packed bytes not smaller than expanded fp32: {report}')
 
 
+def validate_multi_output_report(report: dict[str, Any], label: str) -> None:
+    require(report.get('all_outputs_allclose_rtol_1e_4_atol_1e_5') is True, f'{label} outputs not allclose: {report}')
+    require(float(report.get('max_abs_error', 1.0)) <= 1e-3, f'{label} max_abs_error too high: {report}')
+    require_onnx_file(report, label)
+
+
 def main() -> None:
     lowbit = load(LOWBIT)
     layer = load(LAYER)
@@ -61,6 +72,7 @@ def main() -> None:
     layer_onnx = load(LAYER_ONNX)
     runtime_linear_onnx = load(RUNTIME_LINEAR_ONNX)
     multi_linear_onnx = load(MULTI_LINEAR_ONNX)
+    same_block_projection_onnx = load(SAME_BLOCK_PROJECTION_ONNX)
 
     require(lowbit.get('status') == 'passed', f'lowbit probe did not pass: {lowbit}')
     require(lowbit.get('milestone_reached') in {'state_dict_inspect', 'cpu_conversion_plan'}, f'lowbit milestone too early: {lowbit}')
@@ -82,11 +94,16 @@ def main() -> None:
     validate_runtime_lowbit_metadata(multi_linear_onnx, 'multi-runtime-lowbit-linear')
     require(multi_linear_onnx.get('block_kind') == 'multi_runtime_lowbit_linear_bundle', f'multi-linear unexpected block kind: {multi_linear_onnx}')
     require(int(multi_linear_onnx.get('layer_count', 0)) >= 2, f'multi-linear layer_count too small: {multi_linear_onnx}')
-    require(multi_linear_onnx.get('all_outputs_allclose_rtol_1e_4_atol_1e_5') is True, f'multi-linear outputs not allclose: {multi_linear_onnx}')
-    require(float(multi_linear_onnx.get('max_abs_error', 1.0)) <= 1e-3, f'multi-linear max_abs_error too high: {multi_linear_onnx}')
-    require(int(multi_linear_onnx.get('onnx_size_bytes', 0)) > 0, f'multi-linear empty onnx file: {multi_linear_onnx}')
-    multi_onnx_path = Path(str(multi_linear_onnx.get('onnx_path', '')))
-    require(multi_onnx_path.is_file(), f'multi-linear onnx file missing from workspace: {multi_onnx_path}')
+    validate_multi_output_report(multi_linear_onnx, 'multi-runtime-lowbit-linear')
+
+    validate_runtime_lowbit_metadata(same_block_projection_onnx, 'same-block-projection')
+    require(same_block_projection_onnx.get('bundle_kind') == 'same_block_qkv_mlp_proj_and_to_out_projection_bundle', f'same-block unexpected bundle kind: {same_block_projection_onnx}')
+    require(same_block_projection_onnx.get('is_real_transformer_block') is False, f'same-block bundle must not claim real transformer block: {same_block_projection_onnx}')
+    require(int(same_block_projection_onnx.get('block_index', -1)) == 0, f'same-block unexpected block index: {same_block_projection_onnx}')
+    require(int(same_block_projection_onnx.get('layer_count', 0)) >= 2, f'same-block layer_count too small: {same_block_projection_onnx}')
+    require('single_transformer_blocks.0.attn.to_qkv_mlp_proj' in same_block_projection_onnx.get('layers', []), f'same-block missing to_qkv_mlp_proj: {same_block_projection_onnx}')
+    require('single_transformer_blocks.0.attn.to_out' in same_block_projection_onnx.get('layers', []), f'same-block missing to_out: {same_block_projection_onnx}')
+    validate_multi_output_report(same_block_projection_onnx, 'same-block-projection')
 
     summary = {
         'ok': True,
@@ -112,7 +129,16 @@ def main() -> None:
         'multi_linear_packed_nbytes': multi_linear_onnx.get('packed_nbytes'),
         'multi_linear_expanded_fp32_weight_nbytes': multi_linear_onnx.get('expanded_fp32_weight_nbytes'),
         'multi_linear_max_abs_error': multi_linear_onnx.get('max_abs_error'),
-        'claim': 'multi_runtime_lowbit_linear_bundle_onnxruntime_cpu_verified_not_transformer_block_or_full_bonsai_pipeline',
+        'same_block_projection_bundle_kind': same_block_projection_onnx.get('bundle_kind'),
+        'same_block_projection_block_index': same_block_projection_onnx.get('block_index'),
+        'same_block_projection_is_real_transformer_block': same_block_projection_onnx.get('is_real_transformer_block'),
+        'same_block_projection_layers': same_block_projection_onnx.get('layers'),
+        'same_block_projection_onnx_size_bytes': same_block_projection_onnx.get('onnx_size_bytes'),
+        'same_block_projection_external_data_size_bytes': same_block_projection_onnx.get('external_data_size_bytes'),
+        'same_block_projection_packed_nbytes': same_block_projection_onnx.get('packed_nbytes'),
+        'same_block_projection_expanded_fp32_weight_nbytes': same_block_projection_onnx.get('expanded_fp32_weight_nbytes'),
+        'same_block_projection_max_abs_error': same_block_projection_onnx.get('max_abs_error'),
+        'claim': 'same_block_lowbit_projection_bundle_onnxruntime_cpu_verified_not_attention_or_transformer_block_or_full_bonsai_pipeline',
     }
     out = ROOT / 'bonsai-lowbit-validation'
     out.mkdir(parents=True, exist_ok=True)
