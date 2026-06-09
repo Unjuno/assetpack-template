@@ -78,6 +78,10 @@ jobs:
         run: |
           python scripts/export_bonsai_lowbit_multi_linear_onnx.py
 
+      - name: Export same-block projection bundle to ONNX
+        run: |
+          python scripts/export_bonsai_lowbit_same_block_projection_onnx.py
+
       - name: Validate low-bit reports
         run: |
           python scripts/validate_bonsai_lowbit_artifacts.py
@@ -109,6 +113,9 @@ jobs:
           if [ -f reports/bonsai-lowbit-multi-linear-onnx/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-multi-linear-onnx/report.json').read_text()); print(json.dumps({'block_kind': r.get('block_kind'), 'layer_count': r.get('layer_count'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'external_data_size_bytes': r.get('external_data_size_bytes'), 'packed_nbytes': r.get('packed_nbytes'), 'expanded_fp32_weight_nbytes': r.get('expanded_fp32_weight_nbytes'), 'max_abs_error': r.get('max_abs_error'), 'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5')}, indent=2))"
           fi
+          if [ -f reports/bonsai-lowbit-same-block-projection-onnx/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-same-block-projection-onnx/report.json').read_text()); print(json.dumps({'bundle_kind': r.get('bundle_kind'), 'block_index': r.get('block_index'), 'layer_count': r.get('layer_count'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'external_data_size_bytes': r.get('external_data_size_bytes'), 'packed_nbytes': r.get('packed_nbytes'), 'expanded_fp32_weight_nbytes': r.get('expanded_fp32_weight_nbytes'), 'max_abs_error': r.get('max_abs_error'), 'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5')}, indent=2))"
+          fi
           if [ -f reports/bonsai-lowbit-validation/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-validation/report.json').read_text()); print(json.dumps(r, indent=2))"
           fi
@@ -127,5 +134,6 @@ jobs:
             reports/bonsai-lowbit-layer-onnx/
             reports/bonsai-lowbit-runtime-linear-onnx/
             reports/bonsai-lowbit-multi-linear-onnx/
+            reports/bonsai-lowbit-same-block-projection-onnx/
             reports/bonsai-lowbit-validation/
           retention-days: 7
