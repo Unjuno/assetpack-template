@@ -10,6 +10,7 @@ REQUIRED_REPORTS = [
     'bonsai-prompt-context-select/report.json',
     'bonsai-prompt-projection-contract/report.json',
     'bonsai-prompt-projection-shape-contract/report.json',
+    'bonsai-prompt-projection-load-contract/report.json',
     'bonsai-prompt-adapter-contract/report.json',
     'bonsai-prompt-staged-smoke/report.json',
     'bonsai-prompt-staged-vae-smoke/report.json',
@@ -63,6 +64,12 @@ def main():
     if shape.get('shape') != [2, 3, 7680]:
         raise AssertionError(f'projection shape contract mismatch: {shape}')
 
+    load = reports['bonsai-prompt-projection-load-contract/report.json']
+    if load.get('projection_wired') is not False:
+        raise AssertionError(f'projection load contract unexpectedly wired: {load}')
+    if load.get('used_in_generation_path') is not False:
+        raise AssertionError(f'projection load contract unexpectedly used in generation path: {load}')
+
     print(json.dumps({
         'ok': True,
         'reports_checked': sorted(REQUIRED_REPORTS),
@@ -70,6 +77,7 @@ def main():
         'png_size_bytes': png.stat().st_size,
         'projection_wired': projection.get('projection_wired'),
         'projection_shape': shape.get('shape'),
+        'projection_load_available': load.get('load_available'),
     }, sort_keys=True))
 
 
