@@ -74,6 +74,10 @@ jobs:
         run: |
           python scripts/export_bonsai_lowbit_runtime_linear_onnx.py
 
+      - name: Export multi runtime low-bit linear bundle to ONNX
+        run: |
+          python scripts/export_bonsai_lowbit_multi_linear_onnx.py
+
       - name: Validate low-bit reports
         run: |
           python scripts/validate_bonsai_lowbit_artifacts.py
@@ -102,6 +106,9 @@ jobs:
           if [ -f reports/bonsai-lowbit-runtime-linear-onnx/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-runtime-linear-onnx/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'constant_folding_disabled': r.get('constant_folding_disabled'), 'unpack_lowering': r.get('unpack_lowering'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'packed_nbytes': r.get('packed_nbytes'), 'expanded_fp32_weight_nbytes': r.get('expanded_fp32_weight_nbytes'), 'mae': r.get('mean_abs_error'), 'max_abs_error': r.get('max_abs_error'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5')}, indent=2))"
           fi
+          if [ -f reports/bonsai-lowbit-multi-linear-onnx/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-multi-linear-onnx/report.json').read_text()); print(json.dumps({'block_kind': r.get('block_kind'), 'layer_count': r.get('layer_count'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'external_data_size_bytes': r.get('external_data_size_bytes'), 'packed_nbytes': r.get('packed_nbytes'), 'expanded_fp32_weight_nbytes': r.get('expanded_fp32_weight_nbytes'), 'max_abs_error': r.get('max_abs_error'), 'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5')}, indent=2))"
+          fi
           if [ -f reports/bonsai-lowbit-validation/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-validation/report.json').read_text()); print(json.dumps(r, indent=2))"
           fi
@@ -119,5 +126,6 @@ jobs:
             reports/bonsai-lowbit-compare-all-layers/
             reports/bonsai-lowbit-layer-onnx/
             reports/bonsai-lowbit-runtime-linear-onnx/
+            reports/bonsai-lowbit-multi-linear-onnx/
             reports/bonsai-lowbit-validation/
           retention-days: 7
