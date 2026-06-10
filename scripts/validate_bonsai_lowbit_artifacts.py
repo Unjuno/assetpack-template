@@ -20,6 +20,7 @@ SAME_BLOCK_PROJECTION_ONNX = ROOT / 'bonsai-lowbit-same-block-projection-onnx' /
 QKV_MLP_SPLIT_ONNX = ROOT / 'bonsai-lowbit-qkv-mlp-split-onnx' / 'report.json'
 QKV_HEAD_RESHAPE_ONNX = ROOT / 'bonsai-lowbit-qkv-head-reshape-onnx' / 'report.json'
 QKV_SEQ_HEAD_LAYOUT_ONNX = ROOT / 'bonsai-lowbit-qkv-seq-head-layout-onnx' / 'report.json'
+ATTENTION_MATH_ONNX = ROOT / 'bonsai-lowbit-attention-math-onnx' / 'report.json'
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -99,6 +100,12 @@ def output_by_name(report: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {item.get('name'): item for item in outputs if isinstance(item, dict)}
 
 
+def require_output_shape(report: dict[str, Any], output_name: str, label: str) -> None:
+    outputs = output_by_name(report)
+    require(output_name in outputs, f'{label} missing output {output_name}: {report}')
+    require(outputs[output_name].get('expected_shape') == outputs[output_name].get('output_shape'), f'{label} {output_name} output shape mismatch: {report}')
+
+
 def main() -> None:
     lowbit = load(LOWBIT)
     layer = load(LAYER)
@@ -112,6 +119,7 @@ def main() -> None:
     qkv_mlp_split_onnx = load(QKV_MLP_SPLIT_ONNX)
     qkv_head_reshape_onnx = load(QKV_HEAD_RESHAPE_ONNX)
     qkv_seq_head_layout_onnx = load(QKV_SEQ_HEAD_LAYOUT_ONNX)
+    attention_math_onnx = load(ATTENTION_MATH_ONNX)
 
     require(lowbit.get('status') == 'passed', f'lowbit probe did not pass: {lowbit}')
     require(lowbit.get('milestone_reached') in {'state_dict_inspect', 'cpu_conversion_plan'}, f'lowbit milestone too early: {lowbit}')
@@ -161,10 +169,9 @@ def main() -> None:
     require(qkv_head_reshape_onnx.get('layer') == 'single_transformer_blocks.0.attn.to_qkv_mlp_proj', f'qkv head unexpected layer: {qkv_head_reshape_onnx}')
     validate_qkv_split_schema(qkv_head_reshape_onnx, 'qkv-head-reshape', hidden_dim, projection_output_dim)
     head_schema, num_heads, head_dim = validate_head_schema(qkv_head_reshape_onnx, 'qkv-head-reshape', hidden_dim)
-    head_outputs = output_by_name(qkv_head_reshape_onnx)
-    require(head_outputs.get('q_heads', {}).get('expected_shape') == head_outputs.get('q_heads', {}).get('output_shape'), f'q heads output shape mismatch: {qkv_head_reshape_onnx}')
-    require(head_outputs.get('k_heads', {}).get('expected_shape') == head_outputs.get('k_heads', {}).get('output_shape'), f'k heads output shape mismatch: {qkv_head_reshape_onnx}')
-    require(head_outputs.get('v_heads', {}).get('expected_shape') == head_outputs.get('v_heads', {}).get('output_shape'), f'v heads output shape mismatch: {qkv_head_reshape_onnx}')
+    require_output_shape(qkv_head_reshape_onnx, 'q_heads', 'qkv-head-reshape')
+    require_output_shape(qkv_head_reshape_onnx, 'k_heads', 'qkv-head-reshape')
+    require_output_shape(qkv_head_reshape_onnx, 'v_heads', 'qkv-head-reshape')
     validate_multi_output_report(qkv_head_reshape_onnx, 'qkv-head-reshape')
 
     validate_runtime_lowbit_metadata(qkv_seq_head_layout_onnx, 'qkv-seq-head-layout')
@@ -179,12 +186,34 @@ def main() -> None:
     require(seq_head_schema.get('layout') == 'batch_heads_seq_head_dim', f'qkv seq head unexpected layout: {qkv_seq_head_layout_onnx}')
     seq_len = int(qkv_seq_head_layout_onnx.get('sequence_length', 0))
     require(seq_len > 0, f'qkv seq head missing sequence length: {qkv_seq_head_layout_onnx}')
-    seq_outputs = output_by_name(qkv_seq_head_layout_onnx)
-    require(seq_outputs.get('q_seq_heads', {}).get('expected_shape') == seq_outputs.get('q_seq_heads', {}).get('output_shape'), f'q seq heads output shape mismatch: {qkv_seq_head_layout_onnx}')
-    require(seq_outputs.get('k_seq_heads', {}).get('expected_shape') == seq_outputs.get('k_seq_heads', {}).get('output_shape'), f'k seq heads output shape mismatch: {qkv_seq_head_layout_onnx}')
-    require(seq_outputs.get('v_seq_heads', {}).get('expected_shape') == seq_outputs.get('v_seq_heads', {}).get('output_shape'), f'v seq heads output shape mismatch: {qkv_seq_head_layout_onnx}')
-    require(seq_outputs.get('mlp', {}).get('expected_shape') == seq_outputs.get('mlp', {}).get('output_shape'), f'mlp sequence output shape mismatch: {qkv_seq_head_layout_onnx}')
+    require_output_shape(qkv_seq_head_layout_onnx, 'q_seq_heads', 'qkv-seq-head-layout')
+    require_output_shape(qkv_seq_head_layout_onnx, 'k_seq_heads', 'qkv-seq-head-layout')
+    require_output_shape(qkv_seq_head_layout_onnx, 'v_seq_heads', 'qkv-seq-head-layout')
+    require_output_shape(qkv_seq_head_layout_onnx, 'mlp', 'qkv-seq-head-layout')
     validate_multi_output_report(qkv_seq_head_layout_onnx, 'qkv-seq-head-layout')
+
+    validate_runtime_lowbit_metadata(attention_math_onnx, 'attention-math')
+    require(attention_math_onnx.get('graph_kind') == 'qkv_projection_scaled_dot_product_attention_math', f'attention math unexpected graph kind: {attention_math_onnx}')
+    require(attention_math_onnx.get('is_attention_math') is True, f'attention math must claim attention math: {attention_math_onnx}')
+    require(attention_math_onnx.get('is_attention_with_to_out') is False, f'attention math must not claim to_out connection: {attention_math_onnx}')
+    require(attention_math_onnx.get('is_real_transformer_block') is False, f'attention math must not claim real transformer block: {attention_math_onnx}')
+    require(int(attention_math_onnx.get('block_index', -1)) == 0, f'attention math unexpected block index: {attention_math_onnx}')
+    require(attention_math_onnx.get('layer') == 'single_transformer_blocks.0.attn.to_qkv_mlp_proj', f'attention math unexpected layer: {attention_math_onnx}')
+    validate_qkv_split_schema(attention_math_onnx, 'attention-math', hidden_dim, projection_output_dim)
+    attn_head_schema, attn_num_heads, attn_head_dim = validate_head_schema(attention_math_onnx, 'attention-math', hidden_dim)
+    require(attn_num_heads == num_heads and attn_head_dim == head_dim, f'attention math head schema mismatch against previous head reshape: {attention_math_onnx}')
+    require(attn_head_schema.get('layout') == 'batch_heads_seq_head_dim', f'attention math unexpected layout: {attention_math_onnx}')
+    attn_math = attention_math_onnx.get('attention_math', {})
+    require(attn_math.get('softmax_dim') == -1, f'attention math unexpected softmax dim: {attention_math_onnx}')
+    require(attn_math.get('mask') is None, f'attention math should not include mask yet: {attention_math_onnx}')
+    require(int(attention_math_onnx.get('sequence_length', 0)) == seq_len, f'attention math sequence length mismatch: {attention_math_onnx}')
+    require_output_shape(attention_math_onnx, 'context', 'attention-math')
+    require_output_shape(attention_math_onnx, 'weights', 'attention-math')
+    require_output_shape(attention_math_onnx, 'scores', 'attention-math')
+    require_output_shape(attention_math_onnx, 'q_heads', 'attention-math')
+    require_output_shape(attention_math_onnx, 'k_heads', 'attention-math')
+    require_output_shape(attention_math_onnx, 'v_heads', 'attention-math')
+    validate_multi_output_report(attention_math_onnx, 'attention-math')
 
     summary = {
         'ok': True,
@@ -216,7 +245,12 @@ def main() -> None:
         'qkv_seq_head_layout_head_schema': qkv_seq_head_layout_onnx.get('head_schema'),
         'qkv_seq_head_layout_split_schema': qkv_seq_head_layout_onnx.get('split_schema'),
         'qkv_seq_head_layout_max_abs_error': qkv_seq_head_layout_onnx.get('max_abs_error'),
-        'claim': 'qkv_projection_sequence_head_layout_onnxruntime_cpu_verified_not_attention_or_transformer_block_or_full_bonsai_pipeline',
+        'attention_math_graph_kind': attention_math_onnx.get('graph_kind'),
+        'attention_math_sequence_length': attention_math_onnx.get('sequence_length'),
+        'attention_math_head_schema': attention_math_onnx.get('head_schema'),
+        'attention_math': attention_math_onnx.get('attention_math'),
+        'attention_math_max_abs_error': attention_math_onnx.get('max_abs_error'),
+        'claim': 'qkv_projection_scaled_dot_product_attention_math_onnxruntime_cpu_verified_not_to_out_or_transformer_block_or_full_bonsai_pipeline',
     }
     out = ROOT / 'bonsai-lowbit-validation'
     out.mkdir(parents=True, exist_ok=True)
