@@ -61,12 +61,14 @@ jobs:
             "scripts/export_bonsai_lowbit_attention_to_out_semantic_input_onnx.py"
             "scripts/export_bonsai_lowbit_attention_to_out_onnx.py"
             "scripts/export_bonsai_lowbit_single_block_modulated_onnx.py"
+            "scripts/export_bonsai_lowbit_two_single_blocks_modulated_onnx.py"
             "scripts/validate_bonsai_lowbit_artifacts.py"
             "scripts/validate_bonsai_lowbit_attention_context_composition.py"
             "scripts/validate_bonsai_lowbit_attention_to_out_input_source.py"
             "scripts/validate_bonsai_lowbit_attention_to_out_semantic_input.py"
             "scripts/validate_bonsai_lowbit_attention_to_out.py"
             "scripts/validate_bonsai_lowbit_single_block_modulated.py"
+            "scripts/validate_bonsai_lowbit_two_single_blocks_modulated.py"
           )
           for s in "${scripts[@]}"; do
             echo "::group::python $s"
