@@ -42,29 +42,29 @@ jobs:
         run: |
           set -euo pipefail
           scripts=(
-            scripts/run_bonsai_lowbit_probe.py --self-test
-            scripts/run_bonsai_lowbit_probe.py
-            scripts/probe_bonsai_lowbit_layer_cols.py
-            scripts/compare_bonsai_lowbit_to_unpacked_layer.py
-            scripts/compare_bonsai_lowbit_to_unpacked_layers.py
-            scripts/compare_bonsai_lowbit_to_unpacked_all_layers.py
-            scripts/export_bonsai_lowbit_layer_onnx.py
-            scripts/export_bonsai_lowbit_runtime_linear_onnx.py
-            scripts/export_bonsai_lowbit_multi_linear_onnx.py
-            scripts/export_bonsai_lowbit_same_block_projection_onnx.py
-            scripts/export_bonsai_lowbit_qkv_mlp_split_onnx.py
-            scripts/export_bonsai_lowbit_qkv_head_reshape_onnx.py
-            scripts/export_bonsai_lowbit_qkv_seq_head_layout_onnx.py
-            scripts/export_bonsai_lowbit_attention_math_onnx.py
-            scripts/export_bonsai_lowbit_attention_context_composition_onnx.py
-            scripts/export_bonsai_lowbit_attention_to_out_input_source_onnx.py
-            scripts/export_bonsai_lowbit_attention_to_out_semantic_input_onnx.py
-            scripts/export_bonsai_lowbit_attention_to_out_onnx.py
-            scripts/validate_bonsai_lowbit_artifacts.py
-            scripts/validate_bonsai_lowbit_attention_context_composition.py
-            scripts/validate_bonsai_lowbit_attention_to_out_input_source.py
-            scripts/validate_bonsai_lowbit_attention_to_out_semantic_input.py
-            scripts/validate_bonsai_lowbit_attention_to_out.py
+            "scripts/run_bonsai_lowbit_probe.py --self-test"
+            "scripts/run_bonsai_lowbit_probe.py"
+            "scripts/probe_bonsai_lowbit_layer_cols.py"
+            "scripts/compare_bonsai_lowbit_to_unpacked_layer.py"
+            "scripts/compare_bonsai_lowbit_to_unpacked_layers.py"
+            "scripts/compare_bonsai_lowbit_to_unpacked_all_layers.py"
+            "scripts/export_bonsai_lowbit_layer_onnx.py"
+            "scripts/export_bonsai_lowbit_runtime_linear_onnx.py"
+            "scripts/export_bonsai_lowbit_multi_linear_onnx.py"
+            "scripts/export_bonsai_lowbit_same_block_projection_onnx.py"
+            "scripts/export_bonsai_lowbit_qkv_mlp_split_onnx.py"
+            "scripts/export_bonsai_lowbit_qkv_head_reshape_onnx.py"
+            "scripts/export_bonsai_lowbit_qkv_seq_head_layout_onnx.py"
+            "scripts/export_bonsai_lowbit_attention_math_onnx.py"
+            "scripts/export_bonsai_lowbit_attention_context_composition_onnx.py"
+            "scripts/export_bonsai_lowbit_attention_to_out_input_source_onnx.py"
+            "scripts/export_bonsai_lowbit_attention_to_out_semantic_input_onnx.py"
+            "scripts/export_bonsai_lowbit_attention_to_out_onnx.py"
+            "scripts/validate_bonsai_lowbit_artifacts.py"
+            "scripts/validate_bonsai_lowbit_attention_context_composition.py"
+            "scripts/validate_bonsai_lowbit_attention_to_out_input_source.py"
+            "scripts/validate_bonsai_lowbit_attention_to_out_semantic_input.py"
+            "scripts/validate_bonsai_lowbit_attention_to_out.py"
           )
           for s in "${scripts[@]}"; do
             echo "::group::python $s"
