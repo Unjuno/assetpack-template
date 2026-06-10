@@ -1,7 +1,9 @@
 name: bonsai-lowbit-smoke
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
