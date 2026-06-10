@@ -27,146 +27,95 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Show runner resources
+      - name: Install probe dependencies
         run: |
           python --version
           df -h
           free -h
           nproc
-
-      - name: Install probe dependencies
-        run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
           pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxscript onnxruntime
-
-      - name: Verify probe dependencies
-        run: |
           python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxscript, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxscript', onnxscript.__version__); print('onnxruntime', ort.__version__)"
 
-      - name: Self-test low-bit probe
+      - name: Run low-bit smoke probes
         run: |
-          python scripts/run_bonsai_lowbit_probe.py --self-test
-
-      - name: Run low-bit pack probe
-        run: |
-          python scripts/run_bonsai_lowbit_probe.py
-
-      - name: Run one-layer column-group probe
-        run: |
-          python scripts/probe_bonsai_lowbit_layer_cols.py
-
-      - name: Compare low-bit layer to unpacked layer
-        run: |
-          python scripts/compare_bonsai_lowbit_to_unpacked_layer.py
-
-      - name: Compare sampled low-bit layers to unpacked weights
-        run: |
-          python scripts/compare_bonsai_lowbit_to_unpacked_layers.py
-
-      - name: Compare all low-bit layers to unpacked weights
-        run: |
-          python scripts/compare_bonsai_lowbit_to_unpacked_all_layers.py
-
-      - name: Export recovered low-bit layer to ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_layer_onnx.py
-
-      - name: Export runtime low-bit linear to ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_runtime_linear_onnx.py
-
-      - name: Export multi runtime low-bit linear bundle to ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_multi_linear_onnx.py
-
-      - name: Export same-block projection bundle to ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_same_block_projection_onnx.py
-
-      - name: Export qkv mlp split to ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_qkv_mlp_split_onnx.py
-
-      - name: Export qkv head reshape to ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_qkv_head_reshape_onnx.py
-
-      - name: Export qkv sequence head layout to ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_qkv_seq_head_layout_onnx.py
-
-      - name: Export scaled dot product attention math to ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_attention_math_onnx.py
-
-      - name: Export attention context composition to ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_attention_context_composition_onnx.py
-
-      - name: Export attention to_out input source candidate to ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_attention_to_out_input_source_onnx.py
-
-      - name: Export attention to_out semantic input to ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_attention_to_out_semantic_input_onnx.py
-
-      - name: Validate low-bit reports
-        run: |
-          python scripts/validate_bonsai_lowbit_artifacts.py
-
-      - name: Validate attention context composition report
-        run: |
-          python scripts/validate_bonsai_lowbit_attention_context_composition.py
-
-      - name: Validate attention to_out input source report
-        run: |
-          python scripts/validate_bonsai_lowbit_attention_to_out_input_source.py
-
-      - name: Validate attention to_out semantic input report
-        run: |
-          python scripts/validate_bonsai_lowbit_attention_to_out_semantic_input.py
+          set -euo pipefail
+          scripts=(
+            scripts/run_bonsai_lowbit_probe.py --self-test
+            scripts/run_bonsai_lowbit_probe.py
+            scripts/probe_bonsai_lowbit_layer_cols.py
+            scripts/compare_bonsai_lowbit_to_unpacked_layer.py
+            scripts/compare_bonsai_lowbit_to_unpacked_layers.py
+            scripts/compare_bonsai_lowbit_to_unpacked_all_layers.py
+            scripts/export_bonsai_lowbit_layer_onnx.py
+            scripts/export_bonsai_lowbit_runtime_linear_onnx.py
+            scripts/export_bonsai_lowbit_multi_linear_onnx.py
+            scripts/export_bonsai_lowbit_same_block_projection_onnx.py
+            scripts/export_bonsai_lowbit_qkv_mlp_split_onnx.py
+            scripts/export_bonsai_lowbit_qkv_head_reshape_onnx.py
+            scripts/export_bonsai_lowbit_qkv_seq_head_layout_onnx.py
+            scripts/export_bonsai_lowbit_attention_math_onnx.py
+            scripts/export_bonsai_lowbit_attention_context_composition_onnx.py
+            scripts/export_bonsai_lowbit_attention_to_out_input_source_onnx.py
+            scripts/export_bonsai_lowbit_attention_to_out_semantic_input_onnx.py
+            scripts/export_bonsai_lowbit_attention_to_out_onnx.py
+            scripts/validate_bonsai_lowbit_artifacts.py
+            scripts/validate_bonsai_lowbit_attention_context_composition.py
+            scripts/validate_bonsai_lowbit_attention_to_out_input_source.py
+            scripts/validate_bonsai_lowbit_attention_to_out_semantic_input.py
+            scripts/validate_bonsai_lowbit_attention_to_out.py
+          )
+          for s in "${scripts[@]}"; do
+            echo "::group::python $s"
+            python $s
+            echo "::endgroup::"
+          done
 
       - name: Show low-bit report summary
         if: always()
         run: |
-          if [ -f reports/bonsai-lowbit-smoke/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-smoke/report.json').read_text()); print(json.dumps({'status': r.get('status'), 'milestone_reached': r.get('milestone_reached'), 'error_type': r.get('error_type'), 'error': r.get('error'), 'stages': [(s.get('name'), s.get('status'), s.get('error_type')) for s in r.get('stages', [])]}, indent=2))"
-          fi
-          for p in reports/bonsai-lowbit-layer/report.json reports/bonsai-lowbit-compare/report.json reports/bonsai-lowbit-compare-layers/report.json reports/bonsai-lowbit-compare-all-layers/report.json reports/bonsai-lowbit-layer-onnx/report.json reports/bonsai-lowbit-runtime-linear-onnx/report.json reports/bonsai-lowbit-multi-linear-onnx/report.json reports/bonsai-lowbit-same-block-projection-onnx/report.json reports/bonsai-lowbit-qkv-mlp-split-onnx/report.json reports/bonsai-lowbit-qkv-head-reshape-onnx/report.json reports/bonsai-lowbit-qkv-seq-head-layout-onnx/report.json reports/bonsai-lowbit-attention-math-onnx/report.json reports/bonsai-lowbit-attention-context-composition-onnx/report.json reports/bonsai-lowbit-attention-context-composition-validation/report.json reports/bonsai-lowbit-attention-to-out-input-source-onnx/report.json reports/bonsai-lowbit-attention-to-out-input-source-validation/report.json reports/bonsai-lowbit-attention-to-out-semantic-input-onnx/report.json reports/bonsai-lowbit-attention-to-out-semantic-input-validation/report.json; do
-            if [ -f "$p" ]; then
-              python -c "import json, sys; from pathlib import Path; p=Path(sys.argv[1]); r=json.loads(p.read_text()); print(json.dumps({'report': str(p), 'graph_kind': r.get('graph_kind'), 'block_kind': r.get('block_kind'), 'bundle_kind': r.get('bundle_kind'), 'layer': r.get('layer'), 'block_index': r.get('block_index'), 'hidden_dim': r.get('hidden_dim'), 'projection_output_dim': r.get('projection_output_dim'), 'sequence_length': r.get('sequence_length'), 'head_schema': r.get('head_schema'), 'attention_math': r.get('attention_math'), 'composition_schema': r.get('composition_schema'), 'source_candidate_schema': r.get('source_candidate_schema'), 'semantic_input_schema': r.get('semantic_input_schema'), 'to_out_input_schema': r.get('to_out_input_schema'), 'split_schema': r.get('split_schema'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'external_data_size_bytes': r.get('external_data_size_bytes'), 'packed_nbytes': r.get('packed_nbytes'), 'expanded_fp32_weight_nbytes': r.get('expanded_fp32_weight_nbytes'), 'max_abs_error': r.get('max_abs_error'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5')}, indent=2))" "$p"
-            fi
-          done
-          if [ -f reports/bonsai-lowbit-validation/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-validation/report.json').read_text()); print(json.dumps(r, indent=2))"
-          fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          reports = sorted(Path('reports').glob('**/report.json'))
+          for p in reports:
+            try:
+              r = json.loads(p.read_text())
+            except Exception as exc:
+              print(json.dumps({'report': str(p), 'error': str(exc)}, indent=2))
+              continue
+            print(json.dumps({
+              'report': str(p),
+              'ok': r.get('ok'),
+              'graph_kind': r.get('graph_kind'),
+              'block_kind': r.get('block_kind'),
+              'bundle_kind': r.get('bundle_kind'),
+              'layer': r.get('layer'),
+              'block_index': r.get('block_index'),
+              'hidden_dim': r.get('hidden_dim'),
+              'projection_output_dim': r.get('projection_output_dim'),
+              'sequence_length': r.get('sequence_length'),
+              'head_schema': r.get('head_schema'),
+              'composition_schema': r.get('composition_schema'),
+              'source_candidate_schema': r.get('source_candidate_schema'),
+              'semantic_input_schema': r.get('semantic_input_schema'),
+              'to_out_input_schema': r.get('to_out_input_schema'),
+              'to_out_schema': r.get('to_out_schema'),
+              'split_schema': r.get('split_schema'),
+              'onnx_size_bytes': r.get('onnx_size_bytes'),
+              'external_data_size_bytes': r.get('external_data_size_bytes'),
+              'max_abs_error': r.get('max_abs_error'),
+              'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'),
+              'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5'),
+              'claim': r.get('claim'),
+            }, indent=2))
+          PY
 
       - name: Upload low-bit reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: bonsai-lowbit-smoke-report
-          path: |
-            reports/bonsai-lowbit-smoke/
-            reports/bonsai-lowbit-layer/
-            reports/bonsai-lowbit-compare/
-            reports/bonsai-lowbit-compare-layers/
-            reports/bonsai-lowbit-compare-all-layers/
-            reports/bonsai-lowbit-layer-onnx/
-            reports/bonsai-lowbit-runtime-linear-onnx/
-            reports/bonsai-lowbit-multi-linear-onnx/
-            reports/bonsai-lowbit-same-block-projection-onnx/
-            reports/bonsai-lowbit-qkv-mlp-split-onnx/
-            reports/bonsai-lowbit-qkv-head-reshape-onnx/
-            reports/bonsai-lowbit-qkv-seq-head-layout-onnx/
-            reports/bonsai-lowbit-attention-math-onnx/
-            reports/bonsai-lowbit-attention-context-composition-onnx/
-            reports/bonsai-lowbit-attention-context-composition-validation/
-            reports/bonsai-lowbit-attention-to-out-input-source-onnx/
-            reports/bonsai-lowbit-attention-to-out-input-source-validation/
-            reports/bonsai-lowbit-attention-to-out-semantic-input-onnx/
-            reports/bonsai-lowbit-attention-to-out-semantic-input-validation/
-            reports/bonsai-lowbit-validation/
+          path: reports/
           retention-days: 7
