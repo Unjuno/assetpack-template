@@ -102,6 +102,10 @@ jobs:
         run: |
           python scripts/export_bonsai_lowbit_attention_context_composition_onnx.py
 
+      - name: Export attention to_out input source candidate to ONNX
+        run: |
+          python scripts/export_bonsai_lowbit_attention_to_out_input_source_onnx.py
+
       - name: Validate low-bit reports
         run: |
           python scripts/validate_bonsai_lowbit_artifacts.py
@@ -110,15 +114,19 @@ jobs:
         run: |
           python scripts/validate_bonsai_lowbit_attention_context_composition.py
 
+      - name: Validate attention to_out input source report
+        run: |
+          python scripts/validate_bonsai_lowbit_attention_to_out_input_source.py
+
       - name: Show low-bit report summary
         if: always()
         run: |
           if [ -f reports/bonsai-lowbit-smoke/report.json ]; then
             python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-smoke/report.json').read_text()); print(json.dumps({'status': r.get('status'), 'milestone_reached': r.get('milestone_reached'), 'error_type': r.get('error_type'), 'error': r.get('error'), 'stages': [(s.get('name'), s.get('status'), s.get('error_type')) for s in r.get('stages', [])]}, indent=2))"
           fi
-          for p in reports/bonsai-lowbit-layer/report.json reports/bonsai-lowbit-compare/report.json reports/bonsai-lowbit-compare-layers/report.json reports/bonsai-lowbit-compare-all-layers/report.json reports/bonsai-lowbit-layer-onnx/report.json reports/bonsai-lowbit-runtime-linear-onnx/report.json reports/bonsai-lowbit-multi-linear-onnx/report.json reports/bonsai-lowbit-same-block-projection-onnx/report.json reports/bonsai-lowbit-qkv-mlp-split-onnx/report.json reports/bonsai-lowbit-qkv-head-reshape-onnx/report.json reports/bonsai-lowbit-qkv-seq-head-layout-onnx/report.json reports/bonsai-lowbit-attention-math-onnx/report.json reports/bonsai-lowbit-attention-context-composition-onnx/report.json reports/bonsai-lowbit-attention-context-composition-validation/report.json; do
+          for p in reports/bonsai-lowbit-layer/report.json reports/bonsai-lowbit-compare/report.json reports/bonsai-lowbit-compare-layers/report.json reports/bonsai-lowbit-compare-all-layers/report.json reports/bonsai-lowbit-layer-onnx/report.json reports/bonsai-lowbit-runtime-linear-onnx/report.json reports/bonsai-lowbit-multi-linear-onnx/report.json reports/bonsai-lowbit-same-block-projection-onnx/report.json reports/bonsai-lowbit-qkv-mlp-split-onnx/report.json reports/bonsai-lowbit-qkv-head-reshape-onnx/report.json reports/bonsai-lowbit-qkv-seq-head-layout-onnx/report.json reports/bonsai-lowbit-attention-math-onnx/report.json reports/bonsai-lowbit-attention-context-composition-onnx/report.json reports/bonsai-lowbit-attention-context-composition-validation/report.json reports/bonsai-lowbit-attention-to-out-input-source-onnx/report.json reports/bonsai-lowbit-attention-to-out-input-source-validation/report.json; do
             if [ -f "$p" ]; then
-              python -c "import json, sys; from pathlib import Path; p=Path(sys.argv[1]); r=json.loads(p.read_text()); print(json.dumps({'report': str(p), 'graph_kind': r.get('graph_kind'), 'block_kind': r.get('block_kind'), 'bundle_kind': r.get('bundle_kind'), 'layer': r.get('layer'), 'block_index': r.get('block_index'), 'hidden_dim': r.get('hidden_dim'), 'projection_output_dim': r.get('projection_output_dim'), 'sequence_length': r.get('sequence_length'), 'head_schema': r.get('head_schema'), 'attention_math': r.get('attention_math'), 'composition_schema': r.get('composition_schema'), 'to_out_input_schema': r.get('to_out_input_schema'), 'split_schema': r.get('split_schema'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'external_data_size_bytes': r.get('external_data_size_bytes'), 'packed_nbytes': r.get('packed_nbytes'), 'expanded_fp32_weight_nbytes': r.get('expanded_fp32_weight_nbytes'), 'max_abs_error': r.get('max_abs_error'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5')}, indent=2))" "$p"
+              python -c "import json, sys; from pathlib import Path; p=Path(sys.argv[1]); r=json.loads(p.read_text()); print(json.dumps({'report': str(p), 'graph_kind': r.get('graph_kind'), 'block_kind': r.get('block_kind'), 'bundle_kind': r.get('bundle_kind'), 'layer': r.get('layer'), 'block_index': r.get('block_index'), 'hidden_dim': r.get('hidden_dim'), 'projection_output_dim': r.get('projection_output_dim'), 'sequence_length': r.get('sequence_length'), 'head_schema': r.get('head_schema'), 'attention_math': r.get('attention_math'), 'composition_schema': r.get('composition_schema'), 'source_candidate_schema': r.get('source_candidate_schema'), 'to_out_input_schema': r.get('to_out_input_schema'), 'split_schema': r.get('split_schema'), 'onnx_size_bytes': r.get('onnx_size_bytes'), 'external_data_size_bytes': r.get('external_data_size_bytes'), 'packed_nbytes': r.get('packed_nbytes'), 'expanded_fp32_weight_nbytes': r.get('expanded_fp32_weight_nbytes'), 'max_abs_error': r.get('max_abs_error'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5')}, indent=2))" "$p"
             fi
           done
           if [ -f reports/bonsai-lowbit-validation/report.json ]; then
@@ -146,5 +154,7 @@ jobs:
             reports/bonsai-lowbit-attention-math-onnx/
             reports/bonsai-lowbit-attention-context-composition-onnx/
             reports/bonsai-lowbit-attention-context-composition-validation/
+            reports/bonsai-lowbit-attention-to-out-input-source-onnx/
+            reports/bonsai-lowbit-attention-to-out-input-source-validation/
             reports/bonsai-lowbit-validation/
           retention-days: 7
