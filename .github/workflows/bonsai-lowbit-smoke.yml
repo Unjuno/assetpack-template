@@ -34,6 +34,9 @@ on:
       - main
     paths:
       - .github/workflows/bonsai-lowbit-smoke.yml
+      - scripts/prepare_bonsai_lowbit_ten_by_two_reference_artifact.py
+      - scripts/export_bonsai_lowbit_pair_persistent_onnx_artifact.py
+      - scripts/validate_bonsai_lowbit_ten_by_two_split_persistent_onnx_artifacts.py
       - scripts/export_bonsai_lowbit_ten_by_two_persistent_onnx_artifacts.py
       - scripts/validate_bonsai_lowbit_ten_by_two_persistent_onnx_artifacts.py
       - scripts/export_bonsai_lowbit_ten_by_two_single_blocks_modulated_onnx.py
@@ -60,11 +63,9 @@ jobs:
       PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
       - name: Install probe dependencies
         run: |
           python --version
@@ -74,46 +75,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
           pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxscript onnxruntime
-          python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxscript, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxscript', onnxscript.__version__); print('onnxruntime', ort.__version__)"
-
       - name: Run selected pair segment probe
         run: |
           set -euo pipefail
           python scripts/export_bonsai_lowbit_pair_segment_single_blocks_modulated_onnx.py --start "${{ inputs.segment_start }}"
-
-      - name: Show low-bit report summary
-        if: always()
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          reports = sorted(Path('reports').glob('**/report.json'))
-          for p in reports:
-            try:
-              r = json.loads(p.read_text())
-            except Exception as exc:
-              print(json.dumps({'report': str(p), 'error': str(exc)}, indent=2))
-              continue
-            print(json.dumps({
-              'report': str(p),
-              'ok': r.get('ok'),
-              'graph_kind': r.get('graph_kind'),
-              'block_indices': r.get('block_indices'),
-              'segment_block_indices': r.get('segment_block_indices'),
-              'sequence_block_count': r.get('sequence_block_count'),
-              'onnx_segment_count': r.get('onnx_segment_count'),
-              'persistent_onnx_artifacts': r.get('persistent_onnx_artifacts'),
-              'reusable_onnx_chain_artifact': r.get('reusable_onnx_chain_artifact'),
-              'validated_from_persisted_onnx_files': r.get('validated_from_persisted_onnx_files'),
-              'is_single_monolithic_onnx': r.get('is_single_monolithic_onnx'),
-              'critical_max_abs_error': r.get('critical_max_abs_error'),
-              'diagnostic_max_abs_error': r.get('diagnostic_max_abs_error'),
-              'critical_outputs_allclose': r.get('critical_outputs_allclose_rtol_1e_4_atol_1e_5'),
-              'diagnostic_outputs_allclose': r.get('diagnostic_outputs_allclose_rtol_1e_4_atol_1e_4'),
-              'claim': r.get('claim'),
-            }, indent=2))
-          PY
-
       - name: Upload selected pair segment report JSON
         if: always()
         uses: actions/upload-artifact@v4
@@ -137,11 +102,9 @@ jobs:
       PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
       - name: Install probe dependencies
         run: |
           python --version
@@ -151,13 +114,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
           pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxscript onnxruntime
-          python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxscript, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxscript', onnxscript.__version__); print('onnxruntime', ort.__version__)"
-
       - name: Run pair segment probe
         run: |
           set -euo pipefail
           python scripts/export_bonsai_lowbit_pair_segment_single_blocks_modulated_onnx.py --start ${{ matrix.start }}
-
       - name: Upload pair segment report JSON
         if: always()
         uses: actions/upload-artifact@v4
@@ -174,18 +134,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/download-artifact@v4
         with:
           pattern: bonsai-lowbit-pair-segment-*-report-json
           path: downloaded-pair-segment-reports
           merge-multiple: true
-
       - name: Aggregate pair segment reports
         run: |
           set -euo pipefail
           python scripts/validate_bonsai_lowbit_pair_segments_aggregate.py downloaded-pair-segment-reports
-
       - name: Upload pair segment aggregate report JSON
         if: always()
         uses: actions/upload-artifact@v4
@@ -205,11 +162,9 @@ jobs:
       PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
       - name: Install probe dependencies
         run: |
           python --version
@@ -219,14 +174,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
           pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxscript onnxruntime
-          python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxscript, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxscript', onnxscript.__version__); print('onnxruntime', ort.__version__)"
-
       - name: Run ten-by-two chain probe
         run: |
           set -euo pipefail
           python scripts/export_bonsai_lowbit_ten_by_two_single_blocks_modulated_onnx.py
           python scripts/validate_bonsai_lowbit_ten_by_two_single_blocks_modulated.py
-
       - name: Upload ten-by-two chain report JSON
         if: always()
         uses: actions/upload-artifact@v4
@@ -235,23 +187,21 @@ jobs:
           path: reports/**/report.json
           retention-days: 7
 
-  ten-by-two-persistent-export:
+  ten-by-two-persistent-reference:
     if: ${{ (github.event_name == 'workflow_dispatch' && inputs.target == 'ten-by-two-persistent-artifacts') || github.event_name == 'push' }}
-    name: ten-by-two-persistent-export
+    name: ten-by-two-persistent-reference
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     env:
       HF_HUB_DISABLE_TELEMETRY: "1"
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
       PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install export dependencies
+      - name: Install reference dependencies
         run: |
           python --version
           df -h
@@ -260,20 +210,57 @@ jobs:
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
           pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxscript onnxruntime
-          python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxscript, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxscript', onnxscript.__version__); print('onnxruntime', ort.__version__)"
-
-      - name: Export persistent ten-by-two ONNX artifact bundle
+      - name: Build ten-by-two reference tensor artifact
         run: |
           set -euo pipefail
-          python scripts/export_bonsai_lowbit_ten_by_two_persistent_onnx_artifacts.py
-          find reports/bonsai-lowbit-ten-by-two-persistent-onnx-artifacts -maxdepth 3 -type f -printf '%p %s bytes\n' | sort
-
-      - name: Upload persistent ten-by-two ONNX artifact bundle
+          python scripts/prepare_bonsai_lowbit_ten_by_two_reference_artifact.py
+          find reports/bonsai-lowbit-ten-by-two-persistent-reference -maxdepth 2 -type f -printf '%p %s bytes\n' | sort
+      - name: Upload persistent ten-by-two reference artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bonsai-lowbit-ten-by-two-persistent-onnx-artifacts
-          path: reports/bonsai-lowbit-ten-by-two-persistent-onnx-artifacts
+          name: bonsai-lowbit-ten-by-two-persistent-reference
+          path: reports/bonsai-lowbit-ten-by-two-persistent-reference
+          retention-days: 7
+
+  ten-by-two-persistent-segment:
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.target == 'ten-by-two-persistent-artifacts') || github.event_name == 'push' }}
+    name: ten-by-two-persistent-segment-${{ matrix.start }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        start: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+    env:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install segment export dependencies
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxscript onnxruntime
+      - name: Export one persistent ONNX segment artifact
+        run: |
+          set -euo pipefail
+          python scripts/export_bonsai_lowbit_pair_persistent_onnx_artifact.py --start ${{ matrix.start }}
+          find reports/bonsai-lowbit-persistent-onnx-segment-${{ matrix.start }}-$(( ${{ matrix.start }} + 1 )) -maxdepth 2 -type f -printf '%p %s bytes\n' | sort
+      - name: Upload persistent ONNX segment artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-lowbit-persistent-onnx-segment-${{ matrix.start }}
+          path: reports/bonsai-lowbit-persistent-onnx-segment-${{ matrix.start }}-*
           retention-days: 7
 
   ten-by-two-persistent-validate:
@@ -281,17 +268,17 @@ jobs:
     name: ten-by-two-persistent-validate
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: ten-by-two-persistent-export
+    needs:
+      - ten-by-two-persistent-reference
+      - ten-by-two-persistent-segment
     env:
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
       PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
       - name: Install validation dependencies
         run: |
           python --version
@@ -300,22 +287,22 @@ jobs:
           nproc
           python -m pip install --upgrade pip
           pip install --no-cache-dir numpy onnxruntime
-          python -c "import numpy as np, onnxruntime as ort; print('numpy', np.__version__); print('onnxruntime', ort.__version__)"
-
       - uses: actions/download-artifact@v4
         with:
-          name: bonsai-lowbit-ten-by-two-persistent-onnx-artifacts
-          path: reports/bonsai-lowbit-ten-by-two-persistent-onnx-artifacts
-
-      - name: Validate downloaded persistent ONNX artifacts without low-bit source reload
+          name: bonsai-lowbit-ten-by-two-persistent-reference
+          path: downloaded-persistent-reference
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bonsai-lowbit-persistent-onnx-segment-*
+          path: downloaded-persistent-segments
+      - name: Validate split downloaded persistent ONNX artifacts without low-bit source reload
         run: |
           set -euo pipefail
-          python scripts/validate_bonsai_lowbit_ten_by_two_persistent_onnx_artifacts.py
-
-      - name: Upload persistent ten-by-two validation report JSON
+          python scripts/validate_bonsai_lowbit_ten_by_two_split_persistent_onnx_artifacts.py
+      - name: Upload split persistent ten-by-two validation report JSON
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bonsai-lowbit-ten-by-two-persistent-onnx-validation-report-json
-          path: reports/bonsai-lowbit-ten-by-two-persistent-onnx-artifacts-validation/report.json
+          name: bonsai-lowbit-ten-by-two-split-persistent-onnx-validation-report-json
+          path: reports/bonsai-lowbit-ten-by-two-split-persistent-onnx-artifacts-validation/report.json
           retention-days: 7
