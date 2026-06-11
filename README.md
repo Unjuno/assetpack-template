@@ -191,6 +191,45 @@ The current experiment is staged:
 
 The default config currently requires `ort_cpu_forward`. That means CI must at least produce an ONNX component and execute it on CPU. It is not yet a full text-to-image pass. Full Bonsai CPU image generation remains a separate milestone because it must compose multiple heavy components and may exceed GitHub-hosted runner RAM.
 
+#### Bonsai low-bit verification evidence
+
+Bonsai low-bit verification is evidence-gated. The canonical machine-readable source is:
+
+```text
+docs/bonsai-lowbit-verification-manifest.json
+```
+
+Supporting human-readable records are:
+
+```text
+docs/bonsai-lowbit-claim-matrix.md
+docs/bonsai-lowbit-local-artifact-audit.md
+docs/bonsai-lowbit-completion-plan.md
+```
+
+Current verified low-bit scope, based only on existing artifact ZIP reports:
+
+- attention `to_out` path;
+- single block modulated attention `to_out` residual;
+- two single blocks modulated residual stack;
+- four single blocks via two-by-two segmented ONNX;
+- eight single blocks via four-by-two segmented ONNX;
+- sixteen single blocks via eight-by-two segmented ONNX.
+
+Current pending low-bit scope:
+
+- all ten pair segments for blocks 0-19;
+- twenty single blocks via ten-by-two chained segmented ONNX.
+
+Any future verification claim must be represented in `docs/bonsai-lowbit-verification-manifest.json` before the README or other docs may treat it as verified.
+
+Do not collapse segmented critical-path evidence into a broader claim. In particular, the current low-bit evidence does not verify:
+
+- full Bonsai ONNX pipeline execution;
+- real transformer block ONNX execution;
+- prompt-to-image generation;
+- single monolithic multi-block ONNX, where the verified path is segmented.
+
 ### 8. Experiment Records
 
 Experiment records must be kept even if generated images are later deleted.
