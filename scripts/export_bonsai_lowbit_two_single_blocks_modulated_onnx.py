@@ -16,6 +16,7 @@ BLOCK_INDICES = [0, 1]
 MODULATION_KEY = "single_stream_modulation.linear.weight"
 OUT_DIR = Path("reports/bonsai-lowbit-two-single-blocks-modulated-onnx")
 SEQ_LEN = 4
+ONNX_OPSET_VERSION = 18
 
 
 def qkv_prefix(index: int) -> str:
@@ -106,7 +107,7 @@ def main() -> int:
         str(onnx_path),
         input_names=["hidden", "temb"],
         output_names=output_names,
-        opset_version=17,
+        opset_version=ONNX_OPSET_VERSION,
         do_constant_folding=False,
         dynamic_axes={
             "hidden": {0: "batch", 1: "seq"},
@@ -164,6 +165,7 @@ def main() -> int:
         "is_two_single_blocks_modulated_stack": True,
         "block_indices": BLOCK_INDICES,
         "sequence_block_count": module.sequence_block_count,
+        "onnx_opset_version": ONNX_OPSET_VERSION,
         "is_attention_with_to_out": True,
         "to_out_connection_attempted": True,
         "has_modulation": True,
@@ -193,7 +195,7 @@ def main() -> int:
         "claim": "two_single_blocks_modulated_attention_to_out_residual_stack_onnxruntime_cpu_verified_not_real_transformer_block_or_full_bonsai_pipeline",
     }
     (OUT_DIR / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"graph_kind": report["graph_kind"], "block_indices": report["block_indices"], "residual_schema": report["residual_schema"], "max_abs_error": report["max_abs_error"], "all_outputs_allclose": report["all_outputs_allclose_rtol_1e_4_atol_1e_5"]}, indent=2))
+    print(json.dumps({"graph_kind": report["graph_kind"], "block_indices": report["block_indices"], "onnx_opset_version": report["onnx_opset_version"], "residual_schema": report["residual_schema"], "max_abs_error": report["max_abs_error"], "all_outputs_allclose": report["all_outputs_allclose_rtol_1e_4_atol_1e_5"]}, indent=2))
     return 0 if allclose else 1
 
 
