@@ -121,6 +121,14 @@ jobs:
             }, indent=2))
           PY
 
+      - name: Upload low-bit report JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-lowbit-smoke-report-json
+          path: reports/**/report.json
+          retention-days: 7
+
       - name: Upload low-bit reports
         if: always()
         uses: actions/upload-artifact@v4
