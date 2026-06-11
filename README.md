@@ -207,19 +207,22 @@ docs/bonsai-lowbit-local-artifact-audit.md
 docs/bonsai-lowbit-completion-plan.md
 ```
 
-Current verified low-bit scope, based only on existing artifact ZIP reports:
+Current verified low-bit scope, based only on manifest-recorded artifact reports:
 
 - attention `to_out` path;
 - single block modulated attention `to_out` residual;
 - two single blocks modulated residual stack;
 - four single blocks via two-by-two segmented ONNX;
 - eight single blocks via four-by-two segmented ONNX;
-- sixteen single blocks via eight-by-two segmented ONNX.
+- sixteen single blocks via eight-by-two segmented ONNX;
+- all ten pair segments for blocks 0-19;
+- twenty single blocks via ten-by-two chained segmented ONNX.
 
 Current pending low-bit scope:
 
-- all ten pair segments for blocks 0-19;
-- twenty single blocks via ten-by-two chained segmented ONNX.
+- none for the current low-bit critical-path scope through ten-by-two twenty-block segmented ONNX.
+
+The twenty-block ten-by-two evidence is a segmented ONNX Runtime CPU critical-path verification. The artifact contains separate export and validation reports; the manifest records the combined evidence boundary.
 
 Any future verification claim must be represented in `docs/bonsai-lowbit-verification-manifest.json` before the README or other docs may treat it as verified.
 
