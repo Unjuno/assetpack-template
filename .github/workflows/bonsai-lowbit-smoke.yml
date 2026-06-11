@@ -2,16 +2,113 @@ name: bonsai-lowbit-smoke
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: "Verification target to run"
+        required: true
+        type: choice
+        default: pair-segment
+        options:
+          - pair-segment
+          - pair-segments-all
+          - ten-by-two-chain
+      segment_start:
+        description: "Even start index for pair-segment target"
+        required: true
+        type: choice
+        default: "0"
+        options:
+          - "0"
+          - "2"
+          - "4"
+          - "6"
+          - "8"
+          - "10"
+          - "12"
+          - "14"
+          - "16"
+          - "18"
 
 permissions:
   contents: read
 
 concurrency:
-  group: bonsai-lowbit-smoke-queue
+  group: bonsai-lowbit-smoke-${{ inputs.target }}-${{ inputs.segment_start }}
   cancel-in-progress: false
 
 jobs:
   pair-segment:
+    if: ${{ inputs.target == 'pair-segment' }}
+    name: pair-segment-${{ inputs.segment_start }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install probe dependencies
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxscript onnxruntime
+          python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxscript, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxscript', onnxscript.__version__); print('onnxruntime', ort.__version__)"
+
+      - name: Run selected pair segment probe
+        run: |
+          set -euo pipefail
+          python scripts/export_bonsai_lowbit_pair_segment_single_blocks_modulated_onnx.py --start "${{ inputs.segment_start }}"
+
+      - name: Show low-bit report summary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          reports = sorted(Path('reports').glob('**/report.json'))
+          for p in reports:
+            try:
+              r = json.loads(p.read_text())
+            except Exception as exc:
+              print(json.dumps({'report': str(p), 'error': str(exc)}, indent=2))
+              continue
+            print(json.dumps({
+              'report': str(p),
+              'ok': r.get('ok'),
+              'graph_kind': r.get('graph_kind'),
+              'block_indices': r.get('block_indices'),
+              'segment_block_indices': r.get('segment_block_indices'),
+              'sequence_block_count': r.get('sequence_block_count'),
+              'onnx_segment_count': r.get('onnx_segment_count'),
+              'is_single_monolithic_onnx': r.get('is_single_monolithic_onnx'),
+              'critical_max_abs_error': r.get('critical_max_abs_error'),
+              'diagnostic_max_abs_error': r.get('diagnostic_max_abs_error'),
+              'critical_outputs_allclose': r.get('critical_outputs_allclose_rtol_1e_4_atol_1e_5'),
+              'diagnostic_outputs_allclose': r.get('diagnostic_outputs_allclose_rtol_1e_4_atol_1e_4'),
+              'claim': r.get('claim'),
+            }, indent=2))
+          PY
+
+      - name: Upload selected pair segment report JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-lowbit-pair-segment-${{ inputs.segment_start }}-report-json
+          path: reports/**/report.json
+          retention-days: 7
+
+  pair-segments-all:
+    if: ${{ inputs.target == 'pair-segments-all' }}
     name: pair-segment-${{ matrix.start }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -46,6 +143,47 @@ jobs:
           set -euo pipefail
           python scripts/export_bonsai_lowbit_pair_segment_single_blocks_modulated_onnx.py --start ${{ matrix.start }}
 
+      - name: Upload pair segment report JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-lowbit-pair-segment-${{ matrix.start }}-report-json
+          path: reports/**/report.json
+          retention-days: 7
+
+  ten-by-two-chain:
+    if: ${{ inputs.target == 'ten-by-two-chain' }}
+    name: ten-by-two-chain
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install probe dependencies
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxscript onnxruntime
+          python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxscript, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxscript', onnxscript.__version__); print('onnxruntime', ort.__version__)"
+
+      - name: Run ten-by-two chain probe
+        run: |
+          set -euo pipefail
+          python scripts/export_bonsai_lowbit_ten_by_two_single_blocks_modulated_onnx.py
+          python scripts/validate_bonsai_lowbit_ten_by_two_single_blocks_modulated.py
+
       - name: Show low-bit report summary
         if: always()
         run: |
@@ -68,24 +206,18 @@ jobs:
               'sequence_block_count': r.get('sequence_block_count'),
               'onnx_segment_count': r.get('onnx_segment_count'),
               'is_single_monolithic_onnx': r.get('is_single_monolithic_onnx'),
-              'hidden_dim': r.get('hidden_dim'),
-              'sequence_length': r.get('sequence_length'),
-              'residual_schema': r.get('residual_schema'),
-              'total_onnx_segment_size_bytes': r.get('total_onnx_segment_size_bytes'),
-              'max_abs_error': r.get('max_abs_error'),
               'critical_max_abs_error': r.get('critical_max_abs_error'),
               'diagnostic_max_abs_error': r.get('diagnostic_max_abs_error'),
-              'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5'),
               'critical_outputs_allclose': r.get('critical_outputs_allclose_rtol_1e_4_atol_1e_5'),
               'diagnostic_outputs_allclose': r.get('diagnostic_outputs_allclose_rtol_1e_4_atol_1e_4'),
               'claim': r.get('claim'),
             }, indent=2))
           PY
 
-      - name: Upload pair segment report JSON
+      - name: Upload ten-by-two chain report JSON
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bonsai-lowbit-pair-segment-${{ matrix.start }}-report-json
+          name: bonsai-lowbit-ten-by-two-chain-report-json
           path: reports/**/report.json
           retention-days: 7
