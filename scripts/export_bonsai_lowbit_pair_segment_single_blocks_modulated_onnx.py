@@ -44,7 +44,7 @@ def export_segment(module: TwoSingleBlocksModulated, hidden: torch.Tensor, temb:
         str(path),
         input_names=["hidden", "temb"],
         output_names=output_names,
-        opset_version=17,
+        opset_version=18,
         do_constant_folding=False,
         dynamic_axes={
             "hidden": {0: "batch", 1: "seq"},
