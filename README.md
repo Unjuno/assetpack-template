@@ -216,13 +216,17 @@ Current verified low-bit scope, based only on manifest-recorded artifact reports
 - eight single blocks via four-by-two segmented ONNX;
 - sixteen single blocks via eight-by-two segmented ONNX;
 - all ten pair segments for blocks 0-19;
-- twenty single blocks via ten-by-two chained segmented ONNX.
+- twenty single blocks via ten-by-two chained segmented export probe;
+- twenty single blocks via split persistent ten-by-two ONNX segment artifacts, validated as a reusable segmented ONNX Runtime CPU chain.
 
 Current pending low-bit scope:
 
-- none for the current low-bit critical-path scope through ten-by-two twenty-block segmented ONNX.
+- none for the current low-bit critical-path scope through split persistent ten-by-two ONNX segment artifacts.
 
-The twenty-block ten-by-two evidence is a segmented ONNX Runtime CPU critical-path verification. The artifact contains separate export and validation reports; the manifest records the combined evidence boundary.
+The twenty-block ten-by-two evidence has two distinct boundaries:
+
+1. `bonsai-lowbit-ten-by-two-chain-report-json` verifies a reproducible export probe. It exports temporary segmented ONNX files, validates them, and uploads JSON reports only.
+2. `bonsai-lowbit-ten-by-two-split-persistent-onnx-validation-report-json` verifies persisted ONNX artifacts. It validates ten downloaded two-block ONNX segment artifacts plus a reference artifact without reloading the low-bit source.
 
 Any future verification claim must be represented in `docs/bonsai-lowbit-verification-manifest.json` before the README or other docs may treat it as verified.
 
