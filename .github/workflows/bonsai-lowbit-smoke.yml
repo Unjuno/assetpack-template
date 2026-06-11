@@ -11,9 +11,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  probe:
+  pair-segment:
+    name: pair-segment-${{ matrix.start }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        start: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
     env:
       HF_HUB_DISABLE_TELEMETRY: "1"
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
@@ -36,18 +41,10 @@ jobs:
           pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxscript onnxruntime
           python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxscript, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxscript', onnxscript.__version__); print('onnxruntime', ort.__version__)"
 
-      - name: Run low-bit smoke probes
+      - name: Run pair segment probe
         run: |
           set -euo pipefail
-          scripts=(
-            "scripts/export_bonsai_lowbit_ten_by_two_single_blocks_modulated_onnx.py"
-            "scripts/validate_bonsai_lowbit_ten_by_two_single_blocks_modulated.py"
-          )
-          for s in "${scripts[@]}"; do
-            echo "::group::python $s"
-            python $s
-            echo "::endgroup::"
-          done
+          python scripts/export_bonsai_lowbit_pair_segment_single_blocks_modulated_onnx.py --start ${{ matrix.start }}
 
       - name: Show low-bit report summary
         if: always()
@@ -66,35 +63,18 @@ jobs:
               'report': str(p),
               'ok': r.get('ok'),
               'graph_kind': r.get('graph_kind'),
-              'block_kind': r.get('block_kind'),
-              'bundle_kind': r.get('bundle_kind'),
-              'layer': r.get('layer'),
-              'block_index': r.get('block_index'),
               'block_indices': r.get('block_indices'),
               'segment_block_indices': r.get('segment_block_indices'),
               'sequence_block_count': r.get('sequence_block_count'),
               'onnx_segment_count': r.get('onnx_segment_count'),
               'is_single_monolithic_onnx': r.get('is_single_monolithic_onnx'),
               'hidden_dim': r.get('hidden_dim'),
-              'projection_output_dim': r.get('projection_output_dim'),
               'sequence_length': r.get('sequence_length'),
-              'head_schema': r.get('head_schema'),
-              'composition_schema': r.get('composition_schema'),
-              'source_candidate_schema': r.get('source_candidate_schema'),
-              'semantic_input_schema': r.get('semantic_input_schema'),
-              'to_out_input_schema': r.get('to_out_input_schema'),
-              'to_out_schema': r.get('to_out_schema'),
-              'modulation_schema': r.get('modulation_schema'),
               'residual_schema': r.get('residual_schema'),
-              'lowbit_layers': r.get('lowbit_layers'),
-              'split_schema': r.get('split_schema'),
-              'onnx_size_bytes': r.get('onnx_size_bytes'),
-              'external_data_size_bytes': r.get('external_data_size_bytes'),
               'total_onnx_segment_size_bytes': r.get('total_onnx_segment_size_bytes'),
               'max_abs_error': r.get('max_abs_error'),
               'critical_max_abs_error': r.get('critical_max_abs_error'),
               'diagnostic_max_abs_error': r.get('diagnostic_max_abs_error'),
-              'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'),
               'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5'),
               'critical_outputs_allclose': r.get('critical_outputs_allclose_rtol_1e_4_atol_1e_5'),
               'diagnostic_outputs_allclose': r.get('diagnostic_outputs_allclose_rtol_1e_4_atol_1e_4'),
@@ -102,10 +82,10 @@ jobs:
             }, indent=2))
           PY
 
-      - name: Upload low-bit report JSON
+      - name: Upload pair segment report JSON
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bonsai-lowbit-smoke-report-json
+          name: bonsai-lowbit-pair-segment-${{ matrix.start }}-report-json
           path: reports/**/report.json
           retention-days: 7
