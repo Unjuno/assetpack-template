@@ -1,12 +1,23 @@
-# Bonsai low-bit local artifact audit
+# Bonsai low-bit artifact audit
 
-This audit was produced from artifact ZIP files already available in the local execution environment. No new GitHub Actions workflow was triggered.
+This audit is now driven by the canonical manifest:
 
-## Inventory
+```text
+docs/bonsai-lowbit-verification-manifest.json
+```
 
-Local ZIP files inspected: 16.
+The manifest combines existing local artifact ZIP reports with verified GitHub Actions artifact reports. Claims remain evidence-gated and must not exceed manifest scope.
 
-Latest JSON-only artifact inspected:
+## Latest verified CI artifacts
+
+| Scope | Run | Artifact | SHA-256 | Status |
+|---|---:|---:|---|---|
+| all ten pair segments for blocks 0-19 | 27366197393 | 7572369505 | `653af8965e7181b9d7063239e438f21e08de7284337258d1f4ee98e30a4ada8a` | verified |
+| twenty blocks via ten-by-two chained segmented ONNX | 27368101404 | 7573239516 | `7e5a75327d81e576512546b3e0c611ae3bbf464c5cdbb1043831fb67d63b99eb` | verified |
+
+## Previously verified local artifact set
+
+Latest JSON-only local artifact inspected:
 
 ```text
 bonsai-lowbit-smoke-report-json-7560534190.zip
@@ -14,40 +25,47 @@ sha256: 99d88924b39e0253667c086875253f4dadcdab04c58e2578b8b068820f244c0f
 report count: 32
 ```
 
-This artifact contains verification reports through the sixteen-block eight-by-two stage. It does not contain the twenty-block ten-by-two validation report or the pair-segment aggregate validation report.
+That local artifact contains verification reports through the sixteen-block eight-by-two stage.
 
-## Verified locally
+## Verified scopes
 
-| Scope | Report path | Local status |
+| Scope | Evidence | Status |
 |---|---|---|
-| attention `to_out` path | `bonsai-lowbit-attention-to-out-validation/report.json` | `ok: true` |
-| single block modulated attention `to_out` residual | `bonsai-lowbit-single-block-modulated-validation/report.json` | `ok: true` |
-| two single blocks modulated residual stack | `bonsai-lowbit-two-single-blocks-modulated-validation/report.json` | `ok: true`, `sequence_block_count: 2` |
-| four single blocks via two-by-two segmented ONNX | `bonsai-lowbit-two-by-two-single-blocks-modulated-validation/report.json` | `ok: true`, `sequence_block_count: 4`, `onnx_segment_count: 2`, `critical_outputs_allclose: true`, `critical_max_abs_error: 3.814697265625e-06` |
-| eight single blocks via four-by-two segmented ONNX | `bonsai-lowbit-four-by-two-single-blocks-modulated-validation/report.json` | `ok: true`, `sequence_block_count: 8`, `onnx_segment_count: 4`, `critical_outputs_allclose: true`, `critical_max_abs_error: 1.049041748046875e-05` |
-| sixteen single blocks via eight-by-two segmented ONNX | `bonsai-lowbit-eight-by-two-single-blocks-modulated-validation/report.json` | `ok: true`, `sequence_block_count: 16`, `onnx_segment_count: 8`, `critical_outputs_allclose: true`, `critical_max_abs_error: 9.059906005859375e-06` |
+| attention `to_out` path | local artifact report | verified |
+| single block modulated attention `to_out` residual | local artifact report | verified |
+| two single blocks modulated residual stack | local artifact report | verified |
+| four single blocks via two-by-two segmented ONNX | local artifact report | verified |
+| eight single blocks via four-by-two segmented ONNX | local artifact report | verified |
+| sixteen single blocks via eight-by-two segmented ONNX | local artifact report | verified |
+| all ten pair segments for blocks 0-19 | CI artifact `bonsai-lowbit-pair-segments-aggregate-report-json` | verified |
+| twenty single blocks via ten-by-two chained segmented ONNX | CI artifact `bonsai-lowbit-ten-by-two-chain-report-json` | verified |
 
-## Still pending from local evidence
+## Ten-by-two verification notes
 
-The local artifact set does not include:
+Artifact `bonsai-lowbit-ten-by-two-chain-report-json` contains both export and validation reports:
 
 ```text
-reports/bonsai-lowbit-pair-segments-aggregate-validation/report.json
-reports/bonsai-lowbit-ten-by-two-single-blocks-modulated-validation/report.json
+bonsai-lowbit-ten-by-two-single-blocks-modulated-onnx/report.json
+bonsai-lowbit-ten-by-two-single-blocks-modulated-validation/report.json
 ```
 
-Pending claims:
+The validation report records `ok: true`, `sequence_block_count: 20`, `onnx_segment_count: 10`, and `critical_outputs_allclose_rtol_1e_4_atol_1e_5: true`.
 
-- all ten pair segments for blocks 0-19;
-- twenty single blocks via ten-by-two chained segmented ONNX.
+The export report records `is_single_monolithic_onnx: false`, `is_real_transformer_block: false`, and `is_full_bonsai_pipeline: false`.
+
+The strict all-output check remains false because some diagnostic tensors use the relaxed diagnostic threshold. This does not change the critical-path pass condition recorded in the manifest.
+
+## Pending claims
+
+None for the current low-bit critical-path scope through ten-by-two twenty-block segmented ONNX.
 
 ## Execution policy
 
-Do not run CI only to reconfirm the verified stages above.
+Do not rerun already verified stages unless their implementation or evidence boundary changes.
 
-Use CI only to generate missing artifacts:
+Forbidden claims remain forbidden unless a future manifest entry verifies them:
 
-1. `target: pair-segments-all` to create `bonsai-lowbit-pair-segments-aggregate-report-json`;
-2. `target: ten-by-two-chain` to create `bonsai-lowbit-ten-by-two-chain-report-json`, only after pair segments pass.
-
-If a workflow-dispatch execution tool is available, use it for those missing artifacts. If no such tool is available, keep the workflow manual and inspect artifacts after they are produced.
+- full Bonsai ONNX pipeline;
+- real transformer block ONNX verification;
+- prompt-to-image generation verification;
+- single monolithic multi-block ONNX when the verified path is segmented.
