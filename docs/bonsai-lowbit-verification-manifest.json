@@ -7,11 +7,11 @@
     "report_count": 32
   },
   "latest_ci_run": {
-    "run_id": 27370454697,
-    "head_sha": "012ab71d0fe2dcb9737e2ad0192c05be92209814",
-    "artifact_id": 7574146614,
-    "artifact_name": "bonsai-lowbit-ten-by-two-split-persistent-onnx-validation-report-json",
-    "artifact_sha256": "a09ce6303c70b0fd95556803cfd45b3765db1a216ad58f70fdc2e8871d758ab3"
+    "run_id": 27372009301,
+    "head_sha": "64ecb8d0fb31a4e33fb4250f877eb607aa4c8ce1",
+    "artifact_id": 7574781425,
+    "artifact_name": "bonsai-lowbit-ten-by-two-chain-handoff-report-json",
+    "artifact_sha256": "5fdc2278ced66cbaed794943d3975c18dfbeda1cd849328e29a0a7b3cfabd5fb"
   },
   "verified": [
     {
@@ -155,20 +155,37 @@
       "critical_max_abs_error": 0.00000858306884765625,
       "final_chained_block19_max_abs_error": 0.000007152557373046875,
       "total_onnx_segment_size_bytes": 2244150,
-      "reference_artifact": {"id": 7574094960, "name": "bonsai-lowbit-ten-by-two-persistent-reference", "sha256": "2f20cfe1f5de4b7e59e055fd6f717eb103396165a11d0c11cd0343d4bea8d9e0", "reference_sha256": "eb31457cbe74f9950cddb96759e3e4590a1e3bb0ce321713935f82329707d980"},
-      "onnx_segment_artifacts": [
-        {"segment_start": 0, "artifact_id": 7574104834, "artifact_name": "bonsai-lowbit-persistent-onnx-segment-0", "artifact_sha256": "27eec69b0710c88f7d8c37e20f14193da77f2de5ad67906a7c099d6e37b8d01b", "onnx_sha256": "d12a6a46b84ea6a4bc162473fcd9e1c7e77c1531cc5916f09450687402c1ce7e", "onnx_size_bytes": 224395},
-        {"segment_start": 2, "artifact_id": 7574104157, "artifact_name": "bonsai-lowbit-persistent-onnx-segment-2", "artifact_sha256": "133615af839513c818a7dae2f4443b0c2e7b9ae9612f79c2291f8faf5e606184", "onnx_sha256": "acbdcfab13fb223822fc9a1be63cfe0e01420686a57eaad5455fa71e270d0270", "onnx_size_bytes": 224395},
-        {"segment_start": 4, "artifact_id": 7574104773, "artifact_name": "bonsai-lowbit-persistent-onnx-segment-4", "artifact_sha256": "03a6c1fcc6b93e6ac855ac5c3757d5b280bb590444a59484a8250c31202ca96b", "onnx_sha256": "7e651fde3ab9394646a99e5f66af18789ac8e53d647d1d257c0c8bf3054af2ef", "onnx_size_bytes": 224395},
-        {"segment_start": 6, "artifact_id": 7574103247, "artifact_name": "bonsai-lowbit-persistent-onnx-segment-6", "artifact_sha256": "0c93e67d9c1b10f9180ba883bb91bf1a83ce68db4b2ad74f55be809497de586f", "onnx_sha256": "3fe42b0705aa4294526785ea464df3f96c8a1c712ece4f52652641d2647993e7", "onnx_size_bytes": 224395},
-        {"segment_start": 8, "artifact_id": 7574106732, "artifact_name": "bonsai-lowbit-persistent-onnx-segment-8", "artifact_sha256": "e66360c32cba53f51a7953090c35b8391075b8daf4d626ce6b9b673651a71441", "onnx_sha256": "267a9b7d78908b7dac0a9fb89c16bf8f0b314c48803c547892c930c45be4ed5f", "onnx_size_bytes": 224395},
-        {"segment_start": 10, "artifact_id": 7574104608, "artifact_name": "bonsai-lowbit-persistent-onnx-segment-10", "artifact_sha256": "44d5214f58ae4027bc0a7549d21289ed2b101afd7e8c0649eb832af641a81f6f", "onnx_sha256": "f49d0d7db81261cb7706fd0e4bb2da85bd6529928e7d7e29fbf2f44af5b258f8", "onnx_size_bytes": 224435},
-        {"segment_start": 12, "artifact_id": 7574105962, "artifact_name": "bonsai-lowbit-persistent-onnx-segment-12", "artifact_sha256": "5365fa5af102624896e5d9d3589ec41de036b4ecc2d69fbd5ce76f62369fa0a3", "onnx_sha256": "f78524d614abb1648193a4b1595ddd13c3a9954afa701b016f5799d93e986814", "onnx_size_bytes": 224435},
-        {"segment_start": 14, "artifact_id": 7574106402, "artifact_name": "bonsai-lowbit-persistent-onnx-segment-14", "artifact_sha256": "39c973241114a841e2483e7ab484ae3c0b4b8d7127bf2bbc08faf634f8c78c4e", "onnx_sha256": "d8184a542a96d8ae043aad3815989ffb0ae80fb37ceeaa594341a1244d595f78", "onnx_size_bytes": 224435},
-        {"segment_start": 16, "artifact_id": 7574105292, "artifact_name": "bonsai-lowbit-persistent-onnx-segment-16", "artifact_sha256": "edbfb3bc97d02f7505c60163989073bd85b545ddd9fe78d5785236ddb03348f2", "onnx_sha256": "63faace259a3e050b78419a2cb6d6037694e9e70e859fa0c2198dc20af375ebe", "onnx_size_bytes": 224435},
-        {"segment_start": 18, "artifact_id": 7574105357, "artifact_name": "bonsai-lowbit-persistent-onnx-segment-18", "artifact_sha256": "154ea6c42a0b10208a892254a91765af2687105a2b8621f4588222d0e9883e79", "onnx_sha256": "75edb5e955a7c134e2015bb63be64df1fcbe2a02fd205fac78b6d3a8dad57732", "onnx_size_bytes": 224435}
-      ],
       "allowed_claim": "ten_by_two_split_persistent_onnx_segments_reusable_chain_artifact_validated_without_lowbit_source_reload_not_single_monolithic_onnx_not_real_transformer_block_or_full_bonsai_pipeline"
+    },
+    {
+      "key": "ten_by_two_chain_state_handoff_report",
+      "status": "verified",
+      "run_id": 27372009301,
+      "head_sha": "64ecb8d0fb31a4e33fb4250f877eb607aa4c8ce1",
+      "validation_job_name": "ten-by-two-persistent-validate",
+      "validation_job_conclusion": "success",
+      "artifact_id": 7574781425,
+      "artifact_name": "bonsai-lowbit-ten-by-two-chain-handoff-report-json",
+      "artifact_sha256": "5fdc2278ced66cbaed794943d3975c18dfbeda1cd849328e29a0a7b3cfabd5fb",
+      "report_path": "report.json",
+      "report_ok": true,
+      "artifact_kind": "chain_state_handoff_report",
+      "graph_kind": "ten_by_two_single_blocks_modulated_attention_to_out_residual_stack",
+      "sequence_block_count": 20,
+      "onnx_segment_count": 10,
+      "handoff_count": 10,
+      "segment_block_indices": [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [10, 11], [12, 13], [14, 15], [16, 17], [18, 19]],
+      "persistent_onnx_artifacts": true,
+      "reusable_onnx_chain_artifact": true,
+      "validated_without_lowbit_source_reload": true,
+      "validated_from_persisted_onnx_files": true,
+      "final_output_sha256_float32_le": "fae160d8620d7315afe5cd07e013305eaa49a616ec9d8259f6fa5a4ee8e6eed4",
+      "source_validation_report_sha256": "1317116c60dc250da25d32025bd3152e57265f2244a831d1ce076c450c751f72",
+      "reference_npz_sha256": "e6b565a44f1a26dada74ad9fcef3c5ca9a9d9f51abdf292bec91c3d965574bb0",
+      "is_single_monolithic_onnx": false,
+      "is_real_transformer_block": false,
+      "is_full_bonsai_pipeline": false,
+      "allowed_claim": "ten_by_two_split_persistent_onnx_segments_chain_state_handoffs_documented_without_lowbit_source_reload_not_single_monolithic_onnx_not_real_transformer_block_or_full_bonsai_pipeline"
     }
   ],
   "pending": [],
@@ -179,6 +196,6 @@
     "single monolithic multi-block ONNX when the verified result is segmented"
   ],
   "next_execution_boundary": [
-    "decide next low-bit boundary after verified split persistent ten-by-two ONNX segment artifacts"
+    "decide next low-bit boundary after verified ten-by-two chain-state handoff report"
   ]
 }
