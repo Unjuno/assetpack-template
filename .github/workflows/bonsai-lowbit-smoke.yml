@@ -12,6 +12,7 @@ on:
           - pair-segment
           - pair-segments-all
           - ten-by-two-chain
+          - ten-by-two-persistent-artifacts
       segment_start:
         description: "Even start index for pair-segment target"
         required: true
@@ -33,6 +34,8 @@ on:
       - main
     paths:
       - .github/workflows/bonsai-lowbit-smoke.yml
+      - scripts/export_bonsai_lowbit_ten_by_two_persistent_onnx_artifacts.py
+      - scripts/validate_bonsai_lowbit_ten_by_two_persistent_onnx_artifacts.py
       - scripts/export_bonsai_lowbit_ten_by_two_single_blocks_modulated_onnx.py
       - scripts/validate_bonsai_lowbit_ten_by_two_single_blocks_modulated.py
       - scripts/export_bonsai_lowbit_two_single_blocks_modulated_onnx.py
@@ -42,7 +45,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: bonsai-lowbit-smoke-${{ github.event_name }}-${{ github.event.inputs.target || 'push-ten-by-two-chain' }}-${{ github.event.inputs.segment_start || 'na' }}
+  group: bonsai-lowbit-smoke-${{ github.event_name }}-${{ github.event.inputs.target || 'push-ten-by-two-persistent-artifacts' }}-${{ github.event.inputs.segment_start || 'na' }}
   cancel-in-progress: false
 
 jobs:
@@ -99,6 +102,9 @@ jobs:
               'segment_block_indices': r.get('segment_block_indices'),
               'sequence_block_count': r.get('sequence_block_count'),
               'onnx_segment_count': r.get('onnx_segment_count'),
+              'persistent_onnx_artifacts': r.get('persistent_onnx_artifacts'),
+              'reusable_onnx_chain_artifact': r.get('reusable_onnx_chain_artifact'),
+              'validated_from_persisted_onnx_files': r.get('validated_from_persisted_onnx_files'),
               'is_single_monolithic_onnx': r.get('is_single_monolithic_onnx'),
               'critical_max_abs_error': r.get('critical_max_abs_error'),
               'diagnostic_max_abs_error': r.get('diagnostic_max_abs_error'),
@@ -189,7 +195,7 @@ jobs:
           retention-days: 7
 
   ten-by-two-chain:
-    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.target == 'ten-by-two-chain') || github.event_name == 'push' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.target == 'ten-by-two-chain' }}
     name: ten-by-two-chain
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -221,40 +227,95 @@ jobs:
           python scripts/export_bonsai_lowbit_ten_by_two_single_blocks_modulated_onnx.py
           python scripts/validate_bonsai_lowbit_ten_by_two_single_blocks_modulated.py
 
-      - name: Show low-bit report summary
-        if: always()
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          reports = sorted(Path('reports').glob('**/report.json'))
-          for p in reports:
-            try:
-              r = json.loads(p.read_text())
-            except Exception as exc:
-              print(json.dumps({'report': str(p), 'error': str(exc)}, indent=2))
-              continue
-            print(json.dumps({
-              'report': str(p),
-              'ok': r.get('ok'),
-              'graph_kind': r.get('graph_kind'),
-              'block_indices': r.get('block_indices'),
-              'segment_block_indices': r.get('segment_block_indices'),
-              'sequence_block_count': r.get('sequence_block_count'),
-              'onnx_segment_count': r.get('onnx_segment_count'),
-              'is_single_monolithic_onnx': r.get('is_single_monolithic_onnx'),
-              'critical_max_abs_error': r.get('critical_max_abs_error'),
-              'diagnostic_max_abs_error': r.get('diagnostic_max_abs_error'),
-              'critical_outputs_allclose': r.get('critical_outputs_allclose_rtol_1e_4_atol_1e_5'),
-              'diagnostic_outputs_allclose': r.get('diagnostic_outputs_allclose_rtol_1e_4_atol_1e_4'),
-              'claim': r.get('claim'),
-            }, indent=2))
-          PY
-
       - name: Upload ten-by-two chain report JSON
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: bonsai-lowbit-ten-by-two-chain-report-json
           path: reports/**/report.json
+          retention-days: 7
+
+  ten-by-two-persistent-export:
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.target == 'ten-by-two-persistent-artifacts') || github.event_name == 'push' }}
+    name: ten-by-two-persistent-export
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install export dependencies
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --no-cache-dir pyyaml huggingface_hub safetensors onnx onnxscript onnxruntime
+          python -c "import torch, huggingface_hub, yaml, safetensors, onnx, onnxscript, onnxruntime as ort; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('onnx', onnx.__version__); print('onnxscript', onnxscript.__version__); print('onnxruntime', ort.__version__)"
+
+      - name: Export persistent ten-by-two ONNX artifact bundle
+        run: |
+          set -euo pipefail
+          python scripts/export_bonsai_lowbit_ten_by_two_persistent_onnx_artifacts.py
+          find reports/bonsai-lowbit-ten-by-two-persistent-onnx-artifacts -maxdepth 3 -type f -printf '%p %s bytes\n' | sort
+
+      - name: Upload persistent ten-by-two ONNX artifact bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-lowbit-ten-by-two-persistent-onnx-artifacts
+          path: reports/bonsai-lowbit-ten-by-two-persistent-onnx-artifacts
+          retention-days: 7
+
+  ten-by-two-persistent-validate:
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.target == 'ten-by-two-persistent-artifacts') || github.event_name == 'push' }}
+    name: ten-by-two-persistent-validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: ten-by-two-persistent-export
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install validation dependencies
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir numpy onnxruntime
+          python -c "import numpy as np, onnxruntime as ort; print('numpy', np.__version__); print('onnxruntime', ort.__version__)"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: bonsai-lowbit-ten-by-two-persistent-onnx-artifacts
+          path: reports/bonsai-lowbit-ten-by-two-persistent-onnx-artifacts
+
+      - name: Validate downloaded persistent ONNX artifacts without low-bit source reload
+        run: |
+          set -euo pipefail
+          python scripts/validate_bonsai_lowbit_ten_by_two_persistent_onnx_artifacts.py
+
+      - name: Upload persistent ten-by-two validation report JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-lowbit-ten-by-two-persistent-onnx-validation-report-json
+          path: reports/bonsai-lowbit-ten-by-two-persistent-onnx-artifacts-validation/report.json
           retention-days: 7
