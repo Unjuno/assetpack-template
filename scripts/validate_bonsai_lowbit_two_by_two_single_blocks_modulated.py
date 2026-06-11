@@ -11,6 +11,21 @@ SOURCE = ROOT / 'bonsai-lowbit-two-by-two-single-blocks-modulated-onnx' / 'repor
 OUT = ROOT / 'bonsai-lowbit-two-by-two-single-blocks-modulated-validation' / 'report.json'
 BLOCK_INDICES = [0, 1, 2, 3]
 SEGMENTS = [[0, 1], [2, 3]]
+CRITICAL_OUTPUTS = [
+    'segment0_1_block0_output',
+    'segment0_1_block1_output',
+    'segment2_3_block0_output',
+    'segment2_3_block1_output',
+    'chained_final_block3_output',
+]
+DIAGNOSTIC_SUFFIXES = [
+    'block0_semantic_to_out_input',
+    'block1_semantic_to_out_input',
+    'block0_gate',
+    'block1_gate',
+    'block0_weights',
+    'block1_weights',
+]
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -31,11 +46,23 @@ def outputs_by_name(report: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {item.get('name'): item for item in report.get('outputs', []) if isinstance(item, dict)}
 
 
-def require_output(report: dict[str, Any], name: str) -> dict[str, Any]:
+def require_output_present(report: dict[str, Any], name: str) -> dict[str, Any]:
     outputs = outputs_by_name(report)
     require(name in outputs, f'missing output {name}: {report}')
-    item = outputs[name]
-    require(item.get('allclose_rtol_1e_4_atol_1e_5') is True, f'{name} not allclose: {item}')
+    return outputs[name]
+
+
+def require_critical_output(report: dict[str, Any], name: str) -> dict[str, Any]:
+    item = require_output_present(report, name)
+    require(item.get('category') == 'critical', f'{name} is not marked critical: {item}')
+    require(item.get('allclose_rtol_1e_4_atol_1e_5') is True, f'{name} critical output not allclose: {item}')
+    return item
+
+
+def require_diagnostic_output(report: dict[str, Any], name: str) -> dict[str, Any]:
+    item = require_output_present(report, name)
+    require(item.get('category') == 'diagnostic', f'{name} is not marked diagnostic: {item}')
+    require('diagnostic_allclose_rtol_1e_4_atol_1e_4' in item, f'{name} missing diagnostic allclose field: {item}')
     return item
 
 
@@ -75,6 +102,9 @@ def main() -> None:
     require(residual.get('segment1_input') == 'segment0_block1_output', f'bad segment1 input: {source}')
     require(residual.get('final_output') == 'block3_output', f'bad final output: {source}')
 
+    policy = source.get('pass_fail_policy', {})
+    require('critical_outputs' in policy and 'diagnostic_outputs' in policy, f'missing pass/fail policy: {source}')
+
     layers = source.get('lowbit_layers', [])
     require(len(layers) == 4, f'expected four lowbit layer entries: {source}')
     for expected, item in zip(BLOCK_INDICES, layers):
@@ -82,12 +112,14 @@ def main() -> None:
         require(item.get('qkv_mlp_proj') == f'single_transformer_blocks.{expected}.attn.to_qkv_mlp_proj', f'bad qkv layer: {source}')
         require(item.get('to_out') == f'single_transformer_blocks.{expected}.attn.to_out', f'bad to_out layer: {source}')
 
+    for name in CRITICAL_OUTPUTS:
+        require_critical_output(source, name)
     for segment_prefix in ['segment0_1', 'segment2_3']:
-        for suffix in ['block0_output', 'block1_output', 'block0_semantic_to_out_input', 'block1_semantic_to_out_input', 'block0_gate', 'block1_gate', 'block0_weights', 'block1_weights']:
-            require_output(source, f'{segment_prefix}_{suffix}')
-    require_output(source, 'chained_final_block3_output')
-    require(source.get('all_outputs_allclose_rtol_1e_4_atol_1e_5') is True, f'source probe outputs not allclose: {source}')
-    require(float(source.get('max_abs_error', 1.0)) <= 1e-3, f'source probe max_abs_error too high: {source}')
+        for suffix in DIAGNOSTIC_SUFFIXES:
+            require_diagnostic_output(source, f'{segment_prefix}_{suffix}')
+
+    require(source.get('critical_outputs_allclose_rtol_1e_4_atol_1e_5') is True, f'critical outputs not allclose: {source}')
+    require(float(source.get('critical_max_abs_error', 1.0)) <= 1e-3, f'critical max_abs_error too high: {source}')
     require(int(source.get('total_onnx_segment_size_bytes', 0)) > 0, f'empty onnx segment artifact size: {source}')
 
     summary = {
@@ -98,8 +130,11 @@ def main() -> None:
         'sequence_block_count': source.get('sequence_block_count'),
         'onnx_segment_count': source.get('onnx_segment_count'),
         'is_single_monolithic_onnx': source.get('is_single_monolithic_onnx'),
-        'max_abs_error': source.get('max_abs_error'),
-        'claim': 'two_by_two_single_blocks_modulated_attention_to_out_residual_stack_onnxruntime_cpu_verified_not_single_monolithic_onnx_not_real_transformer_block_or_full_bonsai_pipeline',
+        'critical_max_abs_error': source.get('critical_max_abs_error'),
+        'diagnostic_max_abs_error': source.get('diagnostic_max_abs_error'),
+        'critical_outputs_allclose_rtol_1e_4_atol_1e_5': source.get('critical_outputs_allclose_rtol_1e_4_atol_1e_5'),
+        'all_outputs_allclose_rtol_1e_4_atol_1e_5': source.get('all_outputs_allclose_rtol_1e_4_atol_1e_5'),
+        'claim': 'two_by_two_single_blocks_modulated_attention_to_out_residual_stack_onnxruntime_cpu_critical_path_verified_not_single_monolithic_onnx_not_real_transformer_block_or_full_bonsai_pipeline',
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(summary, indent=2) + '\n', encoding='utf-8')
