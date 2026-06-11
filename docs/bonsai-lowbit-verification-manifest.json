@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "source": "existing local artifact ZIPs only; no CI triggered for this manifest",
+  "latest_source_zip": {
+    "name": "bonsai-lowbit-smoke-report-json-7560534190.zip",
+    "sha256": "99d88924b39e0253667c086875253f4dadcdab04c58e2578b8b068820f244c0f",
+    "report_count": 32
+  },
+  "verified": [
+    {
+      "key": "attention_to_out",
+      "status": "verified",
+      "report_path": "bonsai-lowbit-attention-to-out-validation/report.json",
+      "zip": "bonsai-lowbit-smoke-report-json-7560534190.zip",
+      "graph_kind": "qkv_projection_attention_to_out",
+      "allowed_claim": "attention_to_out_path_onnxruntime_cpu_verified_not_real_transformer_block_or_full_bonsai_pipeline"
+    },
+    {
+      "key": "single_block_modulated",
+      "status": "verified",
+      "report_path": "bonsai-lowbit-single-block-modulated-validation/report.json",
+      "zip": "bonsai-lowbit-smoke-report-json-7560534190.zip",
+      "graph_kind": "single_block_modulated_attention_to_out_residual",
+      "allowed_claim": "single_block_modulated_attention_to_out_residual_onnxruntime_cpu_verified_not_real_transformer_block_or_full_bonsai_pipeline"
+    },
+    {
+      "key": "two_single_blocks_modulated",
+      "status": "verified",
+      "sequence_block_count": 2,
+      "report_path": "bonsai-lowbit-two-single-blocks-modulated-validation/report.json",
+      "zip": "bonsai-lowbit-smoke-report-json-7560534190.zip",
+      "graph_kind": "two_single_blocks_modulated_attention_to_out_residual_stack",
+      "allowed_claim": "two_single_blocks_modulated_attention_to_out_residual_stack_onnxruntime_cpu_verified_not_real_transformer_block_or_full_bonsai_pipeline"
+    },
+    {
+      "key": "two_by_two_four_blocks",
+      "status": "verified",
+      "sequence_block_count": 4,
+      "onnx_segment_count": 2,
+      "is_single_monolithic_onnx": false,
+      "critical_outputs_allclose_rtol_1e_4_atol_1e_5": true,
+      "critical_max_abs_error": 0.000003814697265625,
+      "report_path": "bonsai-lowbit-two-by-two-single-blocks-modulated-validation/report.json",
+      "zip": "bonsai-lowbit-smoke-report-json-7560534190.zip",
+      "graph_kind": "two_by_two_single_blocks_modulated_attention_to_out_residual_stack",
+      "allowed_claim": "two_by_two_single_blocks_modulated_attention_to_out_residual_stack_onnxruntime_cpu_critical_path_verified_not_single_monolithic_onnx_not_real_transformer_block_or_full_bonsai_pipeline"
+    },
+    {
+      "key": "four_by_two_eight_blocks",
+      "status": "verified",
+      "sequence_block_count": 8,
+      "onnx_segment_count": 4,
+      "is_single_monolithic_onnx": false,
+      "critical_outputs_allclose_rtol_1e_4_atol_1e_5": true,
+      "critical_max_abs_error": 0.00001049041748046875,
+      "report_path": "bonsai-lowbit-four-by-two-single-blocks-modulated-validation/report.json",
+      "zip": "bonsai-lowbit-smoke-report-json-7560534190.zip",
+      "graph_kind": "four_by_two_single_blocks_modulated_attention_to_out_residual_stack",
+      "allowed_claim": "four_by_two_single_blocks_modulated_attention_to_out_residual_stack_onnxruntime_cpu_critical_path_verified_not_single_monolithic_onnx_not_real_transformer_block_or_full_bonsai_pipeline"
+    },
+    {
+      "key": "eight_by_two_sixteen_blocks",
+      "status": "verified",
+      "sequence_block_count": 16,
+      "onnx_segment_count": 8,
+      "is_single_monolithic_onnx": false,
+      "critical_outputs_allclose_rtol_1e_4_atol_1e_5": true,
+      "critical_max_abs_error": 0.000009059906005859375,
+      "report_path": "bonsai-lowbit-eight-by-two-single-blocks-modulated-validation/report.json",
+      "zip": "bonsai-lowbit-smoke-report-json-7560534190.zip",
+      "graph_kind": "eight_by_two_single_blocks_modulated_attention_to_out_residual_stack",
+      "allowed_claim": "eight_by_two_single_blocks_modulated_attention_to_out_residual_stack_onnxruntime_cpu_critical_path_verified_not_single_monolithic_onnx_not_real_transformer_block_or_full_bonsai_pipeline"
+    }
+  ],
+  "pending": [
+    {
+      "key": "pair_segments_aggregate",
+      "status": "missing_artifact",
+      "required_report_path": "reports/bonsai-lowbit-pair-segments-aggregate-validation/report.json",
+      "required_before_claim": true
+    },
+    {
+      "key": "ten_by_two_twenty_blocks",
+      "status": "missing_artifact",
+      "required_report_path": "reports/bonsai-lowbit-ten-by-two-single-blocks-modulated-validation/report.json",
+      "required_before_claim": true
+    }
+  ],
+  "forbidden_claims": [
+    "full Bonsai ONNX pipeline",
+    "real transformer block ONNX verification",
+    "prompt-to-image generation verification",
+    "single monolithic multi-block ONNX when the verified result is segmented"
+  ],
+  "next_execution_boundary": [
+    "pair_segments_aggregate",
+    "ten_by_two_twenty_blocks after pair segments pass"
+  ]
+}
