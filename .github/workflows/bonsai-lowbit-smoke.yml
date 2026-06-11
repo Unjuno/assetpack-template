@@ -62,7 +62,7 @@ jobs:
             "scripts/export_bonsai_lowbit_attention_to_out_onnx.py"
             "scripts/export_bonsai_lowbit_single_block_modulated_onnx.py"
             "scripts/export_bonsai_lowbit_two_single_blocks_modulated_onnx.py"
-            "scripts/export_bonsai_lowbit_four_single_blocks_modulated_onnx.py"
+            "scripts/export_bonsai_lowbit_two_by_two_single_blocks_modulated_onnx.py"
             "scripts/validate_bonsai_lowbit_artifacts.py"
             "scripts/validate_bonsai_lowbit_attention_context_composition.py"
             "scripts/validate_bonsai_lowbit_attention_to_out_input_source.py"
@@ -70,7 +70,7 @@ jobs:
             "scripts/validate_bonsai_lowbit_attention_to_out.py"
             "scripts/validate_bonsai_lowbit_single_block_modulated.py"
             "scripts/validate_bonsai_lowbit_two_single_blocks_modulated.py"
-            "scripts/validate_bonsai_lowbit_four_single_blocks_modulated.py"
+            "scripts/validate_bonsai_lowbit_two_by_two_single_blocks_modulated.py"
           )
           for s in "${scripts[@]}"; do
             echo "::group::python $s"
@@ -100,7 +100,10 @@ jobs:
               'layer': r.get('layer'),
               'block_index': r.get('block_index'),
               'block_indices': r.get('block_indices'),
+              'segment_block_indices': r.get('segment_block_indices'),
               'sequence_block_count': r.get('sequence_block_count'),
+              'onnx_segment_count': r.get('onnx_segment_count'),
+              'is_single_monolithic_onnx': r.get('is_single_monolithic_onnx'),
               'hidden_dim': r.get('hidden_dim'),
               'projection_output_dim': r.get('projection_output_dim'),
               'sequence_length': r.get('sequence_length'),
@@ -116,6 +119,7 @@ jobs:
               'split_schema': r.get('split_schema'),
               'onnx_size_bytes': r.get('onnx_size_bytes'),
               'external_data_size_bytes': r.get('external_data_size_bytes'),
+              'total_onnx_segment_size_bytes': r.get('total_onnx_segment_size_bytes'),
               'max_abs_error': r.get('max_abs_error'),
               'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'),
               'all_outputs_allclose': r.get('all_outputs_allclose_rtol_1e_4_atol_1e_5'),
