@@ -7,11 +7,11 @@
     "report_count": 32
   },
   "latest_ci_run": {
-    "run_id": 27366197393,
-    "head_sha": "6e3f416a40102577efbae675863685bf6a3cd2f3",
-    "aggregate_artifact_id": 7572369505,
-    "aggregate_artifact_name": "bonsai-lowbit-pair-segments-aggregate-report-json",
-    "aggregate_artifact_sha256": "653af8965e7181b9d7063239e438f21e08de7284337258d1f4ee98e30a4ada8a"
+    "run_id": 27368101404,
+    "head_sha": "8de1a0ed4504017d87024a6401c91e4d91732ad7",
+    "artifact_id": 7573239516,
+    "artifact_name": "bonsai-lowbit-ten-by-two-chain-report-json",
+    "artifact_sha256": "7e5a75327d81e576512546b3e0c611ae3bbf464c5cdbb1043831fb67d63b99eb"
   },
   "verified": [
     {
@@ -97,16 +97,36 @@
       "critical_max_abs_error": 0.00000476837158203125,
       "diagnostic_max_abs_error": 0.00007152557373046875,
       "allowed_claim": "all_pair_segments_single_blocks_modulated_attention_to_out_residual_stack_onnxruntime_cpu_critical_paths_verified_not_single_monolithic_onnx_not_real_transformer_block_or_full_bonsai_pipeline"
-    }
-  ],
-  "pending": [
+    },
     {
       "key": "ten_by_two_twenty_blocks",
-      "status": "missing_artifact",
-      "required_report_path": "reports/bonsai-lowbit-ten-by-two-single-blocks-modulated-validation/report.json",
-      "required_before_claim": true
+      "status": "verified",
+      "run_id": 27368101404,
+      "head_sha": "8de1a0ed4504017d87024a6401c91e4d91732ad7",
+      "job_name": "ten-by-two-chain",
+      "job_conclusion": "success",
+      "artifact_id": 7573239516,
+      "artifact_name": "bonsai-lowbit-ten-by-two-chain-report-json",
+      "artifact_sha256": "7e5a75327d81e576512546b3e0c611ae3bbf464c5cdbb1043831fb67d63b99eb",
+      "validation_report_path": "bonsai-lowbit-ten-by-two-single-blocks-modulated-validation/report.json",
+      "export_report_path": "bonsai-lowbit-ten-by-two-single-blocks-modulated-onnx/report.json",
+      "validation_report_ok": true,
+      "graph_kind": "ten_by_two_single_blocks_modulated_attention_to_out_residual_stack",
+      "sequence_block_count": 20,
+      "onnx_segment_count": 10,
+      "segment_block_indices": [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [10, 11], [12, 13], [14, 15], [16, 17], [18, 19]],
+      "is_single_monolithic_onnx": false,
+      "is_real_transformer_block": false,
+      "is_full_bonsai_pipeline": false,
+      "critical_outputs_allclose_rtol_1e_4_atol_1e_5": true,
+      "critical_max_abs_error": 0.00000858306884765625,
+      "diagnostic_max_abs_error": 0.00010395050048828125,
+      "diagnostic_outputs_allclose_rtol_1e_4_atol_1e_4": true,
+      "all_outputs_allclose_rtol_1e_4_atol_1e_5": false,
+      "allowed_claim": "ten_by_two_single_blocks_modulated_attention_to_out_residual_stack_onnxruntime_cpu_critical_path_verified_not_single_monolithic_onnx_not_real_transformer_block_or_full_bonsai_pipeline"
     }
   ],
+  "pending": [],
   "forbidden_claims": [
     "full Bonsai ONNX pipeline",
     "real transformer block ONNX verification",
@@ -114,6 +134,6 @@
     "single monolithic multi-block ONNX when the verified result is segmented"
   ],
   "next_execution_boundary": [
-    "ten_by_two_twenty_blocks after pair segments pass"
+    "decide next low-bit boundary after verified ten-by-two twenty-block critical path"
   ]
 }
