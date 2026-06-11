@@ -22,6 +22,7 @@ NORM_K_KEY = f"{BLOCK_PREFIX}.attn.norm_k.weight"
 MODULATION_KEY = "single_stream_modulation.linear.weight"
 OUT_DIR = Path("reports/bonsai-lowbit-single-block-modulated-onnx")
 SEQ_LEN = 4
+ONNX_OPSET_VERSION = 18
 
 
 class SingleBlockModulatedCore(torch.nn.Module):
@@ -140,7 +141,7 @@ def main() -> int:
         str(onnx_path),
         input_names=["hidden", "temb"],
         output_names=output_names,
-        opset_version=17,
+        opset_version=ONNX_OPSET_VERSION,
         do_constant_folding=False,
         dynamic_axes={
             "hidden": {0: "batch", 1: "seq"},
@@ -199,6 +200,7 @@ def main() -> int:
         "modulation_layer": MODULATION_KEY,
         "graph_kind": "single_block_modulated_attention_to_out_residual",
         "is_single_block_modulated_core": True,
+        "onnx_opset_version": ONNX_OPSET_VERSION,
         "is_attention_with_to_out": True,
         "to_out_connection_attempted": True,
         "has_modulation": True,
@@ -231,7 +233,7 @@ def main() -> int:
         "claim": "single_block_modulated_attention_to_out_residual_onnxruntime_cpu_verified_not_real_transformer_block_or_full_bonsai_pipeline",
     }
     (OUT_DIR / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"graph_kind": report["graph_kind"], "modulation_schema": report["modulation_schema"], "residual_schema": report["residual_schema"], "max_abs_error": report["max_abs_error"], "all_outputs_allclose": report["all_outputs_allclose_rtol_1e_4_atol_1e_5"]}, indent=2))
+    print(json.dumps({"graph_kind": report["graph_kind"], "onnx_opset_version": report["onnx_opset_version"], "modulation_schema": report["modulation_schema"], "residual_schema": report["residual_schema"], "max_abs_error": report["max_abs_error"], "all_outputs_allclose": report["all_outputs_allclose_rtol_1e_4_atol_1e_5"]}, indent=2))
     return 0 if allclose else 1
 
 
