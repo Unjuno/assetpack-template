@@ -151,6 +151,34 @@ jobs:
           path: reports/**/report.json
           retention-days: 7
 
+  pair-segments-aggregate:
+    if: ${{ inputs.target == 'pair-segments-all' }}
+    name: pair-segments-aggregate
+    runs-on: ubuntu-latest
+    needs: pair-segments-all
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bonsai-lowbit-pair-segment-*-report-json
+          path: downloaded-pair-segment-reports
+          merge-multiple: true
+
+      - name: Aggregate pair segment reports
+        run: |
+          set -euo pipefail
+          python scripts/validate_bonsai_lowbit_pair_segments_aggregate.py downloaded-pair-segment-reports
+
+      - name: Upload pair segment aggregate report JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-lowbit-pair-segments-aggregate-report-json
+          path: reports/**/report.json
+          retention-days: 7
+
   ten-by-two-chain:
     if: ${{ inputs.target == 'ten-by-two-chain' }}
     name: ten-by-two-chain
