@@ -21,11 +21,10 @@ Verified and recorded in the manifest:
 - all ten pair segments for blocks 0-19;
 - twenty single blocks via ten-by-two chained segmented export probe;
 - twenty single blocks via split persistent ten-by-two ONNX segment artifacts, validated as a reusable segmented ONNX chain;
-- ten-by-two chain-state handoff report.
+- ten-by-two chain-state handoff report;
+- ten-by-two input boundary report.
 
-Pending for the current low-bit critical-path scope:
-
-- input boundary report artifact verification.
+Pending for the current low-bit critical-path scope: none.
 
 ## Step 1 — Execution discipline
 
@@ -229,22 +228,23 @@ ten-by-two split persistent ONNX segments have their segment-to-segment hidden-s
 
 ## Step 6 — Input boundary report
 
-Status: implemented; CI artifact pending.
+Status: verified.
 
-Implementation commits:
-
-```text
-eabfc8faa3b0bad73fdcbbc5974acd6334debf2f
-76f119acb67b26b88acb2446276b1d851c3d37ac
-```
-
-Expected artifact:
+Run:
 
 ```text
-bonsai-lowbit-ten-by-two-input-boundary-report-json
+27399310016
 ```
 
-Expected completion condition:
+Artifact:
+
+```text
+bonsai-lowbit-ten-by-two-input-boundary-report-json / 7584863386
+sha256: 321133159edaa0136412c09efc04e59f61e53da502cc27d737282b565b8665ac
+head_sha: 76f119acb67b26b88acb2446276b1d851c3d37ac
+```
+
+Verified completion condition:
 
 ```json
 {
@@ -257,6 +257,7 @@ Expected completion condition:
   "validated_without_lowbit_source_reload": true,
   "validated_from_persisted_onnx_files": true,
   "input_boundary": {
+    "external_onnx_inputs": ["hidden", "temb"],
     "prompt_tokens_present": false,
     "text_encoder_present": false,
     "scheduler_present": false,
@@ -267,7 +268,7 @@ Expected completion condition:
 }
 ```
 
-This report must not promote any full-pipeline claim. It only documents the current external ONNX input boundary: `hidden` and `temb`.
+This report does not promote any full-pipeline claim. It documents the current external ONNX input boundary: `hidden` and `temb`.
 
 Forbidden claims remain:
 
@@ -278,9 +279,9 @@ Forbidden claims remain:
 
 ## Step 7 — Decide next expansion boundary
 
-Status: blocked until Step 6 has a verified CI artifact.
+Status: ready for decision.
 
-Candidate options after Step 6:
+Candidate options:
 
 1. add image/semantic input boundary probes;
 2. add double-block side of the real architecture;
