@@ -2,6 +2,15 @@ name: bonsai-onnx-smoke
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: "Bonsai ONNX smoke target"
+        required: true
+        type: choice
+        default: layout-boundary
+        options:
+          - layout-boundary
+          - export
   push:
     branches:
       - main
@@ -14,11 +23,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: bonsai-onnx-smoke-${{ github.event_name }}
+  group: bonsai-onnx-smoke-${{ github.event_name }}-${{ github.event.inputs.target || 'push-layout-boundary' }}
   cancel-in-progress: false
 
 jobs:
   layout-boundary:
+    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.target == 'layout-boundary') }}
     name: layout-boundary
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -64,7 +74,7 @@ jobs:
           retention-days: 7
 
   export:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.target == 'export' }}
     runs-on: ubuntu-latest
     timeout-minutes: 180
     env:
