@@ -44,7 +44,7 @@ def stage(name: str, allowed_claim: str, fn: Callable[[], dict[str, Any]]) -> di
     try:
         payload = fn()
         return {"name": name, "status": "passed", "seconds": round(time.time() - start, 3), "claim_promotable_to_manifest": True, "allowed_claim": allowed_claim, **payload}
-    except Exception as exc:
+    except BaseException as exc:
         return {"name": name, "status": "failed", "seconds": round(time.time() - start, 3), "claim_promotable_to_manifest": False, "allowed_claim": allowed_claim, "error_type": type(exc).__name__, "error": str(exc)[:3000]}
 
 
@@ -159,19 +159,22 @@ def run(args: argparse.Namespace) -> int:
     run_transformer_load = env_bool("BONSAI_RUN_TRANSFORMER_LOAD", False)
     require_all = env_bool("BONSAI_REQUIRE_ALL_COMBINED_CLAIMS", False)
     start = time.time()
-    stages = [
-        stage("tokenizer_execution", "bonsai_tokenizer_execution_verified", lambda: tokenizer_probe(model_ref)),
-        stage("text_encoder_execution", "bonsai_text_encoder_execution_verified", lambda: text_encoder_probe(model_ref)),
-        stage("scheduler_execution", "bonsai_scheduler_step_execution_verified", lambda: scheduler_probe(model_ref)),
-        stage("vae_execution", "bonsai_vae_decoder_execution_verified", lambda: vae_probe(model_ref)),
-        stage("transformer_config_load", "bonsai_transformer_config_boundary_verified_not_runtime_execution", lambda: transformer_config_probe(model_ref)),
-    ]
     if run_transformer_load:
-        stages.append(stage("transformer_weight_load", "bonsai_real_transformer_weight_load_verified_not_onnx_execution", lambda: transformer_load_probe(model_ref)))
+        stages = [
+            stage("transformer_config_load", "bonsai_transformer_config_boundary_verified_not_runtime_execution", lambda: transformer_config_probe(model_ref)),
+            stage("transformer_weight_load", "bonsai_real_transformer_weight_load_verified_not_onnx_execution", lambda: transformer_load_probe(model_ref)),
+        ]
     else:
-        stages.append(skip_stage("transformer_weight_load", "bonsai_real_transformer_weight_load_verified_not_onnx_execution", "set BONSAI_RUN_TRANSFORMER_LOAD=true to attempt heavy transformer weight load"))
+        stages = [
+            stage("tokenizer_execution", "bonsai_tokenizer_execution_verified", lambda: tokenizer_probe(model_ref)),
+            stage("text_encoder_execution", "bonsai_text_encoder_execution_verified", lambda: text_encoder_probe(model_ref)),
+            stage("scheduler_execution", "bonsai_scheduler_step_execution_verified", lambda: scheduler_probe(model_ref)),
+            stage("vae_execution", "bonsai_vae_decoder_execution_verified", lambda: vae_probe(model_ref)),
+            stage("transformer_config_load", "bonsai_transformer_config_boundary_verified_not_runtime_execution", lambda: transformer_config_probe(model_ref)),
+            skip_stage("transformer_weight_load", "bonsai_real_transformer_weight_load_verified_not_onnx_execution", "set BONSAI_RUN_TRANSFORMER_LOAD=true to attempt heavy transformer weight load"),
+        ]
     statuses = {s["name"]: s["status"] for s in stages}
-    stages.append(dependency_blocked_stage("full_pipeline_composition", "bonsai_full_pipeline_composition_verified", {"tokenizer_execution": statuses.get("tokenizer_execution"), "text_encoder_execution": statuses.get("text_encoder_execution"), "scheduler_execution": statuses.get("scheduler_execution"), "vae_execution": statuses.get("vae_execution"), "transformer_weight_load": statuses.get("transformer_weight_load")}))
+    stages.append(dependency_blocked_stage("full_pipeline_composition", "bonsai_full_pipeline_composition_verified", {"tokenizer_execution": statuses.get("tokenizer_execution", "not_run"), "text_encoder_execution": statuses.get("text_encoder_execution", "not_run"), "scheduler_execution": statuses.get("scheduler_execution", "not_run"), "vae_execution": statuses.get("vae_execution", "not_run"), "transformer_weight_load": statuses.get("transformer_weight_load")}))
     stages.append(dependency_blocked_stage("prompt_to_image_generation", "bonsai_prompt_to_image_generation_verified", {"full_pipeline_composition": stages[-1]["status"]}))
     stages.append(dependency_blocked_stage("single_monolithic_multi_block_onnx", "bonsai_single_monolithic_multi_block_onnx_verified", {"full_pipeline_composition": stages[-2]["status"]}))
     promotable = [s for s in stages if s.get("claim_promotable_to_manifest")]
