@@ -34,6 +34,7 @@ on:
       - main
     paths:
       - .github/workflows/bonsai-lowbit-smoke.yml
+      - scripts/write_bonsai_lowbit_ten_by_two_input_boundary_report.py
       - scripts/write_bonsai_lowbit_ten_by_two_chain_handoff_report.py
       - scripts/prepare_bonsai_lowbit_ten_by_two_reference_artifact.py
       - scripts/export_bonsai_lowbit_pair_persistent_onnx_artifact.py
@@ -304,6 +305,10 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/write_bonsai_lowbit_ten_by_two_chain_handoff_report.py
+      - name: Write input boundary report
+        run: |
+          set -euo pipefail
+          python scripts/write_bonsai_lowbit_ten_by_two_input_boundary_report.py
       - name: Upload split persistent ten-by-two validation report JSON
         if: always()
         uses: actions/upload-artifact@v4
@@ -317,4 +322,11 @@ jobs:
         with:
           name: bonsai-lowbit-ten-by-two-chain-handoff-report-json
           path: reports/bonsai-lowbit-ten-by-two-chain-handoff/report.json
+          retention-days: 7
+      - name: Upload split persistent ten-by-two input boundary report JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-lowbit-ten-by-two-input-boundary-report-json
+          path: reports/bonsai-lowbit-ten-by-two-input-boundary/report.json
           retention-days: 7
