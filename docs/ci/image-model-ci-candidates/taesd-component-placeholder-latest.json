@@ -1,0 +1,87 @@
+{
+  "experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "negative_prompt": "blurry, distorted, low quality",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+  },
+  "selection": {
+    "candidate_ids": [
+      "taesd-component-placeholder"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61613182976,
+      "free_bytes": 93264228352
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61613182976,
+      "free_bytes": 93264228352
+    },
+    "max_rss_mb_end": 19.633
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "failed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "taesd-component-placeholder",
+        "enabled": true,
+        "batch": "runtime",
+        "ci_stage": "placeholder",
+        "method": "component_load_placeholder",
+        "model_ref": "madebyollin/taesd",
+        "license_hint": "mit",
+        "expected_role": "tiny_vae_method_candidate",
+        "notes": "TAESD is a component/method candidate, not a full text-to-image pipeline. Implement component probe separately."
+      },
+      "status": "skipped",
+      "started_at_monotonic_seconds": 1781287604.913,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61613182976,
+        "free_bytes": 93264228352
+      },
+      "max_rss_mb_before": 19.633,
+      "reason": "Placeholder or unsupported runtime; add an implementation before enabling execution.",
+      "execution_attempted": false,
+      "load_only": false,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61613182976,
+        "free_bytes": 93264228352
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 1,
+    "total": 1
+  },
+  "seconds_so_far": 0.072,
+  "summary": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 1,
+    "total": 1
+  },
+  "ci_conclusion": "success_with_candidate_failures",
+  "seconds": 0.075
+}
