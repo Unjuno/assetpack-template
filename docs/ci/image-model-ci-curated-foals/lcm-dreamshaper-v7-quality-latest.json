@@ -1,0 +1,113 @@
+{
+  "experiment_id": "image-model-ci-curated-foals-v1",
+  "prompt": "a cute miniature foal standing in a shallow bonsai pot, detailed coat, natural young horse anatomy, delicate legs, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a foal, not a horse, cat, dog, rabbit, toy",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Foal generation uses the strict seven candidates accepted from cat artifact review. Foal visual quality is unverified until this workflow is run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "lcm-dreamshaper-v7-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61395423232,
+      "free_bytes": 93481988096
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 66879057920,
+      "free_bytes": 87998353408
+    },
+    "max_rss_mb_end": 5214.105
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "lcm-dreamshaper-v7-quality",
+        "enabled": true,
+        "batch": "curated_foal",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "SimianLuo/LCM_Dreamshaper_v7",
+        "pipeline_class": "LatentConsistencyModelPipeline",
+        "height": 384,
+        "width": 384,
+        "steps": 4,
+        "guidance_scale": 8.0,
+        "expected_role": "foal_lcm_reference"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781300898.632,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61395423232,
+        "free_bytes": 93481988096
+      },
+      "max_rss_mb_before": 19.723,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "LatentConsistencyModelPipeline",
+      "model_ref": "SimianLuo/LCM_Dreamshaper_v7",
+      "load_seconds": 18.846,
+      "generate_seconds": 27.58,
+      "total_seconds": 46.597,
+      "height": 384,
+      "width": 384,
+      "steps": 4,
+      "guidance_scale": 8.0,
+      "call_kwargs": {
+        "prompt": "a cute miniature foal standing in a shallow bonsai pot, detailed coat, natural young horse anatomy, delicate legs, studio lighting, sharp focus",
+        "num_inference_steps": 4,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a foal, not a horse, cat, dog, rabbit, toy",
+        "height": 384,
+        "width": 384,
+        "guidance_scale": 8.0
+      },
+      "image_path": "reports/image-model-ci-curated-foals/lcm-dreamshaper-v7-quality/images/lcm-dreamshaper-v7-quality/cat.png",
+      "image_sha256": "cb8861af479531ba79abc560e4246998f977c98f4b844c0662b5e111fdff473a",
+      "image_size_bytes": 207482,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 5214.105,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 66879057920,
+        "free_bytes": 87998353408
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 49.188,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 49.188
+}
