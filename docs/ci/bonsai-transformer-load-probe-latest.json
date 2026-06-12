@@ -1,0 +1,96 @@
+{
+  "experiment_id": "bonsai-combined-component-probe-v1",
+  "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
+  "status": "passed",
+  "ci_conclusion": "success",
+  "claim_promotable_to_manifest": true,
+  "require_all": false,
+  "run_transformer_load": true,
+  "promotable_claims": [
+    {
+      "name": "transformer_config_load",
+      "allowed_claim": "bonsai_transformer_config_boundary_verified_not_runtime_execution"
+    },
+    {
+      "name": "transformer_weight_load",
+      "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution"
+    }
+  ],
+  "stages": [
+    {
+      "name": "transformer_config_load",
+      "status": "passed",
+      "seconds": 0.391,
+      "claim_promotable_to_manifest": true,
+      "allowed_claim": "bonsai_transformer_config_boundary_verified_not_runtime_execution",
+      "component": "transformer",
+      "load_kind": "config_only",
+      "class_name": "Flux2Transformer2DModel",
+      "selected_config": {
+        "in_channels": 128,
+        "out_channels": null,
+        "num_layers": 5,
+        "num_single_layers": 20,
+        "attention_head_dim": 128,
+        "num_attention_heads": 24,
+        "joint_attention_dim": 7680,
+        "guidance_embeds": false,
+        "axes_dims_rope": [
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "transformer_weight_load",
+      "status": "passed",
+      "seconds": 32.027,
+      "claim_promotable_to_manifest": true,
+      "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
+      "component": "transformer",
+      "load_kind": "weights",
+      "class_name": "Flux2Transformer2DModel",
+      "param_count": 3875544576,
+      "param_count_billion": 3.876,
+      "dtype_param_counts": {
+        "torch.float16": 3875544576
+      }
+    },
+    {
+      "name": "full_pipeline_composition",
+      "status": "blocked",
+      "seconds": 0.0,
+      "claim_promotable_to_manifest": false,
+      "allowed_claim": "bonsai_full_pipeline_composition_verified",
+      "blocked_by": {
+        "tokenizer_execution": "not_run",
+        "text_encoder_execution": "not_run",
+        "scheduler_execution": "not_run",
+        "vae_execution": "not_run"
+      }
+    },
+    {
+      "name": "prompt_to_image_generation",
+      "status": "blocked",
+      "seconds": 0.0,
+      "claim_promotable_to_manifest": false,
+      "allowed_claim": "bonsai_prompt_to_image_generation_verified",
+      "blocked_by": {
+        "full_pipeline_composition": "blocked"
+      }
+    },
+    {
+      "name": "single_monolithic_multi_block_onnx",
+      "status": "blocked",
+      "seconds": 0.0,
+      "claim_promotable_to_manifest": false,
+      "allowed_claim": "bonsai_single_monolithic_multi_block_onnx_verified",
+      "blocked_by": {
+        "full_pipeline_composition": "blocked"
+      }
+    }
+  ],
+  "seconds": 32.42
+}
