@@ -8,6 +8,12 @@ Canonical verification source:
 docs/bonsai-lowbit-verification-manifest.json
 ```
 
+Scope cap decision:
+
+```text
+docs/bonsai-lowbit-scope-cap.md
+```
+
 ## Current baseline
 
 Verified and recorded in the manifest:
@@ -25,6 +31,8 @@ Verified and recorded in the manifest:
 - ten-by-two input boundary report.
 
 Pending for the current low-bit critical-path scope: none.
+
+Current low-bit critical-path scope: closed.
 
 ## Step 1 — Execution discipline
 
@@ -270,6 +278,24 @@ Verified completion condition:
 
 This report does not promote any full-pipeline claim. It documents the current external ONNX input boundary: `hidden` and `temb`.
 
+## Step 7 — Scope cap decision
+
+Status: done.
+
+Document:
+
+```text
+docs/bonsai-lowbit-scope-cap.md
+```
+
+Decision:
+
+```text
+Current low-bit critical-path scope is closed after the verified ten-by-two input-boundary report.
+```
+
+The closed scope covers a reusable segmented ONNX Runtime CPU critical-path chain. It does not cover a full Bonsai pipeline, real transformer block ONNX execution, prompt-to-image generation, or a single monolithic 20-block ONNX graph.
+
 Forbidden claims remain:
 
 - full Bonsai ONNX pipeline;
@@ -277,14 +303,16 @@ Forbidden claims remain:
 - prompt-to-image generation verification;
 - single monolithic 20-block ONNX.
 
-## Step 7 — Decide next expansion boundary
+## Step 8 — Future expansion boundary
 
-Status: ready for decision.
+Status: not started.
 
-Candidate options:
+Any future expansion must start a new manifest key and a new evidence boundary before README or docs may promote the claim.
 
-1. add image/semantic input boundary probes;
-2. add double-block side of the real architecture;
-3. keep ONNX scope capped at single-stream block chain and document the boundary.
+Candidate scopes:
 
-Do not start Step 7 unless the next boundary is explicitly defined and its claim language is added to the manifest evidence policy.
+1. real architecture double-block / single-block integration evidence;
+2. text-encoder or prompt-token input boundary evidence;
+3. scheduler / latent boundary evidence;
+4. VAE boundary evidence;
+5. composed full-pipeline evidence.
