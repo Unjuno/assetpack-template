@@ -1,4 +1,4 @@
-experiment_id: image-model-ci-benchmark-v2
+experiment_id: image-model-ci-benchmark-v3
 prompt: "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting"
 negative_prompt: "blurry, distorted, low quality"
 seed: 12345
@@ -16,7 +16,7 @@ runtime:
 #   lcm: latent-consistency and few-step candidates likely to be useful on CPU.
 #   turbo: distilled/turbo/lightning/hyper candidates; some are likely too heavy on standard runners.
 #   load_only: quality baselines or heavy models checked only for load feasibility.
-#   runtime: quantized/OpenVINO/cpp placeholders; enable after artifact selection.
+#   runtime: quantized/OpenVINO/cpp/component placeholders; enable after artifact selection.
 candidates:
   - id: tiny-stable-diffusion-pipe
     enabled: true
@@ -90,6 +90,20 @@ candidates:
     expected_role: small_sd_load_candidate
     notes: "Load-only first. Promote to generation after resource data."
 
+  - id: bk-sdm-base-load
+    enabled: true
+    batch: smoke
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: nota-ai/bk-sdm-base
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 7.5
+    expected_role: small_sd_load_candidate
+    notes: "BK-SDM base load-only comparison."
+
   - id: lcm-dreamshaper-v7
     enabled: true
     batch: lcm
@@ -110,7 +124,7 @@ candidates:
     batch: lcm
     ci_stage: generation
     method: diffusers_lora_text_to_image
-    base_model_ref: runwayml/stable-diffusion-v1-5
+    base_model_ref: stable-diffusion-v1-5/stable-diffusion-v1-5
     lora_model_ref: latent-consistency/lcm-lora-sdv1-5
     pipeline_class: StableDiffusionPipeline
     scheduler_class: LCMScheduler
@@ -199,6 +213,20 @@ candidates:
     license_hint: apache-2.0
     notes: "Small SDXL-class model. Load-only first."
 
+  - id: segmind-vega-load
+    enabled: true
+    batch: turbo
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: segmind/Segmind-Vega
+    pipeline_class: StableDiffusionXLPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 0.0
+    expected_role: small_sdxl_load_candidate
+    notes: "Segmind-Vega small SDXL-family candidate. Load-only first."
+
   - id: ssd-1b-lcm-lora-load
     enabled: true
     batch: turbo
@@ -236,7 +264,7 @@ candidates:
     batch: load_only
     ci_stage: load_only
     method: diffusers_load_only
-    model_ref: runwayml/stable-diffusion-v1-5
+    model_ref: stable-diffusion-v1-5/stable-diffusion-v1-5
     pipeline_class: StableDiffusionPipeline
     height: 256
     width: 256
@@ -245,19 +273,33 @@ candidates:
     expected_role: baseline_load_candidate
     notes: "Baseline load feasibility. Generation disabled initially."
 
-  - id: sd21-base-load
+  - id: sd14-load-baseline
     enabled: true
     batch: load_only
     ci_stage: load_only
     method: diffusers_load_only
-    model_ref: stabilityai/stable-diffusion-2-1-base
+    model_ref: CompVis/stable-diffusion-v1-4
     pipeline_class: StableDiffusionPipeline
     height: 256
     width: 256
     steps: 20
     guidance_scale: 7.5
     expected_role: baseline_load_candidate
-    notes: "SD2.1 load-only baseline."
+    notes: "SD1.4 load-only baseline."
+
+  - id: sd21-base-load
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: stabilityai/stable-diffusion-2-1
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 20
+    guidance_scale: 7.5
+    expected_role: baseline_load_candidate
+    notes: "SD2.1 load-only baseline. If unavailable, CI records repo/access failure."
 
   - id: sdxl-base-load
     enabled: true
@@ -273,6 +315,92 @@ candidates:
     expected_role: heavy_baseline_load_candidate
     notes: "SDXL load-only baseline."
 
+  - id: sdxl-lightning-load
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: ByteDance/SDXL-Lightning
+    pipeline_class: DiffusionPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 0.0
+    expected_role: lightning_repo_load_candidate
+    license_hint: openrail-plus-plus
+    notes: "Repo-level load-only check; may fail because Lightning provides UNet/LoRA weights rather than a complete pipeline."
+
+  - id: hyper-sd-load
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: ByteDance/Hyper-SD
+    pipeline_class: DiffusionPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 0.0
+    expected_role: hyper_repo_load_candidate
+    notes: "Repo-level load-only check; may fail because Hyper-SD provides adapters/checkpoints rather than a single complete pipeline."
+
+  - id: pixart-alpha-load
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: PixArt-alpha/PixArt-XL-2-1024-MS
+    pipeline_class: PixArtAlphaPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 4.5
+    expected_role: transformer_quality_load_candidate
+    license_hint: openrail-plus-plus
+    notes: "Transformer-family quality candidate. Load-only on standard CI."
+
+  - id: pixart-sigma-load
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: PixArt-alpha/PixArt-Sigma-XL-2-1024-MS
+    pipeline_class: PixArtSigmaPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 4.5
+    expected_role: transformer_quality_load_candidate
+    notes: "PixArt Sigma load-only candidate. Failure boundary is useful if pipeline class is unavailable."
+
+  - id: playground-v25-load
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: playgroundai/playground-v2.5-1024px-aesthetic
+    pipeline_class: StableDiffusionXLPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 3.0
+    expected_role: sdxl_quality_load_candidate
+    notes: "Quality SDXL-family candidate. Load-only first."
+
+  - id: sd35-medium-load
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: stabilityai/stable-diffusion-3.5-medium
+    pipeline_class: StableDiffusion3Pipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 4.5
+    expected_role: heavy_quality_load_candidate
+    notes: "Likely too heavy or gated for standard CI. Load-only failure boundary is useful."
+
   - id: flux-schnell-load
     enabled: true
     batch: load_only
@@ -286,7 +414,7 @@ candidates:
     guidance_scale: 0.0
     expected_role: heavy_quality_load_candidate
     license_hint: apache-2.0
-    notes: "Likely too heavy for standard CI; load-only evidence is useful."
+    notes: "Gated and likely too heavy for standard CI; load-only evidence is useful."
 
   - id: qwen-image-load
     enabled: true
@@ -300,7 +428,18 @@ candidates:
     steps: 4
     guidance_scale: 0.0
     expected_role: heavy_text_rendering_load_candidate
+    license_hint: apache-2.0
     notes: "Likely too heavy or unavailable depending on installed diffusers version. Failure boundary is useful."
+
+  - id: taesd-component-placeholder
+    enabled: true
+    batch: runtime
+    ci_stage: placeholder
+    method: component_load_placeholder
+    model_ref: madebyollin/taesd
+    expected_role: tiny_vae_method_candidate
+    license_hint: mit
+    notes: "TAESD is a component/method candidate, not a full text-to-image pipeline. Implement component probe separately."
 
   - id: openvino-small-sd-placeholder
     enabled: true
