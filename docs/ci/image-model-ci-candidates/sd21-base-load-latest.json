@@ -25,15 +25,15 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 61613207552,
-      "free_bytes": 93264203776
+      "used_bytes": 61614063616,
+      "free_bytes": 93263347712
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 61613178880,
-      "free_bytes": 93264232448
+      "used_bytes": 61614055424,
+      "free_bytes": 93263355904
     },
-    "max_rss_mb_end": 357.422
+    "max_rss_mb_end": 357.57
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -56,22 +56,22 @@
         "notes": "SD2.1 load-only baseline. If unavailable, CI records repo/access failure."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781287332.761,
+      "started_at_monotonic_seconds": 1781290450.991,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613207552,
-        "free_bytes": 93264203776
+        "used_bytes": 61614063616,
+        "free_bytes": 93263347712
       },
-      "max_rss_mb_before": 19.766,
+      "max_rss_mb_before": 19.73,
       "error_type": "OSError",
       "error": "Cannot load model stabilityai/stable-diffusion-2-1: model is not cached locally and an error occurred while trying to fetch metadata from the Hub. Please check out the root cause in the stacktrace above.",
       "execution_attempted": false,
-      "total_seconds": 5.042,
-      "max_rss_mb_after_candidate": 357.422,
+      "total_seconds": 4.022,
+      "max_rss_mb_after_candidate": 357.57,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613170688,
-        "free_bytes": 93264240640
+        "used_bytes": 61614047232,
+        "free_bytes": 93263364096
       }
     }
   ],
@@ -81,7 +81,7 @@
     "skipped": 0,
     "total": 1
   },
-  "seconds_so_far": 5.075,
+  "seconds_so_far": 4.053,
   "summary": {
     "passed": 0,
     "failed": 1,
@@ -89,5 +89,5 @@
     "total": 1
   },
   "ci_conclusion": "success_with_candidate_failures",
-  "seconds": 5.076
+  "seconds": 4.054
 }
