@@ -1,0 +1,114 @@
+{
+  "experiment_id": "image-model-ci-curated-octopuses-v1",
+  "prompt": "a tiny realistic octopus in a shallow ceramic bonsai pot, eight arms draped over the rim and around bonsai roots, visible suction cups, natural octopus anatomy, wet skin texture, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not an octopus, squid, jellyfish, cat, dog, rabbit, bird, toy",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Octopus generation uses the strict seven candidates accepted from cat artifact review. Octopus visual quality is unverified until this workflow is run. This is an intentionally hard morphology stress test."
+  },
+  "selection": {
+    "candidate_ids": [
+      "ssd-1b-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61395632128,
+      "free_bytes": 93481779200
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 70329282560,
+      "free_bytes": 84548128768
+    },
+    "max_rss_mb_end": 9779.926
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "ssd-1b-quality",
+        "enabled": true,
+        "batch": "curated_octopus",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "segmind/SSD-1B",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 8,
+        "guidance_scale": 7.5,
+        "license_hint": "apache-2.0",
+        "expected_role": "octopus_small_sdxl_candidate"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781301287.712,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61395632128,
+        "free_bytes": 93481779200
+      },
+      "max_rss_mb_before": 19.73,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "StableDiffusionXLPipeline",
+      "model_ref": "segmind/SSD-1B",
+      "load_seconds": 30.48,
+      "generate_seconds": 209.615,
+      "total_seconds": 240.329,
+      "height": 512,
+      "width": 512,
+      "steps": 8,
+      "guidance_scale": 7.5,
+      "call_kwargs": {
+        "prompt": "a tiny realistic octopus in a shallow ceramic bonsai pot, eight arms draped over the rim and around bonsai roots, visible suction cups, natural octopus anatomy, wet skin texture, studio lighting, sharp focus",
+        "num_inference_steps": 8,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not an octopus, squid, jellyfish, cat, dog, rabbit, bird, toy",
+        "height": 512,
+        "width": 512,
+        "guidance_scale": 7.5
+      },
+      "image_path": "reports/image-model-ci-curated-octopuses/ssd-1b-quality/images/ssd-1b-quality/cat.png",
+      "image_sha256": "4787eb9a2efcb7e53a1efb63988b6e554e85b99b7b4c7f4710c643bcdeaf507f",
+      "image_size_bytes": 428383,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 9779.926,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 70329282560,
+        "free_bytes": 84548128768
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 244.168,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 244.169
+}
