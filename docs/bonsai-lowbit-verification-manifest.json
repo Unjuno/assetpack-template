@@ -7,11 +7,11 @@
     "report_count": 32
   },
   "latest_ci_run": {
-    "run_id": 27399310016,
-    "head_sha": "76f119acb67b26b88acb2446276b1d851c3d37ac",
-    "artifact_id": 7584863386,
-    "artifact_name": "bonsai-lowbit-ten-by-two-input-boundary-report-json",
-    "artifact_sha256": "321133159edaa0136412c09efc04e59f61e53da502cc27d737282b565b8665ac"
+    "run_id": 27406318749,
+    "head_sha": "4d6601d208df7c7ff68ecd63d813c0cd517506c7",
+    "artifact_id": 7587605829,
+    "artifact_name": "bonsai-layout-boundary-report-json",
+    "artifact_sha256": "468f3168e1066365df96924341547ff0ac1c028a02e4cea07dcad97fd583ac4f"
   },
   "verified": [
     {
@@ -227,6 +227,42 @@
       "is_real_transformer_block": false,
       "is_full_bonsai_pipeline": false,
       "allowed_claim": "ten_by_two_split_persistent_onnx_segments_input_boundary_documented_hidden_temb_only_no_prompt_text_encoder_scheduler_vae_or_full_pipeline"
+    },
+    {
+      "key": "bonsai_repo_layout_boundary_preflight",
+      "status": "verified",
+      "run_id": 27406318749,
+      "head_sha": "4d6601d208df7c7ff68ecd63d813c0cd517506c7",
+      "job_name": "layout-boundary",
+      "job_conclusion": "success",
+      "artifact_id": 7587605829,
+      "artifact_name": "bonsai-layout-boundary-report-json",
+      "artifact_sha256": "468f3168e1066365df96924341547ff0ac1c028a02e4cea07dcad97fd583ac4f",
+      "report_path": "report.json",
+      "report_ok": true,
+      "artifact_kind": "layout_probe",
+      "experiment_id": "bonsai-onnx-smoke-v2",
+      "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
+      "layout_probe_mode": "boundary_files",
+      "download_weights": false,
+      "exported_onnx": false,
+      "ran_onnxruntime": false,
+      "claim_promotable_to_manifest": true,
+      "has_model_index_json": true,
+      "boundary_files_present": [
+        "model_index.json",
+        "scheduler/scheduler_config.json",
+        "text_encoder/config.json",
+        "tokenizer/tokenizer_config.json",
+        "transformer/config.json",
+        "vae/config.json"
+      ],
+      "boundary_files_absent": [
+        "text_encoder_2/config.json",
+        "tokenizer_2/tokenizer_config.json"
+      ],
+      "top_level_entries": ["model_index.json", "scheduler", "text_encoder", "tokenizer", "transformer", "vae"],
+      "allowed_claim": "bonsai_repo_layout_boundary_files_verified_without_weight_download_onnx_export_or_runtime_execution"
     }
   ],
   "pending": [],
@@ -237,6 +273,6 @@
     "single monolithic multi-block ONNX when the verified result is segmented"
   ],
   "next_execution_boundary": [
-    "decide next low-bit boundary after verified ten-by-two input boundary report"
+    "decide whether to verify text-encoder/tokenizer execution, scheduler-latent boundary, VAE boundary, or composed full-pipeline evidence"
   ]
 }
