@@ -1,0 +1,236 @@
+name: image-model-ci-final-runoff-hard-subjects
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_ids:
+        description: "Optional comma-separated candidate IDs. Empty means all 3 final candidates."
+        required: false
+        default: ""
+      subject_ids:
+        description: "Optional comma-separated subject IDs. Empty means all 20 hard subjects."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: image-model-ci-final-runoff-hard-subjects-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      count: ${{ steps.matrix.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build final runoff matrix
+        id: matrix
+        env:
+          INPUT_CANDIDATE_IDS: ${{ github.event.inputs.candidate_ids }}
+          INPUT_SUBJECT_IDS: ${{ github.event.inputs.subject_ids }}
+        run: |
+          python -m pip install --no-cache-dir pyyaml
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          import yaml
+
+          cfg = yaml.safe_load(Path('experiments/image-model-ci-final-runoff-hard-subjects.yml').read_text())
+          requested_candidates = {x.strip() for x in os.environ.get('INPUT_CANDIDATE_IDS', '').split(',') if x.strip()}
+          requested_subjects = {x.strip() for x in os.environ.get('INPUT_SUBJECT_IDS', '').split(',') if x.strip()}
+
+          candidates = []
+          for c in cfg.get('candidates', []):
+              cid = c.get('id')
+              if not c.get('enabled', False):
+                  continue
+              if requested_candidates and cid not in requested_candidates:
+                  continue
+              candidates.append(cid)
+
+          subjects = []
+          for s in cfg.get('subjects', []):
+              sid = s.get('id')
+              if requested_subjects and sid not in requested_subjects:
+                  continue
+              subjects.append(sid)
+
+          items = []
+          for subject_id in subjects:
+              for candidate_id in candidates:
+                  items.append({'subject_id': subject_id, 'candidate_id': candidate_id})
+
+          payload = json.dumps(items, separators=(',', ':'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as f:
+              f.write(f'matrix={payload}\n')
+              f.write(f'count={len(items)}\n')
+          print(payload)
+          print(f'count={len(items)}')
+          PY
+
+  final-runoff:
+    needs: prepare-matrix
+    if: ${{ needs.prepare-matrix.outputs.count != '0' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include: ${{ fromJson(needs.prepare-matrix.outputs.matrix) }}
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_HUB_ETAG_TIMEOUT: "30"
+      HF_HUB_DOWNLOAD_TIMEOUT: "600"
+      IMAGE_MODEL_CI_FINAL_RUNOFF_REVISION: "v1"
+      IMAGE_MODEL_CANDIDATE_TIMEOUT_SECONDS: "900"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Write per-subject config
+        run: |
+          python -m pip install --no-cache-dir pyyaml
+          mkdir -p /tmp/final-runoff-configs
+          python - <<'PY'
+          from copy import deepcopy
+          from pathlib import Path
+          import os
+          import yaml
+
+          subject_id = os.environ['SUBJECT_ID']
+          candidate_id = os.environ['CANDIDATE_ID']
+          source_path = Path('experiments/image-model-ci-final-runoff-hard-subjects.yml')
+          cfg = yaml.safe_load(source_path.read_text())
+
+          subjects = {s['id']: s for s in cfg.get('subjects', [])}
+          if subject_id not in subjects:
+              raise SystemExit(f'Unknown subject_id: {subject_id}')
+          subject = subjects[subject_id]
+
+          candidates = [c for c in cfg.get('candidates', []) if c.get('id') == candidate_id and c.get('enabled', False)]
+          if len(candidates) != 1:
+              raise SystemExit(f'Expected exactly one enabled candidate for {candidate_id}, found {len(candidates)}')
+
+          run_cfg = deepcopy(cfg)
+          run_cfg['experiment_id'] = f"image-model-ci-final-runoff-hard-subjects-v1-{subject_id}"
+          run_cfg['prompt'] = subject['prompt']
+          run_cfg['negative_prompt'] = subject['negative_prompt']
+          run_cfg['output_root'] = f"reports/image-model-ci-final-runoff-hard-subjects/{subject_id}"
+          run_cfg['current_subject'] = {
+              'id': subject_id,
+              'prompt': subject['prompt'],
+              'negative_prompt': subject['negative_prompt'],
+              'evaluation_focus': subject.get('evaluation_focus', ''),
+          }
+          run_cfg['candidates'] = candidates
+          run_cfg.pop('subjects', None)
+
+          out = Path('/tmp/final-runoff-configs') / f'{subject_id}__{candidate_id}.yml'
+          out.write_text(yaml.safe_dump(run_cfg, sort_keys=False, allow_unicode=True), encoding='utf-8')
+          print(out)
+          PY
+        env:
+          SUBJECT_ID: ${{ matrix.subject_id }}
+          CANDIDATE_ID: ${{ matrix.candidate_id }}
+
+      - name: Write preflight report
+        run: |
+          mkdir -p reports/image-model-ci-final-runoff-hard-subjects/${{ matrix.subject_id }}/${{ matrix.candidate_id }}
+          cat > reports/image-model-ci-final-runoff-hard-subjects/${{ matrix.subject_id }}/${{ matrix.candidate_id }}/report.json <<JSON
+          {
+            "experiment_id": "image-model-ci-final-runoff-hard-subjects-preflight-v1",
+            "subject_id": "${{ matrix.subject_id }}",
+            "candidate_id": "${{ matrix.candidate_id }}",
+            "status": "preflight_started",
+            "ci_conclusion": "preflight_only",
+            "claim_promotable_to_manifest": false,
+            "allowed_claim": "ci_image_model_final_runoff_measurement_not_model_quality_claim",
+            "execution_attempted": false,
+            "candidate_timeout_seconds": 900,
+            "note": "This preflight report is overwritten by scripts/run_image_model_ci_benchmark.py if benchmark execution runs. This final runoff generates 60 images: 3 candidates across 20 hard subjects."
+          }
+          JSON
+
+      - name: Show runner resources
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --no-cache-dir pyyaml huggingface_hub safetensors diffusers transformers accelerate pillow sentencepiece protobuf peft
+
+      - name: Run final runoff benchmark
+        run: |
+          python scripts/run_image_model_ci_benchmark.py \
+            --config /tmp/final-runoff-configs/${{ matrix.subject_id }}__${{ matrix.candidate_id }}.yml \
+            --out-dir reports/image-model-ci-final-runoff-hard-subjects/${{ matrix.subject_id }}/${{ matrix.candidate_id }} \
+            --candidate-ids "${{ matrix.candidate_id }}" \
+            --candidate-timeout-seconds 900
+
+      - name: Add subject metadata to report
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import yaml
+
+          subject_id = '${{ matrix.subject_id }}'
+          candidate_id = '${{ matrix.candidate_id }}'
+          report_path = Path(f'reports/image-model-ci-final-runoff-hard-subjects/{subject_id}/{candidate_id}/report.json')
+          cfg_path = Path('/tmp/final-runoff-configs') / f'{subject_id}__{candidate_id}.yml'
+          if not report_path.exists() or not cfg_path.exists():
+              raise SystemExit(0)
+          report = json.loads(report_path.read_text())
+          cfg = yaml.safe_load(cfg_path.read_text())
+          report['subject_id'] = subject_id
+          report['subject_prompt'] = cfg.get('prompt')
+          report['subject_negative_prompt'] = cfg.get('negative_prompt')
+          report['subject_evaluation_focus'] = cfg.get('current_subject', {}).get('evaluation_focus')
+          report['final_runoff'] = {
+              'total_candidates': 3,
+              'total_subjects': 20,
+              'total_expected_images': 60,
+              'matrix_unit': 'one subject-candidate image per job',
+          }
+          report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n')
+          PY
+
+      - name: Show final runoff report
+        if: always()
+        run: |
+          if [ -f reports/image-model-ci-final-runoff-hard-subjects/${{ matrix.subject_id }}/${{ matrix.candidate_id }}/report.json ]; then
+            python -m json.tool reports/image-model-ci-final-runoff-hard-subjects/${{ matrix.subject_id }}/${{ matrix.candidate_id }}/report.json
+          fi
+
+      - name: Upload final runoff report and image
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-model-ci-final-runoff-${{ matrix.subject_id }}-${{ matrix.candidate_id }}
+          path: |
+            reports/image-model-ci-final-runoff-hard-subjects/${{ matrix.subject_id }}/${{ matrix.candidate_id }}/report.json
+            reports/image-model-ci-final-runoff-hard-subjects/${{ matrix.subject_id }}/${{ matrix.candidate_id }}/images/**/*.png
+          if-no-files-found: warn
+          retention-days: 7
