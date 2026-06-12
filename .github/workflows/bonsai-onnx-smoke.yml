@@ -38,6 +38,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
       BONSAI_REQUIRED_MILESTONE: layout_probe
       BONSAI_DOWNLOAD_WEIGHTS: "false"
+      BONSAI_ALLOW_EXTERNAL_RATE_LIMIT: "true"
     steps:
       - uses: actions/checkout@v4
 
@@ -62,7 +63,7 @@ jobs:
         if: always()
         run: |
           if [ -f reports/bonsai-layout-boundary/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-layout-boundary/report.json').read_text()); stage=next((s for s in r.get('stages', []) if s.get('name') == 'layout_probe'), {}); analysis=stage.get('analysis', {}); print(json.dumps({'status': r.get('status'), 'required_milestone': r.get('required_milestone'), 'milestone_reached': r.get('milestone_reached'), 'download_weights': r.get('download_weights'), 'has_model_index_json': analysis.get('has_model_index_json'), 'top_level_entries': analysis.get('top_level_entries'), 'component_candidates': analysis.get('component_candidates')}, indent=2))"
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-layout-boundary/report.json').read_text()); stage=next((s for s in r.get('stages', []) if s.get('name') == 'layout_probe'), {}); analysis=stage.get('analysis', {}); print(json.dumps({'status': r.get('status'), 'ci_conclusion': r.get('ci_conclusion'), 'claim_promotable_to_manifest': r.get('claim_promotable_to_manifest'), 'required_milestone': r.get('required_milestone'), 'milestone_reached': r.get('milestone_reached'), 'download_weights': r.get('download_weights'), 'external_rate_limited': r.get('external_rate_limited'), 'error_type': r.get('error_type'), 'error': r.get('error'), 'has_model_index_json': analysis.get('has_model_index_json'), 'top_level_entries': analysis.get('top_level_entries'), 'component_candidates': analysis.get('component_candidates')}, indent=2))"
           fi
 
       - name: Upload Bonsai layout boundary report
@@ -118,7 +119,7 @@ jobs:
         if: always()
         run: |
           if [ -f reports/bonsai-onnx-smoke/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-onnx-smoke/report.json').read_text()); print(json.dumps({'status': r.get('status'), 'required_milestone': r.get('required_milestone'), 'milestone_reached': r.get('milestone_reached'), 'error_type': r.get('error_type'), 'error': r.get('error'), 'stages': [(s.get('name'), s.get('status'), s.get('error_type')) for s in r.get('stages', [])]}, indent=2))"
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-onnx-smoke/report.json').read_text()); print(json.dumps({'status': r.get('status'), 'ci_conclusion': r.get('ci_conclusion'), 'claim_promotable_to_manifest': r.get('claim_promotable_to_manifest'), 'required_milestone': r.get('required_milestone'), 'milestone_reached': r.get('milestone_reached'), 'error_type': r.get('error_type'), 'error': r.get('error'), 'stages': [(s.get('name'), s.get('status'), s.get('error_type')) for s in r.get('stages', [])]}, indent=2))"
           fi
 
       - name: Upload Bonsai report
