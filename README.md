@@ -217,16 +217,19 @@ Current verified low-bit scope, based only on manifest-recorded artifact reports
 - sixteen single blocks via eight-by-two segmented ONNX;
 - all ten pair segments for blocks 0-19;
 - twenty single blocks via ten-by-two chained segmented export probe;
-- twenty single blocks via split persistent ten-by-two ONNX segment artifacts, validated as a reusable segmented ONNX Runtime CPU chain.
+- twenty single blocks via split persistent ten-by-two ONNX segment artifacts, validated as a reusable segmented ONNX Runtime CPU chain;
+- ten-by-two chain-state handoff report.
 
 Current pending low-bit scope:
 
-- none for the current low-bit critical-path scope through split persistent ten-by-two ONNX segment artifacts.
+- ten-by-two input boundary report artifact verification.
 
-The twenty-block ten-by-two evidence has two distinct boundaries:
+The twenty-block ten-by-two evidence has three distinct verified boundaries and one implemented pending boundary:
 
 1. `bonsai-lowbit-ten-by-two-chain-report-json` verifies a reproducible export probe. It exports temporary segmented ONNX files, validates them, and uploads JSON reports only.
 2. `bonsai-lowbit-ten-by-two-split-persistent-onnx-validation-report-json` verifies persisted ONNX artifacts. It validates ten downloaded two-block ONNX segment artifacts plus a reference artifact without reloading the low-bit source.
+3. `bonsai-lowbit-ten-by-two-chain-handoff-report-json` verifies the segment-to-segment tensor handoff evidence for the reusable segmented chain.
+4. `bonsai-lowbit-ten-by-two-input-boundary-report-json` is implemented but not yet manifest-verified; it is intended to document that the current ONNX chain accepts only `hidden` and `temb` as external ONNX inputs and does not include prompt tokens, a text encoder, scheduler, VAE, image latents, or full Bonsai pipeline inputs.
 
 Any future verification claim must be represented in `docs/bonsai-lowbit-verification-manifest.json` before the README or other docs may treat it as verified.
 
