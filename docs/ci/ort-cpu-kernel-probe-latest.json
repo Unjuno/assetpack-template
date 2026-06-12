@@ -1,8 +1,8 @@
 {
-  "experiment_id": "ort-cpu-kernel-probe-v3",
-  "purpose": "Synthetic ONNX Runtime CPUExecutionProvider kernel probe for Cos FLOAT16, INT64, and FLOAT cast workarounds.",
+  "experiment_id": "ort-cpu-kernel-probe-v4",
+  "purpose": "Synthetic ONNX Runtime CPUExecutionProvider kernel probe for Cos FLOAT16, FLOAT32, DOUBLE, INT64, and FLOAT cast workarounds.",
   "claim_promotable_to_manifest": true,
-  "allowed_claim": "synthetic_ort_cpu_cos_int64_cast_workaround_verified_not_bonsai_pipeline",
+  "allowed_claim": "synthetic_ort_cpu_cos_double_cast_workaround_verified_not_bonsai_pipeline",
   "versions": {
     "onnx": "1.21.0",
     "onnxruntime": "1.26.0",
@@ -15,7 +15,9 @@
     "cos_float16_original": {
       "path": "reports/ort-cpu-kernel-probe/cos_float16_original.onnx",
       "elem_type": "FLOAT16",
+      "output_elem_type": "FLOAT16",
       "patched": false,
+      "cast_back": true,
       "node_types": [
         "Cos"
       ],
@@ -25,8 +27,49 @@
     "cos_float32_original": {
       "path": "reports/ort-cpu-kernel-probe/cos_float32_original.onnx",
       "elem_type": "FLOAT",
+      "output_elem_type": "FLOAT",
       "patched": false,
+      "cast_back": true,
       "node_types": [
+        "Cos"
+      ],
+      "opset": 17,
+      "ir_version": 8
+    },
+    "cos_double_original": {
+      "path": "reports/ort-cpu-kernel-probe/cos_double_original.onnx",
+      "elem_type": "DOUBLE",
+      "output_elem_type": "DOUBLE",
+      "patched": false,
+      "cast_back": true,
+      "node_types": [
+        "Cos"
+      ],
+      "opset": 17,
+      "ir_version": 8
+    },
+    "cos_double_with_float32_cast_patch": {
+      "path": "reports/ort-cpu-kernel-probe/cos_double_with_float32_cast_patch.onnx",
+      "elem_type": "DOUBLE",
+      "output_elem_type": "DOUBLE",
+      "patched": true,
+      "cast_back": true,
+      "node_types": [
+        "Cast",
+        "Cos",
+        "Cast"
+      ],
+      "opset": 17,
+      "ir_version": 8
+    },
+    "cos_double_with_float32_output_patch": {
+      "path": "reports/ort-cpu-kernel-probe/cos_double_with_float32_output_patch.onnx",
+      "elem_type": "DOUBLE",
+      "output_elem_type": "FLOAT",
+      "patched": true,
+      "cast_back": false,
+      "node_types": [
+        "Cast",
         "Cos"
       ],
       "opset": 17,
@@ -35,7 +78,9 @@
     "cos_int64_original": {
       "path": "reports/ort-cpu-kernel-probe/cos_int64_original.onnx",
       "elem_type": "INT64",
+      "output_elem_type": "INT64",
       "patched": false,
+      "cast_back": true,
       "node_types": [
         "Cos"
       ],
@@ -45,7 +90,9 @@
     "cos_int64_with_float32_cast_patch": {
       "path": "reports/ort-cpu-kernel-probe/cos_int64_with_float32_cast_patch.onnx",
       "elem_type": "INT64",
+      "output_elem_type": "INT64",
       "patched": true,
+      "cast_back": true,
       "node_types": [
         "Cast",
         "Cos",
@@ -57,7 +104,9 @@
     "cos_float16_with_float32_cast_patch": {
       "path": "reports/ort-cpu-kernel-probe/cos_float16_with_float32_cast_patch.onnx",
       "elem_type": "FLOAT16",
+      "output_elem_type": "FLOAT16",
       "patched": true,
+      "cast_back": true,
       "node_types": [
         "Cast",
         "Cos",
@@ -98,7 +147,7 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.002423
+      "seconds": 0.002677
     },
     "cos_float32_original": {
       "status": "passed",
@@ -130,14 +179,85 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.000156
+      "seconds": 0.000171
+    },
+    "cos_double_original": {
+      "status": "failed",
+      "error_type": "NotImplemented",
+      "error": "[ONNXRuntimeError] : 9 : NOT_IMPLEMENTED : Could not find an implementation for Cos(7) node with name 'cos_original'",
+      "execution_attempted": false,
+      "seconds": 0.0002
+    },
+    "cos_double_with_float32_cast_patch": {
+      "status": "passed",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "available_providers": [
+        "AzureExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "inputs": [
+        {
+          "name": "x",
+          "shape": [
+            1,
+            4
+          ],
+          "type": "tensor(double)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "y",
+          "shape": [
+            1,
+            4
+          ],
+          "type": "tensor(double)"
+        }
+      ],
+      "execution_attempted": false,
+      "seconds": 0.000193
+    },
+    "cos_double_with_float32_output_patch": {
+      "status": "passed",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "available_providers": [
+        "AzureExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "inputs": [
+        {
+          "name": "x",
+          "shape": [
+            1,
+            4
+          ],
+          "type": "tensor(double)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "y",
+          "shape": [
+            1,
+            4
+          ],
+          "type": "tensor(float)"
+        }
+      ],
+      "execution_attempted": false,
+      "seconds": 0.00019
     },
     "cos_int64_original": {
       "status": "failed",
       "error_type": "InvalidGraph",
       "error": "[ONNXRuntimeError] : 10 : INVALID_GRAPH : Load model from reports/ort-cpu-kernel-probe/cos_int64_original.onnx failed:This is an invalid model. Type Error: Type 'tensor(int64)' of input parameter (x) of operator (Cos) in node (cos_original) is invalid.",
       "execution_attempted": false,
-      "seconds": 0.000196
+      "seconds": 0.000132
     },
     "cos_int64_with_float32_cast_patch": {
       "status": "passed",
@@ -169,7 +289,7 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.000204
+      "seconds": 0.000175
     },
     "cos_float16_with_float32_cast_patch": {
       "status": "passed",
@@ -201,12 +321,15 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.000186
+      "seconds": 0.000183
     }
   },
   "inference": {
     "cos_float16_original_load_passed": true,
     "cos_float32_original_load_passed": true,
+    "cos_double_original_load_failed": true,
+    "cos_double_with_float32_cast_back_load_passed": true,
+    "cos_double_with_float32_output_load_passed": true,
     "cos_int64_original_load_failed": true,
     "cos_int64_with_float32_cast_patch_load_passed": true,
     "cos_float16_with_float32_cast_patch_load_passed": true,
@@ -214,5 +337,5 @@
   },
   "status": "passed",
   "ci_conclusion": "success",
-  "seconds": 0.170164
+  "seconds": 0.282926
 }
