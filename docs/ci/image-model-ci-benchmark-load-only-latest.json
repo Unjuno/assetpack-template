@@ -1,0 +1,568 @@
+{
+  "experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "negative_prompt": "blurry, distorted, low quality",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+  },
+  "selection": {
+    "candidate_ids": [],
+    "batches": [
+      "load_only"
+    ],
+    "include_disabled": false,
+    "selected_count": 12
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61613322240,
+      "free_bytes": 93264089088
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 146029383680,
+      "free_bytes": 8848027648
+    },
+    "max_rss_mb_end": 6565.441
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sd15-load-baseline",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "stable-diffusion-v1-5/stable-diffusion-v1-5",
+        "pipeline_class": "StableDiffusionPipeline",
+        "height": 256,
+        "width": 256,
+        "steps": 20,
+        "guidance_scale": 7.5,
+        "expected_role": "baseline_load_candidate",
+        "notes": "Baseline load feasibility. Generation disabled initially."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286851.924,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61613322240,
+        "free_bytes": 93264089088
+      },
+      "max_rss_mb_before": 19.73,
+      "method": "diffusers_load_only",
+      "pipeline_class": "StableDiffusionPipeline",
+      "model_ref": "stable-diffusion-v1-5/stable-diffusion-v1-5",
+      "load_seconds": 17.426,
+      "generate_seconds": null,
+      "total_seconds": 17.609,
+      "components": [
+        "feature_extractor",
+        "image_encoder",
+        "safety_checker",
+        "scheduler",
+        "text_encoder",
+        "tokenizer",
+        "unet",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 2678.875,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 67096297472,
+        "free_bytes": 87781113856
+      }
+    },
+    {
+      "candidate": {
+        "id": "sd14-load-baseline",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "CompVis/stable-diffusion-v1-4",
+        "pipeline_class": "StableDiffusionPipeline",
+        "height": 256,
+        "width": 256,
+        "steps": 20,
+        "guidance_scale": 7.5,
+        "expected_role": "baseline_load_candidate",
+        "notes": "SD1.4 load-only baseline."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286872.608,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 67096297472,
+        "free_bytes": 87781113856
+      },
+      "max_rss_mb_before": 2678.875,
+      "method": "diffusers_load_only",
+      "pipeline_class": "StableDiffusionPipeline",
+      "model_ref": "CompVis/stable-diffusion-v1-4",
+      "load_seconds": 14.541,
+      "generate_seconds": null,
+      "total_seconds": 14.717,
+      "components": [
+        "feature_extractor",
+        "image_encoder",
+        "safety_checker",
+        "scheduler",
+        "text_encoder",
+        "tokenizer",
+        "unet",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 2678.875,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 72579313664,
+        "free_bytes": 82298097664
+      }
+    },
+    {
+      "candidate": {
+        "id": "sd21-base-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "stabilityai/stable-diffusion-2-1",
+        "pipeline_class": "StableDiffusionPipeline",
+        "height": 256,
+        "width": 256,
+        "steps": 20,
+        "guidance_scale": 7.5,
+        "expected_role": "baseline_load_candidate",
+        "notes": "SD2.1 load-only baseline. If unavailable, CI records repo/access failure."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781286887.326,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 72579317760,
+        "free_bytes": 82298093568
+      },
+      "max_rss_mb_before": 2678.875,
+      "error_type": "OSError",
+      "error": "Cannot load model stabilityai/stable-diffusion-2-1: model is not cached locally and an error occurred while trying to fetch metadata from the Hub. Please check out the root cause in the stacktrace above.",
+      "execution_attempted": false,
+      "total_seconds": 0.03,
+      "max_rss_mb_after_candidate": 2678.875,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 72579317760,
+        "free_bytes": 82298093568
+      }
+    },
+    {
+      "candidate": {
+        "id": "sdxl-base-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "stabilityai/stable-diffusion-xl-base-1.0",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 20,
+        "guidance_scale": 7.5,
+        "expected_role": "heavy_baseline_load_candidate",
+        "notes": "SDXL load-only baseline."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286887.356,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 72579317760,
+        "free_bytes": 82298093568
+      },
+      "max_rss_mb_before": 2678.875,
+      "method": "diffusers_load_only",
+      "pipeline_class": "StableDiffusionXLPipeline",
+      "model_ref": "stabilityai/stable-diffusion-xl-base-1.0",
+      "load_seconds": 37.601,
+      "generate_seconds": null,
+      "total_seconds": 37.786,
+      "components": [
+        "feature_extractor",
+        "image_encoder",
+        "scheduler",
+        "text_encoder",
+        "text_encoder_2",
+        "tokenizer",
+        "tokenizer_2",
+        "unet",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 3433.371,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 86791700480,
+        "free_bytes": 68085710848
+      }
+    },
+    {
+      "candidate": {
+        "id": "sdxl-lightning-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "ByteDance/SDXL-Lightning",
+        "pipeline_class": "DiffusionPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 0.0,
+        "license_hint": "openrail-plus-plus",
+        "expected_role": "lightning_repo_load_candidate",
+        "notes": "Repo-level load-only check; may fail because Lightning provides UNet/LoRA weights rather than a complete pipeline."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781286925.144,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 86791700480,
+        "free_bytes": 68085710848
+      },
+      "max_rss_mb_before": 3433.371,
+      "error_type": "RemoteEntryNotFoundError",
+      "error": "404 Client Error. (Request ID: Root=1-6a2c480d-3b608fe0696db5797799b029;a3f166c7-e4bf-405e-8a42-593ccf8eced6)\n\nEntry Not Found for url: https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/model_index.json.",
+      "execution_attempted": false,
+      "total_seconds": 0.055,
+      "max_rss_mb_after_candidate": 3433.371,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 86791720960,
+        "free_bytes": 68085690368
+      }
+    },
+    {
+      "candidate": {
+        "id": "hyper-sd-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "ByteDance/Hyper-SD",
+        "pipeline_class": "DiffusionPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 0.0,
+        "expected_role": "hyper_repo_load_candidate",
+        "notes": "Repo-level load-only check; may fail because Hyper-SD provides adapters/checkpoints rather than a single complete pipeline."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781286925.199,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 86791725056,
+        "free_bytes": 68085686272
+      },
+      "max_rss_mb_before": 3433.371,
+      "error_type": "RemoteEntryNotFoundError",
+      "error": "404 Client Error. (Request ID: Root=1-6a2c480d-672be3bf7c04a6de02c6b925;85930500-aec8-44cd-b657-7f1daec65b97)\n\nEntry Not Found for url: https://huggingface.co/ByteDance/Hyper-SD/resolve/main/model_index.json.",
+      "execution_attempted": false,
+      "total_seconds": 0.045,
+      "max_rss_mb_after_candidate": 3433.371,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 86791745536,
+        "free_bytes": 68085665792
+      }
+    },
+    {
+      "candidate": {
+        "id": "pixart-alpha-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "PixArt-alpha/PixArt-XL-2-1024-MS",
+        "pipeline_class": "PixArtAlphaPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 4.5,
+        "license_hint": "openrail-plus-plus",
+        "expected_role": "transformer_quality_load_candidate",
+        "notes": "Transformer-family quality candidate. Load-only on standard CI."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286925.245,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 86791745536,
+        "free_bytes": 68085665792
+      },
+      "max_rss_mb_before": 3433.371,
+      "method": "diffusers_load_only",
+      "pipeline_class": "PixArtAlphaPipeline",
+      "model_ref": "PixArt-alpha/PixArt-XL-2-1024-MS",
+      "load_seconds": 57.413,
+      "generate_seconds": null,
+      "total_seconds": 57.603,
+      "components": [
+        "scheduler",
+        "text_encoder",
+        "tokenizer",
+        "transformer",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 3930.93,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 108624486400,
+        "free_bytes": 46252924928
+      }
+    },
+    {
+      "candidate": {
+        "id": "pixart-sigma-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
+        "pipeline_class": "PixArtSigmaPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 4.5,
+        "expected_role": "transformer_quality_load_candidate",
+        "notes": "PixArt Sigma load-only candidate. Failure boundary is useful if pipeline class is unavailable."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286982.85,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 108624486400,
+        "free_bytes": 46252924928
+      },
+      "max_rss_mb_before": 3930.93,
+      "method": "diffusers_load_only",
+      "pipeline_class": "PixArtSigmaPipeline",
+      "model_ref": "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
+      "load_seconds": 55.875,
+      "generate_seconds": null,
+      "total_seconds": 56.072,
+      "components": [
+        "scheduler",
+        "text_encoder",
+        "tokenizer",
+        "transformer",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 4004.457,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 130453262336,
+        "free_bytes": 24424148992
+      }
+    },
+    {
+      "candidate": {
+        "id": "playground-v25-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "playgroundai/playground-v2.5-1024px-aesthetic",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 3.0,
+        "expected_role": "sdxl_quality_load_candidate",
+        "notes": "Quality SDXL-family candidate. Load-only first."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781287038.924,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 130453266432,
+        "free_bytes": 24424144896
+      },
+      "max_rss_mb_before": 4004.457,
+      "method": "diffusers_load_only",
+      "pipeline_class": "StableDiffusionXLPipeline",
+      "model_ref": "playgroundai/playground-v2.5-1024px-aesthetic",
+      "load_seconds": 39.323,
+      "generate_seconds": null,
+      "total_seconds": 39.505,
+      "components": [
+        "feature_extractor",
+        "image_encoder",
+        "scheduler",
+        "text_encoder",
+        "text_encoder_2",
+        "tokenizer",
+        "tokenizer_2",
+        "unet",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 4004.457,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 144330973184,
+        "free_bytes": 10546438144
+      }
+    },
+    {
+      "candidate": {
+        "id": "sd35-medium-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "stabilityai/stable-diffusion-3.5-medium",
+        "pipeline_class": "StableDiffusion3Pipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 4.5,
+        "expected_role": "heavy_quality_load_candidate",
+        "notes": "Likely too heavy or gated for standard CI. Load-only failure boundary is useful."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781287078.431,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 144330973184,
+        "free_bytes": 10546438144
+      },
+      "max_rss_mb_before": 4004.457,
+      "error_type": "GatedRepoError",
+      "error": "401 Client Error. (Request ID: Root=1-6a2c48a6-1eddfe283d4b0ed72c8970ef;627a0431-1491-4e84-86aa-6235a23ff553)\n\nCannot access gated repo for url https://huggingface.co/stabilityai/stable-diffusion-3.5-medium/resolve/main/model_index.json.\nAccess to model stabilityai/stable-diffusion-3.5-medium is restricted. You must have access to it and be authenticated to access it. Please log in.",
+      "execution_attempted": false,
+      "total_seconds": 0.086,
+      "max_rss_mb_after_candidate": 4004.457,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 144330973184,
+        "free_bytes": 10546438144
+      }
+    },
+    {
+      "candidate": {
+        "id": "flux-schnell-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "black-forest-labs/FLUX.1-schnell",
+        "pipeline_class": "FluxPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 0.0,
+        "license_hint": "apache-2.0",
+        "expected_role": "heavy_quality_load_candidate",
+        "notes": "Gated and likely too heavy for standard CI; load-only evidence is useful."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781287078.518,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 144330973184,
+        "free_bytes": 10546438144
+      },
+      "max_rss_mb_before": 4004.457,
+      "error_type": "GatedRepoError",
+      "error": "401 Client Error. (Request ID: Root=1-6a2c48a6-76cf54bf5f987f0e452f3878;6684124b-be79-4c0d-b80f-dae733ae3539)\n\nCannot access gated repo for url https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/model_index.json.\nAccess to model black-forest-labs/FLUX.1-schnell is restricted. You must have access to it and be authenticated to access it. Please log in.",
+      "execution_attempted": false,
+      "total_seconds": 0.035,
+      "max_rss_mb_after_candidate": 4004.457,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 144330973184,
+        "free_bytes": 10546438144
+      }
+    },
+    {
+      "candidate": {
+        "id": "qwen-image-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "Qwen/Qwen-Image",
+        "pipeline_class": "QwenImagePipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 0.0,
+        "license_hint": "apache-2.0",
+        "expected_role": "heavy_text_rendering_load_candidate",
+        "notes": "Likely too heavy or unavailable depending on installed diffusers version. Failure boundary is useful."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781287078.554,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 144330977280,
+        "free_bytes": 10546434048
+      },
+      "max_rss_mb_before": 4004.457,
+      "error_type": "RuntimeError",
+      "error": "Task error: File reconstruction error: Internal Writer Error: Background writer channel closed",
+      "execution_attempted": false,
+      "total_seconds": 63.778,
+      "max_rss_mb_after_candidate": 6565.441,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 146029383680,
+        "free_bytes": 8848027648
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 6,
+    "failed": 6,
+    "skipped": 0,
+    "total": 12
+  },
+  "seconds_so_far": 290.438,
+  "summary": {
+    "passed": 6,
+    "failed": 6,
+    "skipped": 0,
+    "total": 12
+  },
+  "ci_conclusion": "success_with_candidate_failures",
+  "seconds": 290.439
+}
