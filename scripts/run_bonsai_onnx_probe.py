@@ -27,6 +27,12 @@ def env_bool(name: str, default: bool) -> bool:
     return value.lower() in {"1", "true", "yes", "on"}
 
 
+def is_external_rate_limit(exc: Exception) -> bool:
+    text = f"{type(exc).__name__}: {exc}"
+    lowered = text.lower()
+    return "429" in lowered or "too many requests" in lowered or "rate limit" in lowered
+
+
 def mb(size: int | None) -> float | None:
     return None if size is None else round(size / 1024 / 1024, 3)
 
@@ -91,6 +97,7 @@ def add_stage(result: dict[str, Any], name: str, fn):
             "seconds": round(time.time() - start, 3),
             "error_type": type(exc).__name__,
             "error": str(exc)[:2000],
+            "external_rate_limited": is_external_rate_limit(exc),
         })
         raise
 
@@ -246,6 +253,7 @@ def run(args: argparse.Namespace) -> int:
     required = os.getenv("BONSAI_REQUIRED_MILESTONE") or export_cfg.get("required_milestone", "layout_probe")
     download = env_bool("BONSAI_DOWNLOAD_WEIGHTS", bool(export_cfg.get("download_weights", False)))
     component = os.getenv("BONSAI_EXPORT_COMPONENT") or export_cfg.get("component", "vae_decoder")
+    allow_external_rate_limit = env_bool("BONSAI_ALLOW_EXTERNAL_RATE_LIMIT", False)
     rank(required)
 
     result = {
@@ -254,10 +262,12 @@ def run(args: argparse.Namespace) -> int:
         "model_ref": cand.get("model_ref"),
         "backend": cand.get("backend"),
         "status": "failed",
+        "ci_conclusion": "failure",
         "required_milestone": required,
         "milestone_reached": None,
         "download_weights": download,
         "export_component": component,
+        "claim_promotable_to_manifest": False,
         "stages": [],
     }
     start = time.time()
@@ -266,6 +276,8 @@ def run(args: argparse.Namespace) -> int:
         result["milestone_reached"] = "layout_probe"
         if rank(required) <= rank("layout_probe"):
             result["status"] = "passed"
+            result["ci_conclusion"] = "success"
+            result["claim_promotable_to_manifest"] = True
             return 0
 
         if not download:
@@ -275,6 +287,8 @@ def run(args: argparse.Namespace) -> int:
         result["milestone_reached"] = "component_load"
         if rank(required) <= rank("component_load"):
             result["status"] = "passed"
+            result["ci_conclusion"] = "success"
+            result["claim_promotable_to_manifest"] = True
             return 0
 
         payload = add_stage(
@@ -285,17 +299,31 @@ def run(args: argparse.Namespace) -> int:
         result["milestone_reached"] = "component_export"
         if rank(required) <= rank("component_export"):
             result["status"] = "passed"
+            result["ci_conclusion"] = "success"
+            result["claim_promotable_to_manifest"] = True
             return 0
 
         add_stage(result, "ort_cpu_forward", lambda: ort_forward(Path(payload["onnx_path"]), payload["input_shape"]))
         result["milestone_reached"] = "ort_cpu_forward"
         if rank(required) <= rank("ort_cpu_forward"):
             result["status"] = "passed"
+            result["ci_conclusion"] = "success"
+            result["claim_promotable_to_manifest"] = True
             return 0
 
         raise RuntimeError("full ONNX CPU image generation is not implemented yet")
     except Exception as exc:
+        if allow_external_rate_limit and required == "layout_probe" and is_external_rate_limit(exc):
+            result["status"] = "external_rate_limited"
+            result["ci_conclusion"] = "success_with_external_rate_limit"
+            result["claim_promotable_to_manifest"] = False
+            result["external_rate_limited"] = True
+            result["error_type"] = type(exc).__name__
+            result["error"] = str(exc)[:2000]
+            return 0
         result["status"] = "failed"
+        result["ci_conclusion"] = "failure"
+        result["claim_promotable_to_manifest"] = False
         result["error_type"] = type(exc).__name__
         result["error"] = str(exc)[:2000]
         return 1
@@ -308,6 +336,8 @@ def self_test() -> int:
     assert rank("layout_probe") == 0
     assert rank("component_load") == 1
     assert rank("ort_cpu_forward") == 3
+    assert is_external_rate_limit(RuntimeError("429 Too Many Requests")) is True
+    assert is_external_rate_limit(RuntimeError("ordinary failure")) is False
     analysis = analyze([
         {"path": "README.md", "size": 1},
         {"path": "transformer/config.json", "size": 2},
