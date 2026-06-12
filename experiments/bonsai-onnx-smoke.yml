@@ -21,6 +21,10 @@ cpu_smoke:
     - id: bonsai-basic
       prompt: a simple bonsai tree, white background, no text
 
+combined_component_probe:
+  revision: scheduler-mu-and-tensor-truth-fix-v1
+  repo_persisted_report: docs/ci/bonsai-combined-component-probe-latest.json
+
 export:
   required_milestone: component_load
   download_weights: true
