@@ -1,0 +1,117 @@
+{
+  "experiment_id": "image-model-ci-curated-owls-v1",
+  "prompt": "a cute small owl perched in a bonsai pot, detailed feathers, natural owl anatomy, bright eyes, tiny talons, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not an owl, cat, dog, rabbit, bird-like toy",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Owl generation uses the strict seven candidates accepted from cat artifact review. Owl visual quality is unverified until this workflow is run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "ssd-1b-lcm-lora-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61395492864,
+      "free_bytes": 93481918464
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 70539071488,
+      "free_bytes": 84338339840
+    },
+    "max_rss_mb_end": 10142.242
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "ssd-1b-lcm-lora-quality",
+        "enabled": true,
+        "batch": "curated_owl",
+        "ci_stage": "generation",
+        "method": "diffusers_lora_text_to_image",
+        "base_model_ref": "segmind/SSD-1B",
+        "lora_model_ref": "latent-consistency/lcm-lora-ssd-1b",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "scheduler_class": "LCMScheduler",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 1.0,
+        "expected_role": "owl_small_sdxl_lcm_candidate"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781301058.873,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61395492864,
+        "free_bytes": 93481918464
+      },
+      "max_rss_mb_before": 19.516,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_lora_text_to_image",
+      "pipeline_class": "StableDiffusionXLPipeline",
+      "scheduler_class": "LCMScheduler",
+      "base_model_ref": "segmind/SSD-1B",
+      "lora_model_ref": "latent-consistency/lcm-lora-ssd-1b",
+      "load_seconds": 30.329,
+      "generate_seconds": 90.419,
+      "total_seconds": 122.28,
+      "height": 512,
+      "width": 512,
+      "steps": 4,
+      "guidance_scale": 1.0,
+      "call_kwargs": {
+        "prompt": "a cute small owl perched in a bonsai pot, detailed feathers, natural owl anatomy, bright eyes, tiny talons, studio lighting, sharp focus",
+        "num_inference_steps": 4,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not an owl, cat, dog, rabbit, bird-like toy",
+        "height": 512,
+        "width": 512,
+        "guidance_scale": 1.0
+      },
+      "image_path": "reports/image-model-ci-curated-owls/ssd-1b-lcm-lora-quality/images/ssd-1b-lcm-lora-quality/cat.png",
+      "image_sha256": "c37812ad08d2b689e771c32234a9f707deace3d2468c2785f4a843d9d55091f2",
+      "image_size_bytes": 326336,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 10142.242,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 70539071488,
+        "free_bytes": 84338339840
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 125.951,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 125.952
+}
