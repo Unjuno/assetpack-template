@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-# This script intentionally emits stage-level evidence so a single CI run can
-# promote successful component claims without overstating blocked full-pipeline claims.
-
 import argparse
 import hashlib
 import inspect
@@ -20,9 +17,7 @@ PROMPT = "a small bonsai tree in a ceramic pot"
 
 def env_bool(name: str, default: bool) -> bool:
     value = os.getenv(name)
-    if value is None or value == "":
-        return default
-    return value.lower() in {"1", "true", "yes", "on"}
+    return default if value in (None, "") else value.lower() in {"1", "true", "yes", "on"}
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -31,7 +26,6 @@ def sha256_bytes(data: bytes) -> str:
 
 def tensor_summary(value: Any) -> dict[str, Any]:
     import numpy as np
-
     if hasattr(value, "detach"):
         value = value.detach().cpu().float().numpy()
     arr = np.asarray(value)
@@ -49,211 +43,105 @@ def stage(name: str, allowed_claim: str, fn: Callable[[], dict[str, Any]]) -> di
     start = time.time()
     try:
         payload = fn()
-        return {
-            "name": name,
-            "status": "passed",
-            "seconds": round(time.time() - start, 3),
-            "claim_promotable_to_manifest": True,
-            "allowed_claim": allowed_claim,
-            **payload,
-        }
+        return {"name": name, "status": "passed", "seconds": round(time.time() - start, 3), "claim_promotable_to_manifest": True, "allowed_claim": allowed_claim, **payload}
     except Exception as exc:
-        return {
-            "name": name,
-            "status": "failed",
-            "seconds": round(time.time() - start, 3),
-            "claim_promotable_to_manifest": False,
-            "allowed_claim": allowed_claim,
-            "error_type": type(exc).__name__,
-            "error": str(exc)[:3000],
-        }
+        return {"name": name, "status": "failed", "seconds": round(time.time() - start, 3), "claim_promotable_to_manifest": False, "allowed_claim": allowed_claim, "error_type": type(exc).__name__, "error": str(exc)[:3000]}
 
 
 def skip_stage(name: str, allowed_claim: str, reason: str) -> dict[str, Any]:
-    return {
-        "name": name,
-        "status": "skipped",
-        "seconds": 0.0,
-        "claim_promotable_to_manifest": False,
-        "allowed_claim": allowed_claim,
-        "skip_reason": reason,
-    }
+    return {"name": name, "status": "skipped", "seconds": 0.0, "claim_promotable_to_manifest": False, "allowed_claim": allowed_claim, "skip_reason": reason}
 
 
-def load_config(config_path: str) -> dict[str, Any]:
-    return json.loads(Path(config_path).read_text(encoding="utf-8"))
+def load_config(path: str) -> dict[str, Any]:
+    return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
-def tokenizer_probe(model_ref: str, prompt: str) -> dict[str, Any]:
+def tokenizer_probe(model_ref: str) -> dict[str, Any]:
     from transformers import AutoTokenizer
-
     tokenizer = AutoTokenizer.from_pretrained(model_ref, subfolder="tokenizer")
-    encoded = tokenizer(prompt, return_tensors="pt")
-    input_ids = encoded["input_ids"]
-    payload = {
-        "component": "tokenizer",
-        "prompt": prompt,
-        "class_name": tokenizer.__class__.__name__,
-        "vocab_size": getattr(tokenizer, "vocab_size", None),
-        "model_max_length": getattr(tokenizer, "model_max_length", None),
-        "input_ids_shape": list(input_ids.shape),
-        "input_ids_sha256_int64_le": sha256_bytes(input_ids.detach().cpu().numpy().astype("int64").tobytes()),
-    }
+    encoded = tokenizer(PROMPT, return_tensors="pt")
+    ids = encoded["input_ids"]
+    out = {"component": "tokenizer", "prompt": PROMPT, "class_name": tokenizer.__class__.__name__, "vocab_size": getattr(tokenizer, "vocab_size", None), "model_max_length": getattr(tokenizer, "model_max_length", None), "input_ids_shape": list(ids.shape), "input_ids_sha256_int64_le": sha256_bytes(ids.detach().cpu().numpy().astype("int64").tobytes())}
     if "attention_mask" in encoded:
         mask = encoded["attention_mask"]
-        payload["attention_mask_shape"] = list(mask.shape)
-        payload["attention_mask_sha256_int64_le"] = sha256_bytes(mask.detach().cpu().numpy().astype("int64").tobytes())
-    return payload
+        out["attention_mask_shape"] = list(mask.shape)
+        out["attention_mask_sha256_int64_le"] = sha256_bytes(mask.detach().cpu().numpy().astype("int64").tobytes())
+    return out
 
 
-def text_encoder_probe(model_ref: str, prompt: str) -> dict[str, Any]:
+def text_encoder_probe(model_ref: str) -> dict[str, Any]:
     import torch
     from transformers import AutoModel, AutoTokenizer
-
     tokenizer = AutoTokenizer.from_pretrained(model_ref, subfolder="tokenizer")
     model = AutoModel.from_pretrained(model_ref, subfolder="text_encoder", torch_dtype=torch.float32)
     model.eval()
-    encoded = tokenizer(prompt, return_tensors="pt")
     with torch.no_grad():
-        output = model(**encoded)
-    hidden = getattr(output, "last_hidden_state", None)
+        output = model(**tokenizer(PROMPT, return_tensors="pt"))
+    hidden = getattr(output, "last_hidden_state", None) or (output[0] if isinstance(output, tuple) and output else None)
     if hidden is None:
-        if isinstance(output, tuple) and output:
-            hidden = output[0]
-        else:
-            raise RuntimeError("text encoder did not return last_hidden_state or tuple[0]")
-    return {
-        "component": "text_encoder",
-        "class_name": model.__class__.__name__,
-        "hidden_state": tensor_summary(hidden),
-    }
+        raise RuntimeError("text encoder did not return hidden state")
+    return {"component": "text_encoder", "class_name": model.__class__.__name__, "hidden_state": tensor_summary(hidden)}
 
 
 def scheduler_probe(model_ref: str) -> dict[str, Any]:
     import torch
     import diffusers
     from huggingface_hub import hf_hub_download
-
-    config_path = hf_hub_download(repo_id=model_ref, filename="scheduler/scheduler_config.json", repo_type="model")
-    config = load_config(config_path)
-    class_name = config.get("_class_name")
+    cfg = load_config(hf_hub_download(repo_id=model_ref, filename="scheduler/scheduler_config.json", repo_type="model"))
+    class_name = cfg.get("_class_name")
     if not class_name:
         raise RuntimeError("scheduler config is missing _class_name")
-    cls = getattr(diffusers, class_name)
-    scheduler = cls.from_pretrained(model_ref, subfolder="scheduler")
-    scheduler.set_timesteps(2)
+    scheduler = getattr(diffusers, class_name).from_pretrained(model_ref, subfolder="scheduler")
+    set_kwargs: dict[str, Any] = {}
+    if "mu" in inspect.signature(scheduler.set_timesteps).parameters:
+        set_kwargs["mu"] = 0.0
+    scheduler.set_timesteps(2, **set_kwargs)
     sample = torch.zeros((1, 4, 8, 8), dtype=torch.float32)
-    model_output = torch.ones_like(sample) * 0.01
-    timestep = scheduler.timesteps[0]
-    step_sig = inspect.signature(scheduler.step)
-    kwargs: dict[str, Any] = {}
-    if "return_dict" in step_sig.parameters:
-        kwargs["return_dict"] = True
-    result = scheduler.step(model_output, timestep, sample, **kwargs)
-    prev = getattr(result, "prev_sample", None)
+    result = scheduler.step(torch.ones_like(sample) * 0.01, scheduler.timesteps[0], sample, return_dict=True)
+    prev = getattr(result, "prev_sample", None) or (result[0] if isinstance(result, tuple) and result else None)
     if prev is None:
-        if isinstance(result, tuple) and result:
-            prev = result[0]
-        else:
-            raise RuntimeError("scheduler.step did not return prev_sample")
-    return {
-        "component": "scheduler",
-        "class_name": class_name,
-        "timesteps": [float(x) for x in scheduler.timesteps.detach().cpu().float().tolist()[:2]],
-        "prev_sample": tensor_summary(prev),
-    }
+        raise RuntimeError("scheduler.step did not return prev_sample")
+    return {"component": "scheduler", "class_name": class_name, "set_timesteps_kwargs": set_kwargs, "timesteps": [float(x) for x in scheduler.timesteps.detach().cpu().float().tolist()[:2]], "prev_sample": tensor_summary(prev)}
 
 
 def vae_probe(model_ref: str) -> dict[str, Any]:
     import torch
     from diffusers import AutoencoderKL
-
     vae = AutoencoderKL.from_pretrained(model_ref, subfolder="vae", torch_dtype=torch.float32)
     vae.eval()
-    latent_channels = int(getattr(vae.config, "latent_channels", 4))
-    latents = torch.zeros((1, latent_channels, 8, 8), dtype=torch.float32)
+    latents = torch.zeros((1, int(getattr(vae.config, "latent_channels", 4)), 8, 8), dtype=torch.float32)
     with torch.no_grad():
         decoded = vae.decode(latents, return_dict=False)[0]
-    return {
-        "component": "vae_decoder",
-        "class_name": vae.__class__.__name__,
-        "input_shape": list(latents.shape),
-        "decoded_sample": tensor_summary(decoded),
-    }
+    return {"component": "vae_decoder", "class_name": vae.__class__.__name__, "input_shape": list(latents.shape), "decoded_sample": tensor_summary(decoded)}
 
 
 def transformer_config_probe(model_ref: str) -> dict[str, Any]:
     from huggingface_hub import hf_hub_download
-
-    config_path = hf_hub_download(repo_id=model_ref, filename="transformer/config.json", repo_type="model")
-    config = load_config(config_path)
-    return {
-        "component": "transformer",
-        "load_kind": "config_only",
-        "class_name": config.get("_class_name"),
-        "selected_config": {
-            key: config.get(key)
-            for key in [
-                "in_channels",
-                "out_channels",
-                "num_layers",
-                "num_single_layers",
-                "attention_head_dim",
-                "num_attention_heads",
-                "joint_attention_dim",
-                "pooled_projection_dim",
-                "guidance_embeds",
-                "axes_dims_rope",
-            ]
-            if key in config
-        },
-    }
+    cfg = load_config(hf_hub_download(repo_id=model_ref, filename="transformer/config.json", repo_type="model"))
+    keys = ["in_channels", "out_channels", "num_layers", "num_single_layers", "attention_head_dim", "num_attention_heads", "joint_attention_dim", "pooled_projection_dim", "guidance_embeds", "axes_dims_rope"]
+    return {"component": "transformer", "load_kind": "config_only", "class_name": cfg.get("_class_name"), "selected_config": {k: cfg.get(k) for k in keys if k in cfg}}
 
 
 def transformer_load_probe(model_ref: str) -> dict[str, Any]:
     import torch
     import diffusers
     from huggingface_hub import hf_hub_download
-
-    config_path = hf_hub_download(repo_id=model_ref, filename="transformer/config.json", repo_type="model")
-    config = load_config(config_path)
-    class_name = config.get("_class_name", "FluxTransformer2DModel")
-    cls = getattr(diffusers, class_name)
+    cfg = load_config(hf_hub_download(repo_id=model_ref, filename="transformer/config.json", repo_type="model"))
+    cls = getattr(diffusers, cfg.get("_class_name", "FluxTransformer2DModel"))
     model = cls.from_pretrained(model_ref, subfolder="transformer", torch_dtype=torch.float16, low_cpu_mem_usage=True)
-    model.eval()
-    param_count = sum(int(param.numel()) for param in model.parameters())
     dtype_counts: dict[str, int] = {}
+    param_count = 0
     for param in model.parameters():
+        param_count += int(param.numel())
         dtype_counts[str(param.dtype)] = dtype_counts.get(str(param.dtype), 0) + int(param.numel())
-    return {
-        "component": "transformer",
-        "load_kind": "weights",
-        "class_name": class_name,
-        "param_count": param_count,
-        "param_count_billion": round(param_count / 1_000_000_000, 3),
-        "dtype_param_counts": dtype_counts,
-    }
+    return {"component": "transformer", "load_kind": "weights", "class_name": cls.__name__, "param_count": param_count, "param_count_billion": round(param_count / 1_000_000_000, 3), "dtype_param_counts": dtype_counts}
 
 
 def dependency_blocked_stage(name: str, allowed_claim: str, dependencies: dict[str, str]) -> dict[str, Any]:
-    failed = {key: value for key, value in dependencies.items() if value != "passed"}
+    failed = {k: v for k, v in dependencies.items() if v != "passed"}
     if failed:
-        return {
-            "name": name,
-            "status": "blocked",
-            "seconds": 0.0,
-            "claim_promotable_to_manifest": False,
-            "allowed_claim": allowed_claim,
-            "blocked_by": failed,
-        }
-    return {
-        "name": name,
-        "status": "not_implemented",
-        "seconds": 0.0,
-        "claim_promotable_to_manifest": False,
-        "allowed_claim": allowed_claim,
-        "reason": "composed execution has not been implemented in this probe yet",
-    }
+        return {"name": name, "status": "blocked", "seconds": 0.0, "claim_promotable_to_manifest": False, "allowed_claim": allowed_claim, "blocked_by": failed}
+    return {"name": name, "status": "not_implemented", "seconds": 0.0, "claim_promotable_to_manifest": False, "allowed_claim": allowed_claim, "reason": "composed execution has not been implemented in this probe yet"}
 
 
 def run(args: argparse.Namespace) -> int:
@@ -261,63 +149,27 @@ def run(args: argparse.Namespace) -> int:
     model_ref = cfg["candidate"]["model_ref"]
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-
     run_transformer_load = env_bool("BONSAI_RUN_TRANSFORMER_LOAD", False)
     require_all = env_bool("BONSAI_REQUIRE_ALL_COMBINED_CLAIMS", False)
     start = time.time()
-
-    stages: list[dict[str, Any]] = []
-    stages.append(stage("tokenizer_execution", "bonsai_tokenizer_execution_verified", lambda: tokenizer_probe(model_ref, PROMPT)))
-    stages.append(stage("text_encoder_execution", "bonsai_text_encoder_execution_verified", lambda: text_encoder_probe(model_ref, PROMPT)))
-    stages.append(stage("scheduler_execution", "bonsai_scheduler_step_execution_verified", lambda: scheduler_probe(model_ref)))
-    stages.append(stage("vae_execution", "bonsai_vae_decoder_execution_verified", lambda: vae_probe(model_ref)))
-    stages.append(stage("transformer_config_load", "bonsai_transformer_config_boundary_verified_not_runtime_execution", lambda: transformer_config_probe(model_ref)))
-
+    stages = [
+        stage("tokenizer_execution", "bonsai_tokenizer_execution_verified", lambda: tokenizer_probe(model_ref)),
+        stage("text_encoder_execution", "bonsai_text_encoder_execution_verified", lambda: text_encoder_probe(model_ref)),
+        stage("scheduler_execution", "bonsai_scheduler_step_execution_verified", lambda: scheduler_probe(model_ref)),
+        stage("vae_execution", "bonsai_vae_decoder_execution_verified", lambda: vae_probe(model_ref)),
+        stage("transformer_config_load", "bonsai_transformer_config_boundary_verified_not_runtime_execution", lambda: transformer_config_probe(model_ref)),
+    ]
     if run_transformer_load:
         stages.append(stage("transformer_weight_load", "bonsai_real_transformer_weight_load_verified_not_onnx_execution", lambda: transformer_load_probe(model_ref)))
     else:
         stages.append(skip_stage("transformer_weight_load", "bonsai_real_transformer_weight_load_verified_not_onnx_execution", "set BONSAI_RUN_TRANSFORMER_LOAD=true to attempt heavy transformer weight load"))
-
-    statuses = {item["name"]: item["status"] for item in stages}
-    stages.append(dependency_blocked_stage(
-        "full_pipeline_composition",
-        "bonsai_full_pipeline_composition_verified",
-        {
-            "tokenizer_execution": statuses.get("tokenizer_execution"),
-            "text_encoder_execution": statuses.get("text_encoder_execution"),
-            "scheduler_execution": statuses.get("scheduler_execution"),
-            "vae_execution": statuses.get("vae_execution"),
-            "transformer_weight_load": statuses.get("transformer_weight_load"),
-        },
-    ))
-    stages.append(dependency_blocked_stage(
-        "prompt_to_image_generation",
-        "bonsai_prompt_to_image_generation_verified",
-        {"full_pipeline_composition": stages[-1]["status"]},
-    ))
-    stages.append(dependency_blocked_stage(
-        "single_monolithic_multi_block_onnx",
-        "bonsai_single_monolithic_multi_block_onnx_verified",
-        {"full_pipeline_composition": stages[-2]["status"]},
-    ))
-
-    promotable = [item for item in stages if item.get("claim_promotable_to_manifest")]
-    failed = [item for item in stages if item.get("status") == "failed"]
-    report = {
-        "experiment_id": "bonsai-combined-component-probe-v1",
-        "model_ref": model_ref,
-        "status": "passed" if promotable and not (require_all and failed) else "failed",
-        "ci_conclusion": "success" if not (require_all and failed) else "failure",
-        "claim_promotable_to_manifest": bool(promotable),
-        "require_all": require_all,
-        "run_transformer_load": run_transformer_load,
-        "promotable_claims": [
-            {"name": item["name"], "allowed_claim": item["allowed_claim"]}
-            for item in promotable
-        ],
-        "stages": stages,
-        "seconds": round(time.time() - start, 3),
-    }
+    statuses = {s["name"]: s["status"] for s in stages}
+    stages.append(dependency_blocked_stage("full_pipeline_composition", "bonsai_full_pipeline_composition_verified", {"tokenizer_execution": statuses.get("tokenizer_execution"), "text_encoder_execution": statuses.get("text_encoder_execution"), "scheduler_execution": statuses.get("scheduler_execution"), "vae_execution": statuses.get("vae_execution"), "transformer_weight_load": statuses.get("transformer_weight_load")}))
+    stages.append(dependency_blocked_stage("prompt_to_image_generation", "bonsai_prompt_to_image_generation_verified", {"full_pipeline_composition": stages[-1]["status"]}))
+    stages.append(dependency_blocked_stage("single_monolithic_multi_block_onnx", "bonsai_single_monolithic_multi_block_onnx_verified", {"full_pipeline_composition": stages[-2]["status"]}))
+    promotable = [s for s in stages if s.get("claim_promotable_to_manifest")]
+    failed = [s for s in stages if s.get("status") == "failed"]
+    report = {"experiment_id": "bonsai-combined-component-probe-v1", "model_ref": model_ref, "status": "passed" if promotable and not (require_all and failed) else "failed", "ci_conclusion": "success" if not (require_all and failed) else "failure", "claim_promotable_to_manifest": bool(promotable), "require_all": require_all, "run_transformer_load": run_transformer_load, "promotable_claims": [{"name": s["name"], "allowed_claim": s["allowed_claim"]} for s in promotable], "stages": stages, "seconds": round(time.time() - start, 3)}
     (out_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return 1 if report["ci_conclusion"] == "failure" else 0
 
@@ -335,9 +187,7 @@ def main() -> int:
     parser.add_argument("--out-dir", default="reports/bonsai-combined-component-probe")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
-    if args.self_test:
-        return self_test()
-    return run(args)
+    return self_test() if args.self_test else run(args)
 
 
 if __name__ == "__main__":
