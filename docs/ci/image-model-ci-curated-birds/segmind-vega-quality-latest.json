@@ -1,0 +1,113 @@
+{
+  "experiment_id": "image-model-ci-curated-birds-v1",
+  "prompt": "a cute small songbird perched in a bonsai pot, detailed feathers, natural bird anatomy, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a bird, cat, dog, feline, canine",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Bird generation uses the strict seven candidates accepted from cat artifact review. Bird visual quality is unverified until this workflow is run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "segmind-vega-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61395263488,
+      "free_bytes": 93482147840
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 67984240640,
+      "free_bytes": 86893170688
+    },
+    "max_rss_mb_end": 7517.07
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "segmind-vega-quality",
+        "enabled": true,
+        "batch": "curated_bird",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "segmind/Segmind-Vega",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 8,
+        "guidance_scale": 7.5,
+        "expected_role": "bird_small_sdxl_candidate"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781300376.339,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61395263488,
+        "free_bytes": 93482147840
+      },
+      "max_rss_mb_before": 19.727,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "StableDiffusionXLPipeline",
+      "model_ref": "segmind/Segmind-Vega",
+      "load_seconds": 21.968,
+      "generate_seconds": 151.293,
+      "total_seconds": 173.47,
+      "height": 512,
+      "width": 512,
+      "steps": 8,
+      "guidance_scale": 7.5,
+      "call_kwargs": {
+        "prompt": "a cute small songbird perched in a bonsai pot, detailed feathers, natural bird anatomy, studio lighting, sharp focus",
+        "num_inference_steps": 8,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a bird, cat, dog, feline, canine",
+        "height": 512,
+        "width": 512,
+        "guidance_scale": 7.5
+      },
+      "image_path": "reports/image-model-ci-curated-birds/segmind-vega-quality/images/segmind-vega-quality/cat.png",
+      "image_sha256": "eb8bd4857d4612b7f8548134d3f076828798d7613c666b8e2fd41f58a6d79e62",
+      "image_size_bytes": 271310,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 7517.07,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 67984240640,
+        "free_bytes": 86893170688
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 176.16,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 176.161
+}
