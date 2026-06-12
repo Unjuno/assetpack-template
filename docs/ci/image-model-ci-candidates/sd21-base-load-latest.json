@@ -1,0 +1,93 @@
+{
+  "experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "negative_prompt": "blurry, distorted, low quality",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+  },
+  "selection": {
+    "candidate_ids": [
+      "sd21-base-load"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61613207552,
+      "free_bytes": 93264203776
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61613178880,
+      "free_bytes": 93264232448
+    },
+    "max_rss_mb_end": 357.422
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "failed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sd21-base-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "stabilityai/stable-diffusion-2-1",
+        "pipeline_class": "StableDiffusionPipeline",
+        "height": 256,
+        "width": 256,
+        "steps": 20,
+        "guidance_scale": 7.5,
+        "expected_role": "baseline_load_candidate",
+        "notes": "SD2.1 load-only baseline. If unavailable, CI records repo/access failure."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781287332.761,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61613207552,
+        "free_bytes": 93264203776
+      },
+      "max_rss_mb_before": 19.766,
+      "error_type": "OSError",
+      "error": "Cannot load model stabilityai/stable-diffusion-2-1: model is not cached locally and an error occurred while trying to fetch metadata from the Hub. Please check out the root cause in the stacktrace above.",
+      "execution_attempted": false,
+      "total_seconds": 5.042,
+      "max_rss_mb_after_candidate": 357.422,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61613170688,
+        "free_bytes": 93264240640
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 5.075,
+  "summary": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success_with_candidate_failures",
+  "seconds": 5.076
+}
