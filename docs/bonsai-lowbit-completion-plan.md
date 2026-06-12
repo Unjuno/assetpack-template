@@ -20,9 +20,12 @@ Verified and recorded in the manifest:
 - sixteen single blocks via eight-by-two segmented ONNX;
 - all ten pair segments for blocks 0-19;
 - twenty single blocks via ten-by-two chained segmented export probe;
-- twenty single blocks via split persistent ten-by-two ONNX segment artifacts, validated as a reusable segmented ONNX chain.
+- twenty single blocks via split persistent ten-by-two ONNX segment artifacts, validated as a reusable segmented ONNX chain;
+- ten-by-two chain-state handoff report.
 
-Pending for the current low-bit critical-path scope: none.
+Pending for the current low-bit critical-path scope:
+
+- input boundary report artifact verification.
 
 ## Step 1 — Execution discipline
 
@@ -184,6 +187,88 @@ Allowed claim after completion:
 twenty single blocks via ten split persistent two-block ONNX segment artifacts are validated as a reusable ONNX Runtime CPU chain without low-bit source reload
 ```
 
+## Step 5 — Chain-state handoff report
+
+Status: verified.
+
+Run:
+
+```text
+27372009301
+```
+
+Artifact:
+
+```text
+bonsai-lowbit-ten-by-two-chain-handoff-report-json / 7574781425
+sha256: 5fdc2278ced66cbaed794943d3975c18dfbeda1cd849328e29a0a7b3cfabd5fb
+head_sha: 64ecb8d0fb31a4e33fb4250f877eb607aa4c8ce1
+```
+
+Verified completion condition:
+
+```json
+{
+  "ok": true,
+  "artifact_kind": "chain_state_handoff_report",
+  "sequence_block_count": 20,
+  "onnx_segment_count": 10,
+  "handoff_count": 10,
+  "persistent_onnx_artifacts": true,
+  "reusable_onnx_chain_artifact": true,
+  "validated_without_lowbit_source_reload": true,
+  "validated_from_persisted_onnx_files": true
+}
+```
+
+Allowed claim after completion:
+
+```text
+ten-by-two split persistent ONNX segments have their segment-to-segment hidden-state handoffs documented without low-bit source reload
+```
+
+## Step 6 — Input boundary report
+
+Status: implemented; CI artifact pending.
+
+Implementation commits:
+
+```text
+eabfc8faa3b0bad73fdcbbc5974acd6334debf2f
+76f119acb67b26b88acb2446276b1d851c3d37ac
+```
+
+Expected artifact:
+
+```text
+bonsai-lowbit-ten-by-two-input-boundary-report-json
+```
+
+Expected completion condition:
+
+```json
+{
+  "ok": true,
+  "artifact_kind": "input_boundary_report",
+  "sequence_block_count": 20,
+  "onnx_segment_count": 10,
+  "persistent_onnx_artifacts": true,
+  "reusable_onnx_chain_artifact": true,
+  "validated_without_lowbit_source_reload": true,
+  "validated_from_persisted_onnx_files": true,
+  "input_boundary": {
+    "prompt_tokens_present": false,
+    "text_encoder_present": false,
+    "scheduler_present": false,
+    "vae_present": false,
+    "image_latents_present": false,
+    "real_bonsai_pipeline_inputs_present": false
+  }
+}
+```
+
+This report must not promote any full-pipeline claim. It only documents the current external ONNX input boundary: `hidden` and `temb`.
+
 Forbidden claims remain:
 
 - full Bonsai ONNX pipeline;
@@ -191,15 +276,14 @@ Forbidden claims remain:
 - prompt-to-image generation verification;
 - single monolithic 20-block ONNX.
 
-## Step 5 — Decide next expansion boundary
+## Step 7 — Decide next expansion boundary
 
-Status: ready for decision.
+Status: blocked until Step 6 has a verified CI artifact.
 
-Options:
+Candidate options after Step 6:
 
-1. add a lightweight chain-state handoff report between persistent pair segments;
-2. add image/semantic input boundary probes;
-3. add double-block side of the real architecture;
-4. keep ONNX scope capped at single-stream block chain and document the boundary.
+1. add image/semantic input boundary probes;
+2. add double-block side of the real architecture;
+3. keep ONNX scope capped at single-stream block chain and document the boundary.
 
-Do not start Step 5 unless the next boundary is explicitly defined and its claim language is added to the manifest evidence policy.
+Do not start Step 7 unless the next boundary is explicitly defined and its claim language is added to the manifest evidence policy.
