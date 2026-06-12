@@ -25,15 +25,15 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 61615497216,
-      "free_bytes": 93261914112
+      "used_bytes": 60683067392,
+      "free_bytes": 94194343936
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 62677929984,
-      "free_bytes": 92199481344
+      "used_bytes": 61745373184,
+      "free_bytes": 93132038144
     },
-    "max_rss_mb_end": 2822.457
+    "max_rss_mb_end": 3077.055
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -57,19 +57,19 @@
         "notes": "Tiny SD candidate. Failure is useful evidence if repo or pipeline metadata differs."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781286877.102,
+      "started_at_monotonic_seconds": 1781289989.522,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61615497216,
-        "free_bytes": 93261914112
+        "used_bytes": 60683067392,
+        "free_bytes": 94194343936
       },
-      "max_rss_mb_before": 19.73,
+      "max_rss_mb_before": 19.613,
       "method": "diffusers_text_to_image",
       "pipeline_class": "StableDiffusionPipeline",
       "model_ref": "segmind/tiny-sd",
-      "load_seconds": 7.204,
-      "generate_seconds": 20.544,
-      "total_seconds": 27.957,
+      "load_seconds": 9.451,
+      "generate_seconds": 20.08,
+      "total_seconds": 29.725,
       "height": 256,
       "width": 256,
       "steps": 4,
@@ -78,12 +78,12 @@
       "image_sha256": "d0b25828707e75680d83b313c9e8a5c22a6532c75aa1cb68842f0976cfaadf44",
       "image_size_bytes": 70696,
       "execution_attempted": true,
-      "max_rss_mb_after_candidate": 2822.457,
+      "max_rss_mb_after_candidate": 3077.055,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 62677929984,
-        "free_bytes": 92199481344
+        "used_bytes": 61745373184,
+        "free_bytes": 93132038144
       }
     }
   ],
@@ -93,7 +93,7 @@
     "skipped": 0,
     "total": 1
   },
-  "seconds_so_far": 31.486,
+  "seconds_so_far": 32.948,
   "summary": {
     "passed": 1,
     "failed": 0,
@@ -101,5 +101,5 @@
     "total": 1
   },
   "ci_conclusion": "success",
-  "seconds": 31.487
+  "seconds": 32.948
 }
