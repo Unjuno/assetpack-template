@@ -9,7 +9,11 @@ docs/ci/bonsai-layout-boundary-latest.json
 docs/ci/bonsai-combined-component-probe-latest.json
 docs/ci/bonsai-transformer-load-probe-latest.json
 docs/ci/ort-cpu-kernel-probe-latest.json
-docs/ci/image-model-ci-benchmark-latest.json
+docs/ci/image-model-ci-benchmark-smoke-latest.json
+docs/ci/image-model-ci-benchmark-lcm-latest.json
+docs/ci/image-model-ci-benchmark-turbo-latest.json
+docs/ci/image-model-ci-benchmark-load-only-latest.json
+docs/ci/image-model-ci-benchmark-runtime-latest.json
 ```
 
 `docs/ci/bonsai-layout-boundary-latest.json` is produced by the `bonsai-onnx-smoke` workflow when `target=layout-boundary` runs. It is copied from:
@@ -79,13 +83,17 @@ Cast INT64 -> FLOAT -> Cos -> Cast back load: passed
 
 This supports the diagnostic interpretation that a Bonsai ONNX Runtime error such as `Cos(7)` can be caused by DOUBLE trig inputs on CPUExecutionProvider. It is not Bonsai model evidence by itself, not transformer graph evidence by itself, not execution evidence, and not a full pipeline claim.
 
-`docs/ci/image-model-ci-benchmark-latest.json` is produced by the `image-model-ci-benchmark` workflow. It is copied from:
+The `image-model-ci-benchmark` workflow writes one repo-persisted report per benchmark batch:
 
 ```text
-reports/image-model-ci-benchmark/report.json
+reports/image-model-ci-benchmark/smoke/report.json     -> docs/ci/image-model-ci-benchmark-smoke-latest.json
+reports/image-model-ci-benchmark/lcm/report.json       -> docs/ci/image-model-ci-benchmark-lcm-latest.json
+reports/image-model-ci-benchmark/turbo/report.json     -> docs/ci/image-model-ci-benchmark-turbo-latest.json
+reports/image-model-ci-benchmark/load_only/report.json -> docs/ci/image-model-ci-benchmark-load-only-latest.json
+reports/image-model-ci-benchmark/runtime/report.json   -> docs/ci/image-model-ci-benchmark-runtime-latest.json
 ```
 
-That report records CI measurements for candidate image-generation methods using a fixed cat prompt. It records candidate-level load seconds, generation seconds, image SHA-256, image size, disk snapshots, and max RSS. It is measurement evidence only; it is not a model-quality claim, not a general benchmark claim, and not a prompt-to-image product claim beyond the specific CI run configuration.
+Those reports record CI measurements for candidate image-generation methods using a fixed cat prompt. Candidate-level records include load seconds, generation seconds, total seconds, image SHA-256, image size, disk snapshots, max RSS, method, pipeline class, and failure boundary. Generated PNGs are uploaded as workflow artifacts for human inspection; they are not committed to the repository. These reports are measurement evidence only; they are not model-quality claims, not general benchmark claims, and not prompt-to-image product claims beyond the specific CI run configuration.
 
 The workflow path filters intentionally do not include `docs/ci/**`, so committing report snapshots does not retrigger the workflows.
 
