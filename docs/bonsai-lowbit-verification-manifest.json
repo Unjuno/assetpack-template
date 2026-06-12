@@ -7,11 +7,11 @@
     "report_count": 32
   },
   "latest_ci_run": {
-    "run_id": 27406318749,
-    "head_sha": "4d6601d208df7c7ff68ecd63d813c0cd517506c7",
-    "artifact_id": 7587605829,
+    "run_id": 27407994527,
+    "head_sha": "8364d769b3d1f8cbb7b249ec1b09b021d7d4128b",
+    "artifact_id": 7588302912,
     "artifact_name": "bonsai-layout-boundary-report-json",
-    "artifact_sha256": "468f3168e1066365df96924341547ff0ac1c028a02e4cea07dcad97fd583ac4f"
+    "artifact_sha256": "c9411decd52ea0451314e261c20849047f2f50b8921f687855620d65a7292e4e"
   },
   "verified": [
     {
@@ -231,13 +231,15 @@
     {
       "key": "bonsai_repo_layout_boundary_preflight",
       "status": "verified",
-      "run_id": 27406318749,
-      "head_sha": "4d6601d208df7c7ff68ecd63d813c0cd517506c7",
+      "run_id": 27407994527,
+      "head_sha": "8364d769b3d1f8cbb7b249ec1b09b021d7d4128b",
       "job_name": "layout-boundary",
       "job_conclusion": "success",
-      "artifact_id": 7587605829,
+      "artifact_id": 7588302912,
       "artifact_name": "bonsai-layout-boundary-report-json",
-      "artifact_sha256": "468f3168e1066365df96924341547ff0ac1c028a02e4cea07dcad97fd583ac4f",
+      "artifact_sha256": "c9411decd52ea0451314e261c20849047f2f50b8921f687855620d65a7292e4e",
+      "repo_persisted_report_path": "docs/ci/bonsai-layout-boundary-latest.json",
+      "repo_persisted_report_sha": "f43c9d908b49a013214c166f6b40ed0005b5ba38",
       "report_path": "report.json",
       "report_ok": true,
       "artifact_kind": "layout_probe",
