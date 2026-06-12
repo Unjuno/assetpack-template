@@ -27,11 +27,11 @@ jobs:
       BONSAI_HF_RETRY_ATTEMPTS: "4"
       BONSAI_HF_RETRY_SLEEP_SECONDS: "30"
       BONSAI_RUN_TRANSFORMER_ONNX_EXPORT: "true"
-      BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION: "v5"
+      BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION: "v6"
       BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_LOAD: "true"
-      BONSAI_TRANSFORMER_ONNXRUNTIME_LOAD_REVISION: "v8"
+      BONSAI_TRANSFORMER_ONNXRUNTIME_LOAD_REVISION: "v9"
       BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH: "true"
-      BONSAI_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH_REVISION: "v5"
+      BONSAI_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH_REVISION: "v6"
     steps:
       - uses: actions/checkout@v4
 
@@ -44,22 +44,36 @@ jobs:
           mkdir -p reports/bonsai-transformer-load-probe
           cat > reports/bonsai-transformer-load-probe/report.json <<'JSON'
           {
-            "experiment_id": "bonsai-transformer-load-probe-preflight-v9",
+            "experiment_id": "bonsai-transformer-load-probe-preflight-v10",
             "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
             "status": "preflight_started",
             "ci_conclusion": "preflight_only",
             "claim_promotable_to_manifest": false,
             "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
             "onnx_export_attempted": true,
-            "onnx_export_revision": "v5",
+            "onnx_export_revision": "v6",
             "onnxruntime_load_attempted": true,
-            "onnxruntime_load_revision": "v8",
+            "onnxruntime_load_revision": "v9",
             "onnxruntime_trig_cast_patch_attempted": true,
-            "onnxruntime_trig_cast_patch_revision": "v5",
+            "onnxruntime_trig_cast_patch_revision": "v6",
             "execution_attempted": false,
-            "note": "This preflight report is overwritten by scripts/run_bonsai_transformer_load_probe.py if dependency installation and probe execution run."
+            "note": "This preflight report is committed before dependency installation. It is overwritten by scripts/run_bonsai_transformer_load_probe.py if dependency installation and probe execution run."
           }
           JSON
+
+      - name: Persist preflight report in repo
+        run: |
+          mkdir -p docs/ci
+          cp reports/bonsai-transformer-load-probe/report.json docs/ci/bonsai-transformer-load-probe-latest.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/ci/bonsai-transformer-load-probe-latest.json
+          if git diff --cached --quiet; then
+            echo "No preflight report changes to commit."
+          else
+            git commit -m "Record Bonsai transformer preflight CI report"
+            git push
+          fi
 
       - name: Show runner resources
         run: |
