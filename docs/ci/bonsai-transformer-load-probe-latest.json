@@ -1,16 +1,17 @@
 {
-  "experiment_id": "bonsai-transformer-load-probe-preflight-v10",
+  "experiment_id": "bonsai-transformer-load-probe-preflight-v11",
   "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
   "status": "preflight_started",
   "ci_conclusion": "preflight_only",
   "claim_promotable_to_manifest": false,
   "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
+  "dependency_stage": "pre_dependency_install",
   "onnx_export_attempted": true,
-  "onnx_export_revision": "v6",
+  "onnx_export_revision": "v7",
   "onnxruntime_load_attempted": true,
-  "onnxruntime_load_revision": "v9",
+  "onnxruntime_load_revision": "v10",
   "onnxruntime_trig_cast_patch_attempted": true,
-  "onnxruntime_trig_cast_patch_revision": "v6",
+  "onnxruntime_trig_cast_patch_revision": "v7",
   "execution_attempted": false,
-  "note": "This preflight report is committed before dependency installation. It is overwritten by scripts/run_bonsai_transformer_load_probe.py if dependency installation and probe execution run."
+  "note": "This preflight report is committed before dependency installation. Later workflow stages overwrite it if they are reached."
 }
