@@ -19,7 +19,7 @@ jobs:
     env:
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
       PYTHONUNBUFFERED: "1"
-      ORT_CPU_KERNEL_PROBE_REVISION: "v3"
+      ORT_CPU_KERNEL_PROBE_REVISION: "v4"
     steps:
       - uses: actions/checkout@v4
 
@@ -32,11 +32,11 @@ jobs:
           mkdir -p reports/ort-cpu-kernel-probe
           cat > reports/ort-cpu-kernel-probe/report.json <<'JSON'
           {
-            "experiment_id": "ort-cpu-kernel-probe-preflight-v3",
+            "experiment_id": "ort-cpu-kernel-probe-preflight-v4",
             "status": "preflight_started",
             "ci_conclusion": "preflight_only",
             "claim_promotable_to_manifest": false,
-            "allowed_claim": "synthetic_ort_cpu_cos_float16_cast_workaround_evidence_not_bonsai_pipeline",
+            "allowed_claim": "synthetic_ort_cpu_cos_int64_cast_workaround_evidence_not_bonsai_pipeline",
             "execution_attempted": false,
             "note": "This preflight report is overwritten by scripts/run_ort_cpu_kernel_probe.py if dependency installation and probe execution succeed."
           }
