@@ -147,7 +147,7 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.002677
+      "seconds": 0.002404
     },
     "cos_float32_original": {
       "status": "passed",
@@ -179,14 +179,14 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.000171
+      "seconds": 0.000186
     },
     "cos_double_original": {
       "status": "failed",
       "error_type": "NotImplemented",
       "error": "[ONNXRuntimeError] : 9 : NOT_IMPLEMENTED : Could not find an implementation for Cos(7) node with name 'cos_original'",
       "execution_attempted": false,
-      "seconds": 0.0002
+      "seconds": 0.000191
     },
     "cos_double_with_float32_cast_patch": {
       "status": "passed",
@@ -218,7 +218,7 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.000193
+      "seconds": 0.000203
     },
     "cos_double_with_float32_output_patch": {
       "status": "passed",
@@ -250,14 +250,14 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.00019
+      "seconds": 0.000165
     },
     "cos_int64_original": {
       "status": "failed",
       "error_type": "InvalidGraph",
       "error": "[ONNXRuntimeError] : 10 : INVALID_GRAPH : Load model from reports/ort-cpu-kernel-probe/cos_int64_original.onnx failed:This is an invalid model. Type Error: Type 'tensor(int64)' of input parameter (x) of operator (Cos) in node (cos_original) is invalid.",
       "execution_attempted": false,
-      "seconds": 0.000132
+      "seconds": 0.000124
     },
     "cos_int64_with_float32_cast_patch": {
       "status": "passed",
@@ -289,7 +289,7 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.000175
+      "seconds": 0.00024
     },
     "cos_float16_with_float32_cast_patch": {
       "status": "passed",
@@ -321,7 +321,7 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.000183
+      "seconds": 0.000185
     }
   },
   "inference": {
@@ -337,5 +337,5 @@
   },
   "status": "passed",
   "ci_conclusion": "success",
-  "seconds": 0.282926
+  "seconds": 0.184027
 }
