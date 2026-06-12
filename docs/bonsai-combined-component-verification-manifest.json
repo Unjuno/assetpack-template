@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source": "docs/ci/bonsai-combined-component-probe-latest.json",
-  "source_report_sha": "f8e1a6a7ed0ae4022b943f72a1e47e14ae3c23c5",
+  "source_report_sha": "c4438112182d6c9a3f66e9d370ab9eac333f5d59",
   "experiment_id": "bonsai-combined-component-probe-v1",
   "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
   "verified": [
@@ -10,17 +10,27 @@
     "bonsai_scheduler_step_execution_verified",
     "bonsai_vae_decoder_execution_verified",
     "bonsai_transformer_config_boundary_verified_not_runtime_execution",
-    "bonsai_real_transformer_weight_load_verified_not_onnx_execution"
+    "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
+    "bonsai_transformer_model_call_execution_verified_not_onnx_export"
   ],
   "transformer_load": {
     "status": "verified",
     "class_name": "Flux2Transformer2DModel",
     "param_count": 3875544576,
-    "dtype": "torch.float16",
-    "seconds": 35.45
+    "dtype": "torch.float16"
+  },
+  "transformer_model_call": {
+    "status": "verified",
+    "input_shapes": {
+      "hidden_states": [1, 1, 128],
+      "encoder_hidden_states": [1, 1, 7680],
+      "img_ids": [1, 4],
+      "txt_ids": [1, 4]
+    },
+    "output_shape": [1, 1, 128],
+    "output_sha256_float32_le": "04e186d84429e726763fe594f0c095e205c00238d1ef766d16e4e80ec8f186b0"
   },
   "not_verified": [
-    "transformer_forward_execution",
     "transformer_onnx_export",
     "full_pipeline_composition",
     "prompt_to_image_generation",
