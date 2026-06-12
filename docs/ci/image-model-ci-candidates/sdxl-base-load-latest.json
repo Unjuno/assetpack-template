@@ -24,16 +24,16 @@
     "python": "3.11.15",
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
-      "total_bytes": 154894188544,
-      "used_bytes": 61613215744,
-      "free_bytes": 93264195584
+      "total_bytes": 76887154688,
+      "used_bytes": 57461891072,
+      "free_bytes": 19408486400
     },
     "disk_end": {
-      "total_bytes": 154894188544,
-      "used_bytes": 75825627136,
-      "free_bytes": 79051784192
+      "total_bytes": 76887154688,
+      "used_bytes": 71674200064,
+      "free_bytes": 5196177408
     },
-    "max_rss_mb_end": 3741.805
+    "max_rss_mb_end": 4353.164
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -56,19 +56,19 @@
         "notes": "SDXL load-only baseline."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781287355.809,
+      "started_at_monotonic_seconds": 1781290490.212,
       "disk_before": {
-        "total_bytes": 154894188544,
-        "used_bytes": 61613215744,
-        "free_bytes": 93264195584
+        "total_bytes": 76887154688,
+        "used_bytes": 57461891072,
+        "free_bytes": 19408486400
       },
-      "max_rss_mb_before": 19.73,
+      "max_rss_mb_before": 19.637,
       "method": "diffusers_load_only",
       "pipeline_class": "StableDiffusionXLPipeline",
       "model_ref": "stabilityai/stable-diffusion-xl-base-1.0",
-      "load_seconds": 40.912,
+      "load_seconds": 42.2,
       "generate_seconds": null,
-      "total_seconds": 41.106,
+      "total_seconds": 42.337,
       "components": [
         "feature_extractor",
         "image_encoder",
@@ -82,12 +82,12 @@
       ],
       "execution_attempted": false,
       "load_only": true,
-      "max_rss_mb_after_candidate": 3741.805,
+      "max_rss_mb_after_candidate": 4353.164,
       "diffusers_version": "0.38.0",
       "disk_after": {
-        "total_bytes": 154894188544,
-        "used_bytes": 75825627136,
-        "free_bytes": 79051784192
+        "total_bytes": 76887154688,
+        "used_bytes": 71674200064,
+        "free_bytes": 5196177408
       }
     }
   ],
@@ -97,7 +97,7 @@
     "skipped": 0,
     "total": 1
   },
-  "seconds_so_far": 45.023,
+  "seconds_so_far": 46.24,
   "summary": {
     "passed": 1,
     "failed": 0,
@@ -105,5 +105,5 @@
     "total": 1
   },
   "ci_conclusion": "success",
-  "seconds": 45.024
+  "seconds": 46.241
 }
