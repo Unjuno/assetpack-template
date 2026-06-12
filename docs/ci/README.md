@@ -65,7 +65,16 @@ This verifies only the minimal standalone transformer ONNX export boundary. It d
 reports/ort-cpu-kernel-probe/report.json
 ```
 
-That report is synthetic ONNX Runtime CPUExecutionProvider evidence for `Cos` with `FLOAT16` input and a `FLOAT32` cast workaround. It is not Bonsai model evidence, not transformer graph evidence, and not a full pipeline claim.
+That report is synthetic ONNX Runtime CPUExecutionProvider evidence for `Cos` type handling. The current relevant result is:
+
+```text
+Cos(FLOAT16) load: passed
+Cos(FLOAT32) load: passed
+Cos(INT64) load: failed as invalid graph
+Cast INT64 -> FLOAT -> Cos -> Cast back load: passed
+```
+
+This supports the diagnostic interpretation that an ONNX Runtime error such as `Cos(7)` is likely an INT64 trig input issue rather than a FLOAT16 kernel issue. It is not Bonsai model evidence by itself, not transformer graph evidence by itself, not execution evidence, and not a full pipeline claim.
 
 The workflow path filters intentionally do not include `docs/ci/**`, so committing report snapshots does not retrigger the workflows.
 
@@ -83,7 +92,7 @@ A repo-persisted report can be promoted to `docs/bonsai-combined-component-verif
 
 For combined reports, individual stages may be promotable even when later full-pipeline stages are blocked or not implemented. Promote only the explicit stage-level `allowed_claim` values with `claim_promotable_to_manifest=true`.
 
-Reports or stages with `external_rate_limited`, `failed`, or `blocked` are evidence records, but not verified manifest entries.
+Reports or stages with `external_rate_limited`, `failed`, `preflight_started`, `preflight_only`, or `blocked` are evidence records, but not verified manifest entries.
 
 ## Non-claims
 
