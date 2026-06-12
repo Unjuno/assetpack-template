@@ -1,0 +1,93 @@
+{
+  "experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "negative_prompt": "blurry, distorted, low quality",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+  },
+  "selection": {
+    "candidate_ids": [
+      "hyper-sd-load"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61615624192,
+      "free_bytes": 93261787136
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61615616000,
+      "free_bytes": 93261795328
+    },
+    "max_rss_mb_end": 359.117
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "failed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "hyper-sd-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "ByteDance/Hyper-SD",
+        "pipeline_class": "DiffusionPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 0.0,
+        "expected_role": "hyper_repo_load_candidate",
+        "notes": "Repo-level load-only check; may fail because Hyper-SD provides adapters/checkpoints rather than a single complete pipeline."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781287395.156,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61615624192,
+        "free_bytes": 93261787136
+      },
+      "max_rss_mb_before": 19.793,
+      "error_type": "RemoteEntryNotFoundError",
+      "error": "404 Client Error. (Request ID: Root=1-6a2c49e6-047e663c18c7af2b069bf72d;e720899f-81ac-42e4-9962-1df45271c8fd)\n\nEntry Not Found for url: https://huggingface.co/ByteDance/Hyper-SD/resolve/main/model_index.json.",
+      "execution_attempted": false,
+      "total_seconds": 3.615,
+      "max_rss_mb_after_candidate": 359.117,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61615616000,
+        "free_bytes": 93261795328
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 3.637,
+  "summary": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success_with_candidate_failures",
+  "seconds": 3.637
+}
