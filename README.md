@@ -205,6 +205,7 @@ Supporting human-readable records are:
 docs/bonsai-lowbit-claim-matrix.md
 docs/bonsai-lowbit-local-artifact-audit.md
 docs/bonsai-lowbit-completion-plan.md
+docs/bonsai-lowbit-scope-cap.md
 ```
 
 Current verified low-bit scope, based only on manifest-recorded artifact reports:
@@ -224,6 +225,12 @@ Current verified low-bit scope, based only on manifest-recorded artifact reports
 Current pending low-bit scope:
 
 - none for the current low-bit critical-path scope through ten-by-two input-boundary documentation.
+
+Scope cap decision:
+
+- the current low-bit critical-path scope is closed in `docs/bonsai-lowbit-scope-cap.md`;
+- the strongest allowed claim is a reusable segmented ONNX Runtime CPU critical-path chain with persisted two-block ONNX artifacts, hidden-state handoff evidence, and hidden/temb-only external input-boundary evidence;
+- any future expansion must start a new manifest key and evidence boundary.
 
 The twenty-block ten-by-two evidence has four distinct verified boundaries:
 
