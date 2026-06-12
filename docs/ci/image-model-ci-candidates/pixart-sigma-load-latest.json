@@ -1,0 +1,105 @@
+{
+  "experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "negative_prompt": "blurry, distorted, low quality",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+  },
+  "selection": {
+    "candidate_ids": [
+      "pixart-sigma-load"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61613305856,
+      "free_bytes": 93264105472
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 83442020352,
+      "free_bytes": 71435390976
+    },
+    "max_rss_mb_end": 4043.004
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "pixart-sigma-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
+        "pipeline_class": "PixArtSigmaPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 4.5,
+        "expected_role": "transformer_quality_load_candidate",
+        "notes": "PixArt Sigma load-only candidate. Failure boundary is useful if pipeline class is unavailable."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781287450.42,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61613305856,
+        "free_bytes": 93264105472
+      },
+      "max_rss_mb_before": 19.73,
+      "method": "diffusers_load_only",
+      "pipeline_class": "PixArtSigmaPipeline",
+      "model_ref": "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
+      "load_seconds": 59.35,
+      "generate_seconds": null,
+      "total_seconds": 59.485,
+      "components": [
+        "scheduler",
+        "text_encoder",
+        "tokenizer",
+        "transformer",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 4043.004,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 83442020352,
+        "free_bytes": 71435390976
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 63.692,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 63.692
+}
