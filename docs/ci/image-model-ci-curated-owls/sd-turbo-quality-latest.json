@@ -1,0 +1,114 @@
+{
+  "experiment_id": "image-model-ci-curated-owls-v1",
+  "prompt": "a cute small owl perched in a bonsai pot, detailed feathers, natural owl anatomy, bright eyes, tiny talons, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not an owl, cat, dog, rabbit, bird-like toy",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Owl generation uses the strict seven candidates accepted from cat artifact review. Owl visual quality is unverified until this workflow is run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "sd-turbo-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61621063680,
+      "free_bytes": 93256347648
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 66783313920,
+      "free_bytes": 88094097408
+    },
+    "max_rss_mb_end": 5940.859
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sd-turbo-quality",
+        "enabled": true,
+        "batch": "curated_owl",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "stabilityai/sd-turbo",
+        "pipeline_class": "AutoPipelineForText2Image",
+        "height": 384,
+        "width": 384,
+        "steps": 2,
+        "guidance_scale": 0.0,
+        "license_hint": "stability-ai-noncommercial-community",
+        "expected_role": "owl_turbo_reference"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781300814.386,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61621063680,
+        "free_bytes": 93256347648
+      },
+      "max_rss_mb_before": 19.633,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "AutoPipelineForText2Image",
+      "model_ref": "stabilityai/sd-turbo",
+      "load_seconds": 19.399,
+      "generate_seconds": 29.194,
+      "total_seconds": 48.816,
+      "height": 384,
+      "width": 384,
+      "steps": 2,
+      "guidance_scale": 0.0,
+      "call_kwargs": {
+        "prompt": "a cute small owl perched in a bonsai pot, detailed feathers, natural owl anatomy, bright eyes, tiny talons, studio lighting, sharp focus",
+        "num_inference_steps": 2,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not an owl, cat, dog, rabbit, bird-like toy",
+        "height": 384,
+        "width": 384,
+        "guidance_scale": 0.0
+      },
+      "image_path": "reports/image-model-ci-curated-owls/sd-turbo-quality/images/sd-turbo-quality/cat.png",
+      "image_sha256": "ba17fae6ae1e1d9b09357bd0abdbf6e7fe48d632f72a33730c26bdcd039233d2",
+      "image_size_bytes": 242043,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 5940.859,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 66783313920,
+        "free_bytes": 88094097408
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 51.43,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 51.43
+}
