@@ -13,7 +13,7 @@ from typing import Any, Callable
 import yaml
 
 PROMPT = "a small bonsai tree in a ceramic pot"
-PROBE_REVISION = "transformer-load-short-circuit-v3"
+PROBE_REVISION = "transformer-minimal-model-call-v1"
 
 
 def env_bool(name: str, default: bool) -> bool:
@@ -157,7 +157,29 @@ def transformer_load_probe(model_ref: str) -> dict[str, Any]:
     for param in model.parameters():
         param_count += int(param.numel())
         dtype_counts[str(param.dtype)] = dtype_counts.get(str(param.dtype), 0) + int(param.numel())
-    return {"component": "transformer", "load_kind": "weights", "loading_strategy": "fp16_low_cpu_mem_usage", "class_name": cls.__name__, "param_count": param_count, "param_count_billion": round(param_count / 1_000_000_000, 3), "dtype_param_counts": dtype_counts}
+    out: dict[str, Any] = {"component": "transformer", "load_kind": "weights", "loading_strategy": "fp16_low_cpu_mem_usage", "class_name": cls.__name__, "param_count": param_count, "param_count_billion": round(param_count / 1_000_000_000, 3), "dtype_param_counts": dtype_counts}
+    if env_bool("BONSAI_RUN_TRANSFORMER_MODEL_CALL", False):
+        try:
+            axes = cfg.get("axes_dims_rope", [32, 32, 32, 32])
+            axes_len = len(axes) if isinstance(axes, list) else 4
+            in_channels = int(cfg.get("in_channels", 64))
+            joint_dim = int(cfg.get("joint_attention_dim", 4096))
+            pooled_dim = int(cfg.get("pooled_projection_dim", 768))
+            with torch.no_grad():
+                result = model(
+                    hidden_states=torch.zeros((1, 1, in_channels), dtype=torch.float16),
+                    encoder_hidden_states=torch.zeros((1, 1, joint_dim), dtype=torch.float16),
+                    pooled_projections=torch.zeros((1, pooled_dim), dtype=torch.float16),
+                    timestep=torch.zeros((1,), dtype=torch.float16),
+                    img_ids=torch.zeros((1, axes_len), dtype=torch.float32),
+                    txt_ids=torch.zeros((1, axes_len), dtype=torch.float32),
+                    return_dict=False,
+                )
+            sample = result[0] if isinstance(result, tuple) else getattr(result, "sample", result)
+            out["model_call_attempt"] = {"status": "passed", "claim_promotable_to_manifest": True, "input_shapes": {"hidden_states": [1, 1, in_channels], "encoder_hidden_states": [1, 1, joint_dim], "pooled_projections": [1, pooled_dim], "img_ids": [1, axes_len], "txt_ids": [1, axes_len]}, "sample": tensor_summary(sample)}
+        except BaseException as exc:
+            out["model_call_attempt"] = {"status": "failed", "claim_promotable_to_manifest": False, "error_type": type(exc).__name__, "error": str(exc)[:3000]}
+    return out
 
 
 def dependency_blocked_stage(name: str, allowed_claim: str, dependencies: dict[str, str]) -> dict[str, Any]:
