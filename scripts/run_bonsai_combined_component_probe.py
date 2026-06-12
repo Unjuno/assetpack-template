@@ -13,7 +13,7 @@ from typing import Any, Callable
 import yaml
 
 PROMPT = "a small bonsai tree in a ceramic pot"
-PROBE_REVISION = "transformer-minimal-model-call-v1"
+PROBE_REVISION = "transformer-minimal-model-call-v2"
 
 
 def env_bool(name: str, default: bool) -> bool:
@@ -158,7 +158,7 @@ def transformer_load_probe(model_ref: str) -> dict[str, Any]:
         param_count += int(param.numel())
         dtype_counts[str(param.dtype)] = dtype_counts.get(str(param.dtype), 0) + int(param.numel())
     out: dict[str, Any] = {"component": "transformer", "load_kind": "weights", "loading_strategy": "fp16_low_cpu_mem_usage", "class_name": cls.__name__, "param_count": param_count, "param_count_billion": round(param_count / 1_000_000_000, 3), "dtype_param_counts": dtype_counts}
-    if env_bool("BONSAI_RUN_TRANSFORMER_MODEL_CALL", False):
+    if env_bool("BONSAI_RUN_TRANSFORMER_MODEL_CALL", True):
         try:
             axes = cfg.get("axes_dims_rope", [32, 32, 32, 32])
             axes_len = len(axes) if isinstance(axes, list) else 4
