@@ -14,6 +14,7 @@ docs/ci/image-model-ci-benchmark-lcm-latest.json
 docs/ci/image-model-ci-benchmark-turbo-latest.json
 docs/ci/image-model-ci-benchmark-load-only-latest.json
 docs/ci/image-model-ci-benchmark-runtime-latest.json
+docs/ci/image-model-ci-candidates/<candidate-id>-latest.json
 ```
 
 `docs/ci/bonsai-layout-boundary-latest.json` is produced by the `bonsai-onnx-smoke` workflow when `target=layout-boundary` runs. It is copied from:
@@ -93,7 +94,21 @@ reports/image-model-ci-benchmark/load_only/report.json -> docs/ci/image-model-ci
 reports/image-model-ci-benchmark/runtime/report.json   -> docs/ci/image-model-ci-benchmark-runtime-latest.json
 ```
 
-Those reports record CI measurements for candidate image-generation methods using a fixed cat prompt. Candidate-level records include load seconds, generation seconds, total seconds, image SHA-256, image size, disk snapshots, max RSS, method, pipeline class, and failure boundary. Generated PNGs are uploaded as workflow artifacts for human inspection; they are not committed to the repository. These reports are measurement evidence only; they are not model-quality claims, not general benchmark claims, and not prompt-to-image product claims beyond the specific CI run configuration.
+The `image-model-ci-candidate-matrix` workflow writes one repo-persisted report per candidate:
+
+```text
+reports/image-model-ci-candidate/<candidate-id>/report.json -> docs/ci/image-model-ci-candidates/<candidate-id>-latest.json
+```
+
+It also uploads a per-candidate artifact named:
+
+```text
+image-model-ci-candidate-<candidate-id>
+```
+
+The artifact contains the candidate report and any generated `cat.png` image. PNGs are intentionally not committed to the repository; they are for human inspection from the Actions artifact UI.
+
+Those reports record CI measurements for candidate image-generation methods using a fixed cat prompt. Candidate-level records include load seconds, generation seconds, total seconds, image SHA-256, image size, disk snapshots, max RSS, method, pipeline class, and failure boundary. These reports are measurement evidence only; they are not model-quality claims, not general benchmark claims, and not prompt-to-image product claims beyond the specific CI run configuration.
 
 The workflow path filters intentionally do not include `docs/ci/**`, so committing report snapshots does not retrigger the workflows.
 
