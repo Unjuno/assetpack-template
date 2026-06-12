@@ -25,15 +25,15 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 60682031104,
-      "free_bytes": 94195380224
+      "used_bytes": 61614280704,
+      "free_bytes": 93263130624
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 65044840448,
-      "free_bytes": 89832570880
+      "used_bytes": 65977110528,
+      "free_bytes": 88900300800
     },
-    "max_rss_mb_end": 3516.617
+    "max_rss_mb_end": 3561.477
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -57,19 +57,19 @@
         "notes": "Small Stable Diffusion candidate for CPU CI."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781286871.255,
+      "started_at_monotonic_seconds": 1781289991.94,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 60682031104,
-        "free_bytes": 94195380224
+        "used_bytes": 61614280704,
+        "free_bytes": 93263130624
       },
-      "max_rss_mb_before": 19.633,
+      "max_rss_mb_before": 19.66,
       "method": "diffusers_text_to_image",
       "pipeline_class": "StableDiffusionPipeline",
       "model_ref": "OFA-Sys/small-stable-diffusion-v0",
-      "load_seconds": 15.838,
-      "generate_seconds": 21.149,
-      "total_seconds": 37.179,
+      "load_seconds": 16.41,
+      "generate_seconds": 21.324,
+      "total_seconds": 37.93,
       "height": 256,
       "width": 256,
       "steps": 4,
@@ -78,12 +78,12 @@
       "image_sha256": "5f0431d064d02d8a87e24a73e9e8117bab4c07c4b86272ef4ce7085cee46c269",
       "image_size_bytes": 70665,
       "execution_attempted": true,
-      "max_rss_mb_after_candidate": 3516.617,
+      "max_rss_mb_after_candidate": 3561.477,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 65044840448,
-        "free_bytes": 89832570880
+        "used_bytes": 65977110528,
+        "free_bytes": 88900300800
       }
     }
   ],
@@ -93,7 +93,7 @@
     "skipped": 0,
     "total": 1
   },
-  "seconds_so_far": 40.875,
+  "seconds_so_far": 41.421,
   "summary": {
     "passed": 1,
     "failed": 0,
@@ -101,5 +101,5 @@
     "total": 1
   },
   "ci_conclusion": "success",
-  "seconds": 40.876
+  "seconds": 41.421
 }
