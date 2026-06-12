@@ -19,21 +19,22 @@
     "include_disabled": false,
     "selected_count": 3
   },
+  "candidate_timeout_seconds": 0,
   "system": {
     "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
     "python": "3.11.15",
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 61613711360,
-      "free_bytes": 93263699968
+      "used_bytes": 61613744128,
+      "free_bytes": 93263667200
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 61613715456,
-      "free_bytes": 93263695872
+      "used_bytes": 61613748224,
+      "free_bytes": 93263663104
     },
-    "max_rss_mb_end": 19.855
+    "max_rss_mb_end": 20.16
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -52,20 +53,20 @@
         "notes": "TAESD is a component/method candidate, not a full text-to-image pipeline. Implement component probe separately."
       },
       "status": "skipped",
-      "started_at_monotonic_seconds": 1781292425.956,
+      "started_at_monotonic_seconds": 1781292754.038,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613711360,
-        "free_bytes": 93263699968
+        "used_bytes": 61613744128,
+        "free_bytes": 93263667200
       },
-      "max_rss_mb_before": 19.855,
+      "max_rss_mb_before": 20.16,
       "reason": "Placeholder or unsupported runtime; add an implementation before enabling execution.",
       "execution_attempted": false,
       "load_only": false,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613711360,
-        "free_bytes": 93263699968
+        "used_bytes": 61613744128,
+        "free_bytes": 93263667200
       }
     },
     {
@@ -83,20 +84,20 @@
         "notes": "Placeholder. Do not quantize large models inside standard CI."
       },
       "status": "skipped",
-      "started_at_monotonic_seconds": 1781292425.957,
+      "started_at_monotonic_seconds": 1781292754.038,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613711360,
-        "free_bytes": 93263699968
+        "used_bytes": 61613744128,
+        "free_bytes": 93263667200
       },
-      "max_rss_mb_before": 19.855,
+      "max_rss_mb_before": 20.16,
       "reason": "Placeholder or unsupported runtime; add an implementation before enabling execution.",
       "execution_attempted": false,
       "load_only": false,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613711360,
-        "free_bytes": 93263699968
+        "used_bytes": 61613744128,
+        "free_bytes": 93263667200
       }
     },
     {
@@ -114,20 +115,20 @@
         "notes": "Placeholder for native quantized runtime."
       },
       "status": "skipped",
-      "started_at_monotonic_seconds": 1781292425.957,
+      "started_at_monotonic_seconds": 1781292754.038,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613711360,
-        "free_bytes": 93263699968
+        "used_bytes": 61613744128,
+        "free_bytes": 93263667200
       },
-      "max_rss_mb_before": 19.855,
+      "max_rss_mb_before": 20.16,
       "reason": "Placeholder or unsupported runtime; add an implementation before enabling execution.",
       "execution_attempted": false,
       "load_only": false,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613711360,
-        "free_bytes": 93263699968
+        "used_bytes": 61613744128,
+        "free_bytes": 93263667200
       }
     }
   ],
@@ -137,7 +138,7 @@
     "skipped": 3,
     "total": 3
   },
-  "seconds_so_far": 0.032,
+  "seconds_so_far": 0.016,
   "summary": {
     "passed": 0,
     "failed": 0,
@@ -145,5 +146,5 @@
     "total": 3
   },
   "ci_conclusion": "success_with_candidate_failures",
-  "seconds": 0.032
+  "seconds": 0.016
 }
