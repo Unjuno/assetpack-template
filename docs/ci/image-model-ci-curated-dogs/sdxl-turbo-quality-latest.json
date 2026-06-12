@@ -1,0 +1,114 @@
+{
+  "experiment_id": "image-model-ci-curated-dogs-v1",
+  "prompt": "a cute golden retriever puppy sitting in a bonsai pot, detailed fur, natural dog anatomy, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a dog, cat, feline",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Dog generation uses the strict seven candidates accepted from cat artifact review. Dog visual quality is unverified until this workflow is run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "sdxl-turbo-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 76887154688,
+      "used_bytes": 58174156800,
+      "free_bytes": 18696220672
+    },
+    "disk_end": {
+      "total_bytes": 76887154688,
+      "used_bytes": 72052322304,
+      "free_bytes": 4818055168
+    },
+    "max_rss_mb_end": 14361.977
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sdxl-turbo-quality",
+        "enabled": true,
+        "batch": "curated_dog",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "stabilityai/sdxl-turbo",
+        "pipeline_class": "AutoPipelineForText2Image",
+        "height": 512,
+        "width": 512,
+        "steps": 1,
+        "guidance_scale": 0.0,
+        "license_hint": "stability-ai-noncommercial-community",
+        "expected_role": "dog_sdxl_turbo_candidate"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781300265.529,
+      "disk_before": {
+        "total_bytes": 76887154688,
+        "used_bytes": 58174156800,
+        "free_bytes": 18696220672
+      },
+      "max_rss_mb_before": 19.727,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "AutoPipelineForText2Image",
+      "model_ref": "stabilityai/sdxl-turbo",
+      "load_seconds": 41.146,
+      "generate_seconds": 57.345,
+      "total_seconds": 100.63,
+      "height": 512,
+      "width": 512,
+      "steps": 1,
+      "guidance_scale": 0.0,
+      "call_kwargs": {
+        "prompt": "a cute golden retriever puppy sitting in a bonsai pot, detailed fur, natural dog anatomy, studio lighting, sharp focus",
+        "num_inference_steps": 1,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a dog, cat, feline",
+        "height": 512,
+        "width": 512,
+        "guidance_scale": 0.0
+      },
+      "image_path": "reports/image-model-ci-curated-dogs/sdxl-turbo-quality/images/sdxl-turbo-quality/cat.png",
+      "image_sha256": "33761f44977bf05435b50208451b287aed74bec6f42fb74c76a0ac0def8ebef1",
+      "image_size_bytes": 381657,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 14361.977,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 76887154688,
+        "used_bytes": 72052322304,
+        "free_bytes": 4818055168
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 104.037,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 104.039
+}
