@@ -1,8 +1,8 @@
 {
-  "experiment_id": "ort-cpu-kernel-probe-v2",
-  "purpose": "Synthetic ONNX Runtime CPUExecutionProvider kernel probe for Cos FLOAT16 and FLOAT cast workaround.",
-  "claim_promotable_to_manifest": false,
-  "allowed_claim": "synthetic_ort_cpu_cos_float16_cast_workaround_evidence_not_bonsai_pipeline",
+  "experiment_id": "ort-cpu-kernel-probe-v3",
+  "purpose": "Synthetic ONNX Runtime CPUExecutionProvider kernel probe for Cos FLOAT16, INT64, and FLOAT cast workarounds.",
+  "claim_promotable_to_manifest": true,
+  "allowed_claim": "synthetic_ort_cpu_cos_int64_cast_workaround_verified_not_bonsai_pipeline",
   "versions": {
     "onnx": "1.21.0",
     "onnxruntime": "1.26.0",
@@ -28,6 +28,28 @@
       "patched": false,
       "node_types": [
         "Cos"
+      ],
+      "opset": 17,
+      "ir_version": 8
+    },
+    "cos_int64_original": {
+      "path": "reports/ort-cpu-kernel-probe/cos_int64_original.onnx",
+      "elem_type": "INT64",
+      "patched": false,
+      "node_types": [
+        "Cos"
+      ],
+      "opset": 17,
+      "ir_version": 8
+    },
+    "cos_int64_with_float32_cast_patch": {
+      "path": "reports/ort-cpu-kernel-probe/cos_int64_with_float32_cast_patch.onnx",
+      "elem_type": "INT64",
+      "patched": true,
+      "node_types": [
+        "Cast",
+        "Cos",
+        "Cast"
       ],
       "opset": 17,
       "ir_version": 8
@@ -76,7 +98,7 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.002684
+      "seconds": 0.002423
     },
     "cos_float32_original": {
       "status": "passed",
@@ -108,7 +130,46 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.00017
+      "seconds": 0.000156
+    },
+    "cos_int64_original": {
+      "status": "failed",
+      "error_type": "InvalidGraph",
+      "error": "[ONNXRuntimeError] : 10 : INVALID_GRAPH : Load model from reports/ort-cpu-kernel-probe/cos_int64_original.onnx failed:This is an invalid model. Type Error: Type 'tensor(int64)' of input parameter (x) of operator (Cos) in node (cos_original) is invalid.",
+      "execution_attempted": false,
+      "seconds": 0.000196
+    },
+    "cos_int64_with_float32_cast_patch": {
+      "status": "passed",
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "available_providers": [
+        "AzureExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "inputs": [
+        {
+          "name": "x",
+          "shape": [
+            1,
+            4
+          ],
+          "type": "tensor(int64)"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "y",
+          "shape": [
+            1,
+            4
+          ],
+          "type": "tensor(int64)"
+        }
+      ],
+      "execution_attempted": false,
+      "seconds": 0.000204
     },
     "cos_float16_with_float32_cast_patch": {
       "status": "passed",
@@ -140,16 +201,18 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.000218
+      "seconds": 0.000186
     }
   },
   "inference": {
-    "cos_float16_original_load_failed": false,
+    "cos_float16_original_load_passed": true,
     "cos_float32_original_load_passed": true,
+    "cos_int64_original_load_failed": true,
+    "cos_int64_with_float32_cast_patch_load_passed": true,
     "cos_float16_with_float32_cast_patch_load_passed": true,
-    "supports_bonsai_interpretation": false
+    "supports_bonsai_cos7_interpretation": true
   },
-  "status": "failed",
-  "ci_conclusion": "success_with_probe_failure",
-  "seconds": 0.177316
+  "status": "passed",
+  "ci_conclusion": "success",
+  "seconds": 0.170164
 }
