@@ -1,0 +1,81 @@
+{
+  "experiment_id": "image-model-onnx-feasibility-v1",
+  "source_experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "selection": {
+    "candidate_ids": [
+      "sd35-medium-load"
+    ],
+    "batches": [],
+    "selected_count": 1
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 60859129856,
+      "free_bytes": 94018281472
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 60859084800,
+      "free_bytes": 94018326528
+    },
+    "max_rss_mb_end": 358.988
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_onnx_feasibility_measurement_not_full_pipeline",
+  "status": "failed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sd35-medium-load",
+        "enabled": true,
+        "batch": "load_only",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "stabilityai/stable-diffusion-3.5-medium",
+        "pipeline_class": "StableDiffusion3Pipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 4.5,
+        "expected_role": "heavy_quality_load_candidate",
+        "notes": "Likely too heavy or gated for standard CI. Load-only failure boundary is useful."
+      },
+      "status": "failed",
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 60859129856,
+        "free_bytes": 94018281472
+      },
+      "max_rss_mb_before": 21.066,
+      "error_type": "GatedRepoError",
+      "error": "401 Client Error. (Request ID: Root=1-6a2c501a-7048e77529c01d1f248e4154;69a204b0-0ba0-49c2-8b86-0b37d7e3ba4a)\n\nCannot access gated repo for url https://huggingface.co/stabilityai/stable-diffusion-3.5-medium/resolve/main/model_index.json.\nAccess to model stabilityai/stable-diffusion-3.5-medium is restricted. You must have access to it and be authenticated to access it. Please log in.",
+      "seconds": 5.125,
+      "max_rss_mb_after_candidate": 358.988,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 60859084800,
+        "free_bytes": 94018326528
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 5.292,
+  "summary": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success_with_candidate_failures",
+  "seconds": 5.292
+}
