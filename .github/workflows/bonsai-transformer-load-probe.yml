@@ -27,11 +27,11 @@ jobs:
       BONSAI_HF_RETRY_ATTEMPTS: "4"
       BONSAI_HF_RETRY_SLEEP_SECONDS: "30"
       BONSAI_RUN_TRANSFORMER_ONNX_EXPORT: "true"
-      BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION: "v6"
+      BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION: "v7"
       BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_LOAD: "true"
-      BONSAI_TRANSFORMER_ONNXRUNTIME_LOAD_REVISION: "v9"
+      BONSAI_TRANSFORMER_ONNXRUNTIME_LOAD_REVISION: "v10"
       BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH: "true"
-      BONSAI_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH_REVISION: "v6"
+      BONSAI_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH_REVISION: "v7"
     steps:
       - uses: actions/checkout@v4
 
@@ -44,24 +44,25 @@ jobs:
           mkdir -p reports/bonsai-transformer-load-probe
           cat > reports/bonsai-transformer-load-probe/report.json <<'JSON'
           {
-            "experiment_id": "bonsai-transformer-load-probe-preflight-v10",
+            "experiment_id": "bonsai-transformer-load-probe-preflight-v11",
             "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
             "status": "preflight_started",
             "ci_conclusion": "preflight_only",
             "claim_promotable_to_manifest": false,
             "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
+            "dependency_stage": "pre_dependency_install",
             "onnx_export_attempted": true,
-            "onnx_export_revision": "v6",
+            "onnx_export_revision": "v7",
             "onnxruntime_load_attempted": true,
-            "onnxruntime_load_revision": "v9",
+            "onnxruntime_load_revision": "v10",
             "onnxruntime_trig_cast_patch_attempted": true,
-            "onnxruntime_trig_cast_patch_revision": "v6",
+            "onnxruntime_trig_cast_patch_revision": "v7",
             "execution_attempted": false,
-            "note": "This preflight report is committed before dependency installation. It is overwritten by scripts/run_bonsai_transformer_load_probe.py if dependency installation and probe execution run."
+            "note": "This preflight report is committed before dependency installation. Later workflow stages overwrite it if they are reached."
           }
           JSON
 
-      - name: Persist preflight report in repo
+      - name: Persist current report in repo
         run: |
           mkdir -p docs/ci
           cp reports/bonsai-transformer-load-probe/report.json docs/ci/bonsai-transformer-load-probe-latest.json
@@ -69,9 +70,9 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/ci/bonsai-transformer-load-probe-latest.json
           if git diff --cached --quiet; then
-            echo "No preflight report changes to commit."
+            echo "No report changes to commit."
           else
-            git commit -m "Record Bonsai transformer preflight CI report"
+            git commit -m "Record Bonsai transformer staged CI report"
             git push
           fi
 
@@ -82,11 +83,82 @@ jobs:
           free -h
           nproc
 
-      - name: Install dependencies
+      - name: Install torch dependency
         run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Write torch-installed report
+        run: |
+          cat > reports/bonsai-transformer-load-probe/report.json <<'JSON'
+          {
+            "experiment_id": "bonsai-transformer-load-probe-dependencies-v11",
+            "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
+            "status": "torch_dependency_installed",
+            "ci_conclusion": "dependency_stage_only",
+            "claim_promotable_to_manifest": false,
+            "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
+            "dependency_stage": "torch_installed_before_runtime_deps",
+            "onnx_export_attempted": true,
+            "onnx_export_revision": "v7",
+            "onnxruntime_load_attempted": true,
+            "onnxruntime_load_revision": "v10",
+            "onnxruntime_trig_cast_patch_attempted": true,
+            "onnxruntime_trig_cast_patch_revision": "v7",
+            "execution_attempted": false,
+            "note": "Torch CPU dependency installation completed. Runtime dependencies and Bonsai probe have not yet completed at this stage."
+          }
+          JSON
+
+      - name: Persist current report in repo after torch
+        run: |
+          mkdir -p docs/ci
+          cp reports/bonsai-transformer-load-probe/report.json docs/ci/bonsai-transformer-load-probe-latest.json
+          git add docs/ci/bonsai-transformer-load-probe-latest.json
+          if git diff --cached --quiet; then
+            echo "No report changes to commit."
+          else
+            git commit -m "Record Bonsai transformer staged CI report"
+            git push
+          fi
+
+      - name: Install runtime dependencies
+        run: |
           pip install --no-cache-dir pyyaml huggingface_hub hf_transfer safetensors diffusers transformers accelerate onnx onnxscript onnxruntime
+
+      - name: Write dependency-ready report
+        run: |
+          cat > reports/bonsai-transformer-load-probe/report.json <<'JSON'
+          {
+            "experiment_id": "bonsai-transformer-load-probe-dependencies-v11",
+            "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
+            "status": "all_dependencies_installed",
+            "ci_conclusion": "dependency_stage_only",
+            "claim_promotable_to_manifest": false,
+            "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
+            "dependency_stage": "all_dependencies_installed_before_probe_script",
+            "onnx_export_attempted": true,
+            "onnx_export_revision": "v7",
+            "onnxruntime_load_attempted": true,
+            "onnxruntime_load_revision": "v10",
+            "onnxruntime_trig_cast_patch_attempted": true,
+            "onnxruntime_trig_cast_patch_revision": "v7",
+            "execution_attempted": false,
+            "note": "All declared Python dependencies installed. The Bonsai transformer probe script has not yet completed at this stage."
+          }
+          JSON
+
+      - name: Persist current report in repo after runtime deps
+        run: |
+          mkdir -p docs/ci
+          cp reports/bonsai-transformer-load-probe/report.json docs/ci/bonsai-transformer-load-probe-latest.json
+          git add docs/ci/bonsai-transformer-load-probe-latest.json
+          if git diff --cached --quiet; then
+            echo "No report changes to commit."
+          else
+            git commit -m "Record Bonsai transformer staged CI report"
+            git push
+          fi
 
       - name: Run transformer load probe
         run: |
@@ -107,14 +179,12 @@ jobs:
           path: reports/bonsai-transformer-load-probe/report.json
           retention-days: 7
 
-      - name: Persist report in repo
+      - name: Persist final report in repo
         if: always()
         run: |
           if [ -f reports/bonsai-transformer-load-probe/report.json ]; then
             mkdir -p docs/ci
             cp reports/bonsai-transformer-load-probe/report.json docs/ci/bonsai-transformer-load-probe-latest.json
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add docs/ci/bonsai-transformer-load-probe-latest.json
             if git diff --cached --quiet; then
               echo "No report changes to commit."
