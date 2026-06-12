@@ -8,6 +8,7 @@ on:
     paths:
       - .github/workflows/bonsai-transformer-load-probe.yml
       - scripts/run_bonsai_transformer_load_probe.py
+      - scripts/run_bonsai_transformer_double_trig_probe.py
       - experiments/bonsai-onnx-smoke.yml
 
 permissions:
@@ -27,11 +28,11 @@ jobs:
       BONSAI_HF_RETRY_ATTEMPTS: "4"
       BONSAI_HF_RETRY_SLEEP_SECONDS: "30"
       BONSAI_RUN_TRANSFORMER_ONNX_EXPORT: "true"
-      BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION: "v7"
+      BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION: "v8"
       BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_LOAD: "true"
-      BONSAI_TRANSFORMER_ONNXRUNTIME_LOAD_REVISION: "v10"
+      BONSAI_TRANSFORMER_ONNXRUNTIME_LOAD_REVISION: "v11"
       BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH: "true"
-      BONSAI_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH_REVISION: "v7"
+      BONSAI_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH_REVISION: "v8"
     steps:
       - uses: actions/checkout@v4
 
@@ -44,7 +45,7 @@ jobs:
           mkdir -p reports/bonsai-transformer-load-probe
           cat > reports/bonsai-transformer-load-probe/report.json <<'JSON'
           {
-            "experiment_id": "bonsai-transformer-load-probe-preflight-v11",
+            "experiment_id": "bonsai-transformer-load-probe-preflight-v12",
             "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
             "status": "preflight_started",
             "ci_conclusion": "preflight_only",
@@ -52,11 +53,12 @@ jobs:
             "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
             "dependency_stage": "pre_dependency_install",
             "onnx_export_attempted": true,
-            "onnx_export_revision": "v7",
+            "onnx_export_revision": "v8",
             "onnxruntime_load_attempted": true,
-            "onnxruntime_load_revision": "v10",
+            "onnxruntime_load_revision": "v11",
             "onnxruntime_trig_cast_patch_attempted": true,
-            "onnxruntime_trig_cast_patch_revision": "v7",
+            "onnxruntime_trig_cast_patch_revision": "v8",
+            "double_trig_cast_probe_revision": "v1",
             "execution_attempted": false,
             "note": "This preflight report is committed before dependency installation. Later workflow stages overwrite it if they are reached."
           }
@@ -92,7 +94,7 @@ jobs:
         run: |
           cat > reports/bonsai-transformer-load-probe/report.json <<'JSON'
           {
-            "experiment_id": "bonsai-transformer-load-probe-dependencies-v11",
+            "experiment_id": "bonsai-transformer-load-probe-dependencies-v12",
             "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
             "status": "torch_dependency_installed",
             "ci_conclusion": "dependency_stage_only",
@@ -100,11 +102,12 @@ jobs:
             "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
             "dependency_stage": "torch_installed_before_runtime_deps",
             "onnx_export_attempted": true,
-            "onnx_export_revision": "v7",
+            "onnx_export_revision": "v8",
             "onnxruntime_load_attempted": true,
-            "onnxruntime_load_revision": "v10",
+            "onnxruntime_load_revision": "v11",
             "onnxruntime_trig_cast_patch_attempted": true,
-            "onnxruntime_trig_cast_patch_revision": "v7",
+            "onnxruntime_trig_cast_patch_revision": "v8",
+            "double_trig_cast_probe_revision": "v1",
             "execution_attempted": false,
             "note": "Torch CPU dependency installation completed. Runtime dependencies and Bonsai probe have not yet completed at this stage."
           }
@@ -130,7 +133,7 @@ jobs:
         run: |
           cat > reports/bonsai-transformer-load-probe/report.json <<'JSON'
           {
-            "experiment_id": "bonsai-transformer-load-probe-dependencies-v11",
+            "experiment_id": "bonsai-transformer-load-probe-dependencies-v12",
             "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
             "status": "all_dependencies_installed",
             "ci_conclusion": "dependency_stage_only",
@@ -138,11 +141,12 @@ jobs:
             "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
             "dependency_stage": "all_dependencies_installed_before_probe_script",
             "onnx_export_attempted": true,
-            "onnx_export_revision": "v7",
+            "onnx_export_revision": "v8",
             "onnxruntime_load_attempted": true,
-            "onnxruntime_load_revision": "v10",
+            "onnxruntime_load_revision": "v11",
             "onnxruntime_trig_cast_patch_attempted": true,
-            "onnxruntime_trig_cast_patch_revision": "v7",
+            "onnxruntime_trig_cast_patch_revision": "v8",
+            "double_trig_cast_probe_revision": "v1",
             "execution_attempted": false,
             "note": "All declared Python dependencies installed. The Bonsai transformer probe script has not yet completed at this stage."
           }
@@ -160,9 +164,9 @@ jobs:
             git push
           fi
 
-      - name: Run transformer load probe
+      - name: Run transformer DOUBLE trig load probe
         run: |
-          python scripts/run_bonsai_transformer_load_probe.py --out-dir reports/bonsai-transformer-load-probe
+          python scripts/run_bonsai_transformer_double_trig_probe.py --out-dir reports/bonsai-transformer-load-probe
 
       - name: Show report
         if: always()
