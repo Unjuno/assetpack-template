@@ -15,6 +15,7 @@ docs/ci/image-model-ci-benchmark-turbo-latest.json
 docs/ci/image-model-ci-benchmark-load-only-latest.json
 docs/ci/image-model-ci-benchmark-runtime-latest.json
 docs/ci/image-model-ci-candidates/<candidate-id>-latest.json
+docs/ci/image-model-onnx-feasibility/<candidate-id>-latest.json
 ```
 
 `docs/ci/bonsai-layout-boundary-latest.json` is produced by the `bonsai-onnx-smoke` workflow when `target=layout-boundary` runs. It is copied from:
@@ -107,6 +108,20 @@ image-model-ci-candidate-<candidate-id>
 ```
 
 The artifact contains the candidate report and any generated `cat.png` image. PNGs are intentionally not committed to the repository; they are for human inspection from the Actions artifact UI.
+
+The `image-model-onnx-feasibility-matrix` workflow writes one repo-persisted ONNX feasibility report per candidate:
+
+```text
+reports/image-model-onnx-feasibility/<candidate-id>/report.json -> docs/ci/image-model-onnx-feasibility/<candidate-id>-latest.json
+```
+
+It also uploads a per-candidate artifact named:
+
+```text
+image-model-onnx-feasibility-<candidate-id>
+```
+
+For Stable-Diffusion-style UNet candidates, the ONNX feasibility workflow attempts a minimal UNet ONNX export, ONNX Runtime CPU load, and ONNX Runtime dummy execution. For SDXL, Flux, Qwen, PixArt, adapter-only repositories, component-only methods, OpenVINO placeholders, and native runtime placeholders, the workflow records the skip or failure boundary instead of pretending a generic ONNX path is valid. These are feasibility measurements only; they do not verify a full prompt-to-image ONNX pipeline.
 
 Those reports record CI measurements for candidate image-generation methods using a fixed cat prompt. Candidate-level records include load seconds, generation seconds, total seconds, image SHA-256, image size, disk snapshots, max RSS, method, pipeline class, and failure boundary. These reports are measurement evidence only; they are not model-quality claims, not general benchmark claims, and not prompt-to-image product claims beyond the specific CI run configuration.
 
