@@ -24,6 +24,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
       BONSAI_RUN_TRANSFORMER_LOAD: "false"
       BONSAI_REQUIRE_ALL_COMBINED_CLAIMS: "false"
+      BONSAI_COMBINED_PROBE_REVISION: "scheduler-mu-and-tensor-truth-fix-v1"
     steps:
       - uses: actions/checkout@v4
 
