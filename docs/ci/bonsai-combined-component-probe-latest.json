@@ -5,134 +5,22 @@
   "ci_conclusion": "success",
   "claim_promotable_to_manifest": true,
   "require_all": false,
-  "run_transformer_load": false,
+  "run_transformer_load": true,
   "promotable_claims": [
-    {
-      "name": "tokenizer_execution",
-      "allowed_claim": "bonsai_tokenizer_execution_verified"
-    },
-    {
-      "name": "text_encoder_execution",
-      "allowed_claim": "bonsai_text_encoder_execution_verified"
-    },
-    {
-      "name": "scheduler_execution",
-      "allowed_claim": "bonsai_scheduler_step_execution_verified"
-    },
-    {
-      "name": "vae_execution",
-      "allowed_claim": "bonsai_vae_decoder_execution_verified"
-    },
     {
       "name": "transformer_config_load",
       "allowed_claim": "bonsai_transformer_config_boundary_verified_not_runtime_execution"
+    },
+    {
+      "name": "transformer_weight_load",
+      "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution"
     }
   ],
   "stages": [
     {
-      "name": "tokenizer_execution",
-      "status": "passed",
-      "seconds": 7.996,
-      "claim_promotable_to_manifest": true,
-      "allowed_claim": "bonsai_tokenizer_execution_verified",
-      "component": "tokenizer",
-      "prompt": "a small bonsai tree in a ceramic pot",
-      "class_name": "Qwen2Tokenizer",
-      "vocab_size": 151643,
-      "model_max_length": 131072,
-      "input_ids_shape": [
-        1,
-        9
-      ],
-      "input_ids_sha256_int64_le": "a3c323ac42dc29072a5896a724ab160c1192d596bd617128113630855b763b68",
-      "attention_mask_shape": [
-        1,
-        9
-      ],
-      "attention_mask_sha256_int64_le": "df070c0849900928e1e85833cce32020c89d2303a9e960510c3c3b79746448b7"
-    },
-    {
-      "name": "text_encoder_execution",
-      "status": "passed",
-      "seconds": 113.694,
-      "claim_promotable_to_manifest": true,
-      "allowed_claim": "bonsai_text_encoder_execution_verified",
-      "component": "text_encoder",
-      "class_name": "Qwen3Model",
-      "hidden_state": {
-        "shape": [
-          1,
-          9,
-          2560
-        ],
-        "dtype": "float32",
-        "min": -28.810636520385742,
-        "max": 67.63907623291016,
-        "mean": 0.06100994348526001,
-        "sha256_float32_le": "6d4ce391fc0cb7664bc52303e8ec0f676023e124327983de943147be41d817b0"
-      }
-    },
-    {
-      "name": "scheduler_execution",
-      "status": "passed",
-      "seconds": 2.544,
-      "claim_promotable_to_manifest": true,
-      "allowed_claim": "bonsai_scheduler_step_execution_verified",
-      "component": "scheduler",
-      "class_name": "FlowMatchEulerDiscreteScheduler",
-      "set_timesteps_kwargs": {
-        "mu": 0.0
-      },
-      "timesteps": [
-        1000.0,
-        1.0
-      ],
-      "prev_sample": {
-        "shape": [
-          1,
-          4,
-          8,
-          8
-        ],
-        "dtype": "float32",
-        "min": -0.009990000165998936,
-        "max": -0.009990000165998936,
-        "mean": -0.00999000109732151,
-        "sha256_float32_le": "e067c3fa7c505915ba6536e0f7a4ff1265605484327484df70785a51b8bbf281"
-      }
-    },
-    {
-      "name": "vae_execution",
-      "status": "passed",
-      "seconds": 5.05,
-      "claim_promotable_to_manifest": true,
-      "allowed_claim": "bonsai_vae_decoder_execution_verified",
-      "component": "vae_decoder",
-      "class_name": "AutoencoderKL",
-      "input_shape": [
-        1,
-        32,
-        8,
-        8
-      ],
-      "decoded_sample": {
-        "shape": [
-          1,
-          3,
-          64,
-          64
-        ],
-        "dtype": "float32",
-        "min": -0.7699174880981445,
-        "max": 0.5026676654815674,
-        "mean": -0.09306952357292175,
-        "sha256_float32_le": "6107e6c616b578184ceac14b086f5fe9fe32569113184f0727d498b3b96004dc"
-      }
-    },
-    {
       "name": "transformer_config_load",
       "status": "passed",
-      "seconds": 0.214,
+      "seconds": 0.382,
       "claim_promotable_to_manifest": true,
       "allowed_claim": "bonsai_transformer_config_boundary_verified_not_runtime_execution",
       "component": "transformer",
@@ -157,11 +45,18 @@
     },
     {
       "name": "transformer_weight_load",
-      "status": "skipped",
-      "seconds": 0.0,
-      "claim_promotable_to_manifest": false,
+      "status": "passed",
+      "seconds": 32.804,
+      "claim_promotable_to_manifest": true,
       "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
-      "skip_reason": "set BONSAI_RUN_TRANSFORMER_LOAD=true to attempt heavy transformer weight load"
+      "component": "transformer",
+      "load_kind": "weights",
+      "class_name": "Flux2Transformer2DModel",
+      "param_count": 3875544576,
+      "param_count_billion": 3.876,
+      "dtype_param_counts": {
+        "torch.float16": 3875544576
+      }
     },
     {
       "name": "full_pipeline_composition",
@@ -170,7 +65,10 @@
       "claim_promotable_to_manifest": false,
       "allowed_claim": "bonsai_full_pipeline_composition_verified",
       "blocked_by": {
-        "transformer_weight_load": "skipped"
+        "tokenizer_execution": "not_run",
+        "text_encoder_execution": "not_run",
+        "scheduler_execution": "not_run",
+        "vae_execution": "not_run"
       }
     },
     {
@@ -194,5 +92,5 @@
       }
     }
   ],
-  "seconds": 129.5
+  "seconds": 33.189
 }
