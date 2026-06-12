@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+# This script intentionally emits stage-level evidence so a single CI run can
+# promote successful component claims without overstating blocked full-pipeline claims.
+
 import argparse
 import hashlib
 import inspect
