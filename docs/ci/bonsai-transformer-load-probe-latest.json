@@ -1,13 +1,16 @@
 {
-  "experiment_id": "bonsai-transformer-load-probe-v3",
+  "experiment_id": "bonsai-transformer-load-probe-v4",
   "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
   "download_weights": true,
   "runtime_load": true,
   "onnx_export_attempted": true,
+  "onnx_export_revision": "v3",
+  "onnxruntime_load_attempted": true,
+  "onnxruntime_load_revision": "v2",
   "claim_promotable_to_manifest": true,
   "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
   "status": "passed",
-  "ci_conclusion": "success",
+  "ci_conclusion": "success_with_probe_failure",
   "class_name": "Flux2Transformer2DModel",
   "param_count": 3875544576,
   "param_count_billion": 3.876,
@@ -21,10 +24,20 @@
     "path": "reports/bonsai-transformer-load-probe/transformer_minimal.onnx",
     "size_bytes": 5070858,
     "files": [
-      "transformer_minimal.onnx.data",
-      "transformer_minimal.onnx"
+      "transformer_minimal.onnx",
+      "transformer_minimal.onnx.data"
     ],
     "external_data_enabled": true
   },
-  "seconds": 279.497
+  "onnxruntime_load": {
+    "status": "failed",
+    "claim_promotable_to_manifest": false,
+    "allowed_claim": "bonsai_transformer_minimal_onnxruntime_load_verified_not_execution",
+    "path": "reports/bonsai-transformer-load-probe/transformer_minimal.onnx",
+    "execution_attempted": false,
+    "error_type": "NotImplemented",
+    "error": "[ONNXRuntimeError] : 9 : NOT_IMPLEMENTED : Could not find an implementation for Cos(7) node with name 'node_cos_1'",
+    "seconds": 0.185
+  },
+  "seconds": 139.237
 }
