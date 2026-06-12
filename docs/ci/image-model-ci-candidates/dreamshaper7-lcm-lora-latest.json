@@ -25,15 +25,15 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 61613142016,
-      "free_bytes": 93264269312
+      "used_bytes": 61614198784,
+      "free_bytes": 93263212544
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 67096125440,
-      "free_bytes": 87781285888
+      "used_bytes": 61614170112,
+      "free_bytes": 93263241216
     },
-    "max_rss_mb_end": 2944.047
+    "max_rss_mb_end": 357.707
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -58,22 +58,22 @@
         "notes": "Quality base + LCM-LoRA. If gated or incompatible, report failure boundary."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781287039.604,
+      "started_at_monotonic_seconds": 1781290158.35,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613142016,
-        "free_bytes": 93264269312
+        "used_bytes": 61614198784,
+        "free_bytes": 93263212544
       },
-      "max_rss_mb_before": 19.73,
-      "error_type": "ValueError",
-      "error": "PEFT backend is required for this method.",
+      "max_rss_mb_before": 19.633,
+      "error_type": "OSError",
+      "error": "Cannot load model Lykon/dreamshaper-7: model is not cached locally and an error occurred while trying to fetch metadata from the Hub. Please check out the root cause in the stacktrace above.",
       "execution_attempted": false,
-      "total_seconds": 21.929,
-      "max_rss_mb_after_candidate": 2944.047,
+      "total_seconds": 3.785,
+      "max_rss_mb_after_candidate": 357.707,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 67096125440,
-        "free_bytes": 87781285888
+        "used_bytes": 61614161920,
+        "free_bytes": 93263249408
       }
     }
   ],
@@ -83,7 +83,7 @@
     "skipped": 0,
     "total": 1
   },
-  "seconds_so_far": 21.963,
+  "seconds_so_far": 3.818,
   "summary": {
     "passed": 0,
     "failed": 1,
@@ -91,5 +91,5 @@
     "total": 1
   },
   "ci_conclusion": "success_with_candidate_failures",
-  "seconds": 21.963
+  "seconds": 3.818
 }
