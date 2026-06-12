@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import os
 import time
@@ -31,7 +32,7 @@ def run(config_path: str, out_dir: str) -> int:
     out = Path(out_dir)
     export_attempt = env_bool("BONSAI_RUN_TRANSFORMER_ONNX_EXPORT", False)
     report = {
-        "experiment_id": "bonsai-transformer-load-probe-v2",
+        "experiment_id": "bonsai-transformer-load-probe-v3",
         "model_ref": model_ref,
         "download_weights": True,
         "runtime_load": True,
@@ -86,15 +87,19 @@ def run(config_path: str, out_dir: str) -> int:
                 torch.zeros((1, axes_len), dtype=torch.float32),
             )
             onnx_path = out / "transformer_minimal.onnx"
-            torch.onnx.export(
-                Wrapper(model),
-                example_inputs,
-                str(onnx_path),
-                input_names=["hidden_states", "encoder_hidden_states", "timestep", "img_ids", "txt_ids"],
-                output_names=["sample"],
-                opset_version=17,
-                do_constant_folding=False,
-            )
+            kwargs = {
+                "input_names": ["hidden_states", "encoder_hidden_states", "timestep", "img_ids", "txt_ids"],
+                "output_names": ["sample"],
+                "opset_version": 17,
+                "do_constant_folding": False,
+            }
+            export_params = inspect.signature(torch.onnx.export).parameters
+            if "external_data" in export_params:
+                kwargs["external_data"] = True
+            elif "use_external_data_format" in export_params:
+                kwargs["use_external_data_format"] = True
+            torch.onnx.export(Wrapper(model), example_inputs, str(onnx_path), **kwargs)
+            extra_files = [p.name for p in out.glob("transformer_minimal.onnx*")]
             report.update({
                 "onnx_export": {
                     "status": "passed",
@@ -102,6 +107,8 @@ def run(config_path: str, out_dir: str) -> int:
                     "allowed_claim": "bonsai_transformer_minimal_onnx_export_verified_not_full_pipeline",
                     "path": str(onnx_path),
                     "size_bytes": onnx_path.stat().st_size,
+                    "files": extra_files,
+                    "external_data_enabled": "external_data" in kwargs or "use_external_data_format" in kwargs,
                 }
             })
     except BaseException as exc:
