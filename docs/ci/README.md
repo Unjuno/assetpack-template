@@ -8,6 +8,7 @@ This directory is reserved for CI reports that are committed back into the repos
 docs/ci/bonsai-layout-boundary-latest.json
 docs/ci/bonsai-combined-component-probe-latest.json
 docs/ci/bonsai-transformer-load-probe-latest.json
+docs/ci/ort-cpu-kernel-probe-latest.json
 ```
 
 `docs/ci/bonsai-layout-boundary-latest.json` is produced by the `bonsai-onnx-smoke` workflow when `target=layout-boundary` runs. It is copied from:
@@ -57,6 +58,14 @@ onnx_export.external_data_enabled: true
 ```
 
 This verifies only the minimal standalone transformer ONNX export boundary. It does not verify ONNX Runtime execution, full pipeline composition, prompt-to-image generation, or a single monolithic multi-block ONNX graph.
+
+`docs/ci/ort-cpu-kernel-probe-latest.json` is produced by the `ort-cpu-kernel-probe` workflow. It is copied from:
+
+```text
+reports/ort-cpu-kernel-probe/report.json
+```
+
+That report is synthetic ONNX Runtime CPUExecutionProvider evidence for `Cos` with `FLOAT16` input and a `FLOAT32` cast workaround. It is not Bonsai model evidence, not transformer graph evidence, and not a full pipeline claim.
 
 The workflow path filters intentionally do not include `docs/ci/**`, so committing report snapshots does not retrigger the workflows.
 
