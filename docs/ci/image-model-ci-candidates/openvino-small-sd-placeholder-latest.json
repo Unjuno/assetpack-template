@@ -25,13 +25,13 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 60681961472,
-      "free_bytes": 94195449856
+      "used_bytes": 60682862592,
+      "free_bytes": 94194548736
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 60681961472,
-      "free_bytes": 94195449856
+      "used_bytes": 60682862592,
+      "free_bytes": 94194548736
     },
     "max_rss_mb_end": 19.73
   },
@@ -54,11 +54,11 @@
         "notes": "Placeholder. Do not quantize large models inside standard CI."
       },
       "status": "skipped",
-      "started_at_monotonic_seconds": 1781287620.124,
+      "started_at_monotonic_seconds": 1781290724.67,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 60681961472,
-        "free_bytes": 94195449856
+        "used_bytes": 60682862592,
+        "free_bytes": 94194548736
       },
       "max_rss_mb_before": 19.73,
       "reason": "Placeholder or unsupported runtime; add an implementation before enabling execution.",
@@ -66,8 +66,8 @@
       "load_only": false,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 60681961472,
-        "free_bytes": 94195449856
+        "used_bytes": 60682862592,
+        "free_bytes": 94194548736
       }
     }
   ],
@@ -77,7 +77,7 @@
     "skipped": 1,
     "total": 1
   },
-  "seconds_so_far": 0.033,
+  "seconds_so_far": 0.032,
   "summary": {
     "passed": 0,
     "failed": 0,
@@ -85,5 +85,5 @@
     "total": 1
   },
   "ci_conclusion": "success_with_candidate_failures",
-  "seconds": 0.033
+  "seconds": 0.032
 }
