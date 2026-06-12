@@ -7,6 +7,7 @@ This directory is reserved for CI reports that are committed back into the repos
 ```text
 docs/ci/bonsai-layout-boundary-latest.json
 docs/ci/bonsai-combined-component-probe-latest.json
+docs/ci/bonsai-transformer-load-probe-latest.json
 ```
 
 `docs/ci/bonsai-layout-boundary-latest.json` is produced by the `bonsai-onnx-smoke` workflow when `target=layout-boundary` runs. It is copied from:
@@ -19,6 +20,12 @@ reports/bonsai-layout-boundary/report.json
 
 ```text
 reports/bonsai-combined-component-probe/report.json
+```
+
+`docs/ci/bonsai-transformer-load-probe-latest.json` is produced by the `bonsai-transformer-load-probe` workflow. It is copied from:
+
+```text
+reports/bonsai-transformer-load-probe/report.json
 ```
 
 The workflow path filters intentionally do not include `docs/ci/**`, so committing report snapshots does not retrigger the workflows.
