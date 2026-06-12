@@ -6,12 +6,25 @@ import gc
 import json
 import os
 import time
+import urllib.error
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 MILESTONES = ["layout_probe", "component_load", "component_export", "ort_cpu_forward", "cpu_image_generation"]
+BOUNDARY_PROBE_PATHS = [
+    "model_index.json",
+    "transformer/config.json",
+    "vae/config.json",
+    "text_encoder/config.json",
+    "text_encoder_2/config.json",
+    "tokenizer/tokenizer_config.json",
+    "tokenizer_2/tokenizer_config.json",
+    "scheduler/scheduler_config.json",
+]
 
 
 def rank(name: str) -> int:
@@ -46,12 +59,12 @@ def analyze(files: list[dict[str, Any]]) -> dict[str, Any]:
         if f["path"].endswith(".safetensors")
     ]
     components = {}
-    for name in ["transformer", "vae", "text_encoder", "text_encoder_2", "tokenizer", "scheduler"]:
+    for name in ["transformer", "vae", "text_encoder", "text_encoder_2", "tokenizer", "tokenizer_2", "scheduler"]:
         selected = sorted(p for p in paths if p == name or p.startswith(name + "/"))
         components[name] = {
             "present": bool(selected),
             "file_count": len(selected),
-            "has_config": f"{name}/config.json" in path_set,
+            "has_config": f"{name}/config.json" in path_set or f"{name}/tokenizer_config.json" in path_set or f"{name}/scheduler_config.json" in path_set,
             "sample_files": selected[:30],
         }
     return {
@@ -82,6 +95,49 @@ def hf_files(model_ref: str) -> list[dict[str, Any]]:
         for path in api.list_repo_files(repo_id=model_ref, repo_type="model"):
             out.append({"path": path, "size": None})
     return sorted(out, key=lambda x: x["path"])
+
+
+def resolve_url(model_ref: str, path: str) -> str:
+    encoded_model = urllib.parse.quote(model_ref, safe="/")
+    encoded_path = urllib.parse.quote(path, safe="/")
+    return f"https://huggingface.co/{encoded_model}/resolve/main/{encoded_path}"
+
+
+def probe_resolve_path(model_ref: str, path: str, timeout: int = 20) -> dict[str, Any]:
+    request = urllib.request.Request(
+        resolve_url(model_ref, path),
+        method="HEAD",
+        headers={"User-Agent": "assetpack-template-bonsai-layout-boundary/1.0"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            size_header = response.headers.get("Content-Length")
+            return {
+                "path": path,
+                "present": True,
+                "status_code": int(response.status),
+                "size": int(size_header) if size_header and size_header.isdigit() else None,
+            }
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            return {"path": path, "present": False, "status_code": 404, "size": None}
+        raise RuntimeError(f"HTTP {exc.code} probing {path}: {exc.reason}") from exc
+
+
+def boundary_files(model_ref: str) -> list[dict[str, Any]]:
+    probed = [probe_resolve_path(model_ref, path) for path in BOUNDARY_PROBE_PATHS]
+    files = [{"path": item["path"], "size": item.get("size")} for item in probed if item.get("present")]
+    if not files:
+        raise RuntimeError("no boundary files were found via resolve probing")
+    return sorted(files, key=lambda x: x["path"])
+
+
+def layout_files(model_ref: str, mode: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    if mode == "tree":
+        return hf_files(model_ref), {"probe_mode": "tree"}
+    if mode == "boundary_files":
+        return boundary_files(model_ref), {"probe_mode": "boundary_files", "probed_paths": BOUNDARY_PROBE_PATHS}
+    raise ValueError(f"unknown layout probe mode: {mode}")
 
 
 def add_stage(result: dict[str, Any], name: str, fn):
@@ -254,6 +310,7 @@ def run(args: argparse.Namespace) -> int:
     download = env_bool("BONSAI_DOWNLOAD_WEIGHTS", bool(export_cfg.get("download_weights", False)))
     component = os.getenv("BONSAI_EXPORT_COMPONENT") or export_cfg.get("component", "vae_decoder")
     allow_external_rate_limit = env_bool("BONSAI_ALLOW_EXTERNAL_RATE_LIMIT", False)
+    layout_probe_mode = os.getenv("BONSAI_LAYOUT_PROBE_MODE") or "tree"
     rank(required)
 
     result = {
@@ -267,12 +324,17 @@ def run(args: argparse.Namespace) -> int:
         "milestone_reached": None,
         "download_weights": download,
         "export_component": component,
+        "layout_probe_mode": layout_probe_mode,
         "claim_promotable_to_manifest": False,
         "stages": [],
     }
     start = time.time()
     try:
-        add_stage(result, "layout_probe", lambda: {"analysis": analyze(hf_files(cand["model_ref"]))})
+        def layout_payload() -> dict[str, Any]:
+            files, metadata = layout_files(cand["model_ref"], layout_probe_mode)
+            return {"analysis": analyze(files), **metadata}
+
+        add_stage(result, "layout_probe", layout_payload)
         result["milestone_reached"] = "layout_probe"
         if rank(required) <= rank("layout_probe"):
             result["status"] = "passed"
@@ -344,10 +406,14 @@ def self_test() -> int:
         {"path": "transformer/diffusion_pytorch_model.safetensors", "size": 2048},
         {"path": "vae/config.json", "size": 2},
         {"path": "vae/diffusion_pytorch_model.safetensors", "size": 1024},
+        {"path": "tokenizer/tokenizer_config.json", "size": 1},
+        {"path": "scheduler/scheduler_config.json", "size": 1},
     ])
     assert analysis["has_model_index_json"] is False
     assert analysis["component_candidates"]["vae"]["present"] is True
     assert analysis["component_candidates"]["transformer"]["present"] is True
+    assert analysis["component_candidates"]["tokenizer"]["present"] is True
+    assert analysis["component_candidates"]["scheduler"]["present"] is True
     assert analysis["safetensors_count"] == 2
     print("self-test passed")
     return 0
