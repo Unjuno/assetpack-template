@@ -1,0 +1,113 @@
+{
+  "experiment_id": "image-model-ci-curated-butterflies-v1",
+  "prompt": "a beautiful butterfly perched on a bonsai branch in a bonsai pot, detailed symmetrical wings, natural butterfly anatomy, delicate legs, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a butterfly, cat, dog, rabbit, bird, chameleon, toy",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Butterfly generation uses the strict seven candidates accepted from cat artifact review. Butterfly visual quality is unverified until this workflow is run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "lcm-dreamshaper-v7-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61395464192,
+      "free_bytes": 93481947136
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 66879127552,
+      "free_bytes": 87998283776
+    },
+    "max_rss_mb_end": 5260.801
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "lcm-dreamshaper-v7-quality",
+        "enabled": true,
+        "batch": "curated_butterfly",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "SimianLuo/LCM_Dreamshaper_v7",
+        "pipeline_class": "LatentConsistencyModelPipeline",
+        "height": 384,
+        "width": 384,
+        "steps": 4,
+        "guidance_scale": 8.0,
+        "expected_role": "butterfly_lcm_reference"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781300882.303,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61395464192,
+        "free_bytes": 93481947136
+      },
+      "max_rss_mb_before": 19.73,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "LatentConsistencyModelPipeline",
+      "model_ref": "SimianLuo/LCM_Dreamshaper_v7",
+      "load_seconds": 19.696,
+      "generate_seconds": 39.991,
+      "total_seconds": 59.893,
+      "height": 384,
+      "width": 384,
+      "steps": 4,
+      "guidance_scale": 8.0,
+      "call_kwargs": {
+        "prompt": "a beautiful butterfly perched on a bonsai branch in a bonsai pot, detailed symmetrical wings, natural butterfly anatomy, delicate legs, studio lighting, sharp focus",
+        "num_inference_steps": 4,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a butterfly, cat, dog, rabbit, bird, chameleon, toy",
+        "height": 384,
+        "width": 384,
+        "guidance_scale": 8.0
+      },
+      "image_path": "reports/image-model-ci-curated-butterflies/lcm-dreamshaper-v7-quality/images/lcm-dreamshaper-v7-quality/cat.png",
+      "image_sha256": "23c0e101dd42564e61a5fcec3200aa097ecfa76426e11ea3ca01774eff529c0d",
+      "image_size_bytes": 221515,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 5260.801,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 66879127552,
+        "free_bytes": 87998283776
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 62.505,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 62.506
+}
