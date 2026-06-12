@@ -1,0 +1,68 @@
+name: bonsai-combined-component-probe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/bonsai-combined-component-probe.yml
+      - scripts/run_bonsai_combined_component_probe.py
+      - experiments/bonsai-onnx-smoke.yml
+
+permissions:
+  contents: read
+
+jobs:
+  combined-component-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      HF_HUB_ENABLE_HF_TRANSFER: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
+      BONSAI_RUN_TRANSFORMER_LOAD: "false"
+      BONSAI_REQUIRE_ALL_COMBINED_CLAIMS: "false"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Show runner resources
+        run: |
+          python --version
+          df -h
+          free -h
+          nproc
+
+      - name: Install component probe dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --no-cache-dir pyyaml huggingface_hub hf_transfer safetensors diffusers transformers accelerate
+
+      - name: Self-test combined component probe
+        run: |
+          python scripts/run_bonsai_combined_component_probe.py --self-test
+
+      - name: Run combined component probe
+        run: |
+          python scripts/run_bonsai_combined_component_probe.py --out-dir reports/bonsai-combined-component-probe
+
+      - name: Show combined component probe summary
+        if: always()
+        run: |
+          if [ -f reports/bonsai-combined-component-probe/report.json ]; then
+            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-combined-component-probe/report.json').read_text()); print(json.dumps({'status': r.get('status'), 'ci_conclusion': r.get('ci_conclusion'), 'claim_promotable_to_manifest': r.get('claim_promotable_to_manifest'), 'promotable_claims': r.get('promotable_claims'), 'stages': [(s.get('name'), s.get('status'), s.get('claim_promotable_to_manifest'), s.get('error_type')) for s in r.get('stages', [])]}, indent=2))"
+          fi
+
+      - name: Upload combined component probe report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-combined-component-probe-report-json
+          path: reports/bonsai-combined-component-probe/report.json
+          retention-days: 7
