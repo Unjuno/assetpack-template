@@ -22,7 +22,20 @@ reports/bonsai-layout-boundary/report.json
 reports/bonsai-combined-component-probe/report.json
 ```
 
-`docs/ci/bonsai-transformer-load-probe-latest.json` is produced by the `bonsai-transformer-load-probe` workflow. It is copied from:
+The current canonical transformer weight-load evidence is also in:
+
+```text
+docs/ci/bonsai-combined-component-probe-latest.json
+```
+
+with:
+
+```text
+run_transformer_load: true
+transformer_weight_load: passed
+```
+
+`docs/ci/bonsai-transformer-load-probe-latest.json` is reserved for the dedicated transformer load workflow when that workflow is used. It is copied from:
 
 ```text
 reports/bonsai-transformer-load-probe/report.json
@@ -44,29 +57,8 @@ A repo-persisted report can be promoted to `docs/bonsai-lowbit-verification-mani
 
 For combined reports, individual stages may be promotable even when later full-pipeline stages are blocked or not implemented. Promote only the explicit stage-level `allowed_claim` values with `claim_promotable_to_manifest=true`.
 
-Reports or stages with any of the following are evidence records, but not verified manifest entries:
-
-```json
-{
-  "status": "external_rate_limited",
-  "claim_promotable_to_manifest": false
-}
-```
-
-```json
-{
-  "status": "failed",
-  "claim_promotable_to_manifest": false
-}
-```
-
-```json
-{
-  "status": "blocked",
-  "claim_promotable_to_manifest": false
-}
-```
+Reports or stages with `external_rate_limited`, `failed`, or `blocked` are evidence records, but not verified manifest entries.
 
 ## Non-claims
 
-Persisting a CI report into this directory does not by itself verify full Bonsai ONNX pipeline execution, real transformer ONNX execution, text encoder execution, scheduler execution, VAE execution, prompt-to-image generation, or single monolithic multi-block ONNX execution. Those require explicit successful report keys and successful evidence-gated promotion.
+Persisting a CI report into this directory does not by itself verify full Bonsai ONNX pipeline execution, real transformer ONNX execution, prompt-to-image generation, or single monolithic multi-block ONNX execution. Those require explicit successful report keys and successful evidence-gated promotion.
