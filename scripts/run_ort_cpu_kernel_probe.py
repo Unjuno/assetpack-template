@@ -16,6 +16,7 @@ def make_cos_model(path: Path, elem_type: int, patched: bool) -> dict:
     import onnx
     from onnx import TensorProto, helper
 
+    path.parent.mkdir(parents=True, exist_ok=True)
     input_info = helper.make_tensor_value_info("x", elem_type, [1, 4])
     output_info = helper.make_tensor_value_info("y", elem_type, [1, 4])
     if patched:
@@ -73,8 +74,9 @@ def try_load(path: Path) -> dict:
 def run(out_dir: str) -> int:
     started = time.time()
     out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
     report: dict = {
-        "experiment_id": "ort-cpu-kernel-probe-v1",
+        "experiment_id": "ort-cpu-kernel-probe-v2",
         "purpose": "Synthetic ONNX Runtime CPUExecutionProvider kernel probe for Cos FLOAT16 and FLOAT cast workaround.",
         "claim_promotable_to_manifest": False,
         "allowed_claim": "synthetic_ort_cpu_cos_float16_cast_workaround_evidence_not_bonsai_pipeline",
