@@ -24,16 +24,16 @@
     "python": "3.11.15",
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
-      "total_bytes": 76887154688,
-      "used_bytes": 57460891648,
-      "free_bytes": 19409485824
+      "total_bytes": 154894188544,
+      "used_bytes": 61614194688,
+      "free_bytes": 93263216640
     },
     "disk_end": {
-      "total_bytes": 76887154688,
-      "used_bytes": 57460740096,
-      "free_bytes": 19409637376
+      "total_bytes": 154894188544,
+      "used_bytes": 61614157824,
+      "free_bytes": 93263253504
     },
-    "max_rss_mb_end": 359.09
+    "max_rss_mb_end": 359.051
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -57,22 +57,22 @@
         "notes": "Gated and likely too heavy for standard CI; load-only evidence is useful."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781287561.418,
+      "started_at_monotonic_seconds": 1781290666.476,
       "disk_before": {
-        "total_bytes": 76887154688,
-        "used_bytes": 57460891648,
-        "free_bytes": 19409485824
+        "total_bytes": 154894188544,
+        "used_bytes": 61614194688,
+        "free_bytes": 93263216640
       },
-      "max_rss_mb_before": 19.73,
+      "max_rss_mb_before": 19.625,
       "error_type": "GatedRepoError",
-      "error": "401 Client Error. (Request ID: Root=1-6a2c4a8e-3eeb0cf85c0030dd6d0e479c;94d80b29-5673-4a5c-a94d-92075cfbf22e)\n\nCannot access gated repo for url https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/model_index.json.\nAccess to model black-forest-labs/FLUX.1-schnell is restricted. You must have access to it and be authenticated to access it. Please log in.",
+      "error": "401 Client Error. (Request ID: Root=1-6a2c56af-054cf4e830e3ee6054e6544c;6f12c7a8-f48e-43ac-93ea-01e225b3cca4)\n\nCannot access gated repo for url https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/model_index.json.\nAccess to model black-forest-labs/FLUX.1-schnell is restricted. You must have access to it and be authenticated to access it. Please log in.",
       "execution_attempted": false,
-      "total_seconds": 5.016,
-      "max_rss_mb_after_candidate": 359.09,
+      "total_seconds": 4.825,
+      "max_rss_mb_after_candidate": 359.051,
       "disk_after": {
-        "total_bytes": 76887154688,
-        "used_bytes": 57460740096,
-        "free_bytes": 19409637376
+        "total_bytes": 154894188544,
+        "used_bytes": 61614157824,
+        "free_bytes": 93263253504
       }
     }
   ],
@@ -82,7 +82,7 @@
     "skipped": 0,
     "total": 1
   },
-  "seconds_so_far": 5.044,
+  "seconds_so_far": 4.857,
   "summary": {
     "passed": 0,
     "failed": 1,
@@ -90,5 +90,5 @@
     "total": 1
   },
   "ci_conclusion": "success_with_candidate_failures",
-  "seconds": 5.045
+  "seconds": 4.857
 }
