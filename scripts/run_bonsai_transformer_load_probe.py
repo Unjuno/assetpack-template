@@ -46,7 +46,9 @@ def run(config_path: str, out_dir: str) -> int:
         "download_weights": True,
         "runtime_load": True,
         "onnx_export_attempted": export_attempt,
+        "onnx_export_revision": os.getenv("BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION", ""),
         "onnxruntime_load_attempted": ort_load_attempt,
+        "onnxruntime_load_revision": os.getenv("BONSAI_TRANSFORMER_ONNXRUNTIME_LOAD_REVISION", ""),
         "claim_promotable_to_manifest": False,
         "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
     }
