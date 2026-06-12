@@ -1,0 +1,104 @@
+{
+  "experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "negative_prompt": "blurry, distorted, low quality",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+  },
+  "selection": {
+    "candidate_ids": [
+      "tiny-stable-diffusion-pipe"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61615517696,
+      "free_bytes": 93261893632
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61624803328,
+      "free_bytes": 93252608000
+    },
+    "max_rss_mb_end": 425.84
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "tiny-stable-diffusion-pipe",
+        "enabled": true,
+        "batch": "smoke",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "hf-internal-testing/tiny-stable-diffusion-pipe",
+        "pipeline_class": "DiffusionPipeline",
+        "height": 64,
+        "width": 64,
+        "steps": 2,
+        "guidance_scale": 1.0,
+        "expected_role": "ci_sentinel",
+        "notes": "Tiny pipeline for CI mechanics, not image quality."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286872.42,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61615517696,
+        "free_bytes": 93261893632
+      },
+      "max_rss_mb_before": 19.73,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "DiffusionPipeline",
+      "model_ref": "hf-internal-testing/tiny-stable-diffusion-pipe",
+      "load_seconds": 2.857,
+      "generate_seconds": 0.114,
+      "total_seconds": 3.13,
+      "height": 64,
+      "width": 64,
+      "steps": 2,
+      "guidance_scale": 1.0,
+      "image_path": "reports/image-model-ci-candidate/tiny-stable-diffusion-pipe/images/tiny-stable-diffusion-pipe/cat.png",
+      "image_sha256": "94ebc5056423d00478272fa04f67c9c5849e7de56d46ac8e30371bf02fa4e455",
+      "image_size_bytes": 11420,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 425.84,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61624803328,
+        "free_bytes": 93252608000
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 5.971,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 5.972
+}
