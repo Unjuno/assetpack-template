@@ -1,0 +1,117 @@
+{
+  "experiment_id": "image-model-onnx-feasibility-v1",
+  "source_experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "selection": {
+    "candidate_ids": [
+      "segmind-vega-load"
+    ],
+    "batches": [],
+    "selected_count": 1
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 60859088896,
+      "free_bytes": 94018322432
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 67447603200,
+      "free_bytes": 87429808128
+    },
+    "max_rss_mb_end": 3367.695
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_onnx_feasibility_measurement_not_full_pipeline",
+  "status": "failed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "segmind-vega-load",
+        "enabled": true,
+        "batch": "turbo",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "segmind/Segmind-Vega",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 0.0,
+        "expected_role": "small_sdxl_load_candidate",
+        "notes": "Segmind-Vega small SDXL-family candidate. Load-only first."
+      },
+      "status": "skipped",
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 60859088896,
+        "free_bytes": 94018322432
+      },
+      "max_rss_mb_before": 21.113,
+      "pipeline_load": {
+        "status": "passed",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "seconds": 20.996
+      },
+      "components": {
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "component_keys": [
+          "feature_extractor",
+          "image_encoder",
+          "scheduler",
+          "text_encoder",
+          "text_encoder_2",
+          "tokenizer",
+          "tokenizer_2",
+          "unet",
+          "vae"
+        ],
+        "has_unet": true,
+        "has_transformer": false,
+        "has_vae": true,
+        "unet_class": "UNet2DConditionModel",
+        "transformer_class": null,
+        "vae_class": "AutoencoderKL"
+      },
+      "onnx_strategy": {
+        "component": "unet",
+        "supported_by_generic_probe": false,
+        "reason": "UNet addition_embed_type='text_time' requires extra conditioning inputs not covered by the generic probe."
+      },
+      "onnx_export": {
+        "status": "skipped",
+        "reason": "UNet addition_embed_type='text_time' requires extra conditioning inputs not covered by the generic probe."
+      },
+      "onnxruntime": {
+        "status": "skipped",
+        "reason": "No ONNX artifact was produced."
+      },
+      "seconds": 24.088,
+      "max_rss_mb_after_candidate": 3367.695,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 67447603200,
+        "free_bytes": 87429808128
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 1,
+    "total": 1
+  },
+  "seconds_so_far": 24.302,
+  "summary": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 1,
+    "total": 1
+  },
+  "ci_conclusion": "success_with_candidate_failures",
+  "seconds": 24.303
+}
