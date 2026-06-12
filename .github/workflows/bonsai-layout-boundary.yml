@@ -1,0 +1,72 @@
+name: bonsai-layout-boundary
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/bonsai-layout-boundary.yml
+      - scripts/run_bonsai_onnx_probe.py
+      - experiments/bonsai-onnx-smoke.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bonsai-layout-boundary-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  layout-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
+      BONSAI_REQUIRED_MILESTONE: layout_probe
+      BONSAI_DOWNLOAD_WEIGHTS: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install layout probe dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir pyyaml huggingface_hub
+      - name: Self-test Bonsai probe script
+        run: |
+          python scripts/run_bonsai_onnx_probe.py --self-test
+      - name: Run Bonsai layout boundary probe
+        run: |
+          python scripts/run_bonsai_onnx_probe.py --out-dir reports/bonsai-layout-boundary
+      - name: Show report summary
+        if: always()
+        run: |
+          if [ -f reports/bonsai-layout-boundary/report.json ]; then
+            python - <<'PY'
+          import json
+          from pathlib import Path
+          r = json.loads(Path('reports/bonsai-layout-boundary/report.json').read_text())
+          stage = next((s for s in r.get('stages', []) if s.get('name') == 'layout_probe'), {})
+          analysis = stage.get('analysis', {})
+          print(json.dumps({
+            'status': r.get('status'),
+            'required_milestone': r.get('required_milestone'),
+            'milestone_reached': r.get('milestone_reached'),
+            'download_weights': r.get('download_weights'),
+            'has_model_index_json': analysis.get('has_model_index_json'),
+            'top_level_entries': analysis.get('top_level_entries'),
+            'component_candidates': analysis.get('component_candidates'),
+          }, indent=2))
+          PY
+          fi
+      - name: Upload Bonsai layout boundary report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bonsai-layout-boundary-report-json
+          path: reports/bonsai-layout-boundary/report.json
+          retention-days: 7
