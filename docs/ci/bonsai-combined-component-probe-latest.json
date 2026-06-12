@@ -16,6 +16,10 @@
       "allowed_claim": "bonsai_text_encoder_execution_verified"
     },
     {
+      "name": "scheduler_execution",
+      "allowed_claim": "bonsai_scheduler_step_execution_verified"
+    },
+    {
       "name": "vae_execution",
       "allowed_claim": "bonsai_vae_decoder_execution_verified"
     },
@@ -28,7 +32,7 @@
     {
       "name": "tokenizer_execution",
       "status": "passed",
-      "seconds": 7.071,
+      "seconds": 7.996,
       "claim_promotable_to_manifest": true,
       "allowed_claim": "bonsai_tokenizer_execution_verified",
       "component": "tokenizer",
@@ -50,7 +54,7 @@
     {
       "name": "text_encoder_execution",
       "status": "passed",
-      "seconds": 127.881,
+      "seconds": 113.694,
       "claim_promotable_to_manifest": true,
       "allowed_claim": "bonsai_text_encoder_execution_verified",
       "component": "text_encoder",
@@ -70,17 +74,37 @@
     },
     {
       "name": "scheduler_execution",
-      "status": "failed",
-      "seconds": 1.869,
-      "claim_promotable_to_manifest": false,
+      "status": "passed",
+      "seconds": 2.544,
+      "claim_promotable_to_manifest": true,
       "allowed_claim": "bonsai_scheduler_step_execution_verified",
-      "error_type": "ValueError",
-      "error": "`mu` must be passed when `use_dynamic_shifting` is set to be `True`"
+      "component": "scheduler",
+      "class_name": "FlowMatchEulerDiscreteScheduler",
+      "set_timesteps_kwargs": {
+        "mu": 0.0
+      },
+      "timesteps": [
+        1000.0,
+        1.0
+      ],
+      "prev_sample": {
+        "shape": [
+          1,
+          4,
+          8,
+          8
+        ],
+        "dtype": "float32",
+        "min": -0.009990000165998936,
+        "max": -0.009990000165998936,
+        "mean": -0.00999000109732151,
+        "sha256_float32_le": "e067c3fa7c505915ba6536e0f7a4ff1265605484327484df70785a51b8bbf281"
+      }
     },
     {
       "name": "vae_execution",
       "status": "passed",
-      "seconds": 4.241,
+      "seconds": 5.05,
       "claim_promotable_to_manifest": true,
       "allowed_claim": "bonsai_vae_decoder_execution_verified",
       "component": "vae_decoder",
@@ -108,7 +132,7 @@
     {
       "name": "transformer_config_load",
       "status": "passed",
-      "seconds": 0.107,
+      "seconds": 0.214,
       "claim_promotable_to_manifest": true,
       "allowed_claim": "bonsai_transformer_config_boundary_verified_not_runtime_execution",
       "component": "transformer",
@@ -146,7 +170,6 @@
       "claim_promotable_to_manifest": false,
       "allowed_claim": "bonsai_full_pipeline_composition_verified",
       "blocked_by": {
-        "scheduler_execution": "failed",
         "transformer_weight_load": "skipped"
       }
     },
@@ -171,5 +194,5 @@
       }
     }
   ],
-  "seconds": 141.17
+  "seconds": 129.5
 }
