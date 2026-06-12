@@ -30,15 +30,10 @@ def sha256_file(path: Path) -> str:
 
 def disk_snapshot(path: Path) -> dict[str, int]:
     usage = shutil.disk_usage(path)
-    return {
-        "total_bytes": int(usage.total),
-        "used_bytes": int(usage.used),
-        "free_bytes": int(usage.free),
-    }
+    return {"total_bytes": int(usage.total), "used_bytes": int(usage.used), "free_bytes": int(usage.free)}
 
 
 def max_rss_mb() -> float:
-    # Linux returns ru_maxrss in KiB. This workflow runs on ubuntu-latest.
     return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024, 3)
 
 
@@ -55,30 +50,15 @@ def comma_set(value: str | None) -> set[str]:
 
 def candidate_public_record(candidate: dict) -> dict:
     keys = [
-        "id",
-        "enabled",
-        "batch",
-        "ci_stage",
-        "method",
-        "model_ref",
-        "base_model_ref",
-        "lora_model_ref",
-        "pipeline_class",
-        "scheduler_class",
-        "height",
-        "width",
-        "steps",
-        "guidance_scale",
-        "license_hint",
-        "expected_role",
-        "notes",
+        "id", "enabled", "batch", "ci_stage", "method", "model_ref", "base_model_ref", "lora_model_ref",
+        "pipeline_class", "scheduler_class", "height", "width", "steps", "guidance_scale", "torch_dtype",
+        "use_negative_prompt", "extra_call_kwargs", "license_hint", "expected_role", "notes",
     ]
     return {key: candidate.get(key) for key in keys if key in candidate}
 
 
 def load_diffusers_class(name: str):
     import diffusers
-
     return getattr(diffusers, name)
 
 
@@ -90,16 +70,15 @@ def disable_safety_checker_when_supported(pipe: Any) -> None:
             pass
 
 
-def torch_dtype_from_cfg(cfg: dict):
+def torch_dtype_from_cfg(candidate: dict, cfg: dict):
     import torch
-
-    dtype_name = cfg.get("runtime", {}).get("torch_dtype", "float32")
+    dtype_name = candidate.get("torch_dtype") or cfg.get("runtime", {}).get("torch_dtype", "float32")
     return getattr(torch, dtype_name)
 
 
 def load_pipe(candidate: dict, cfg: dict):
     cls = load_diffusers_class(candidate.get("pipeline_class", "DiffusionPipeline"))
-    return cls.from_pretrained(candidate["model_ref"], torch_dtype=torch_dtype_from_cfg(cfg))
+    return cls.from_pretrained(candidate["model_ref"], torch_dtype=torch_dtype_from_cfg(candidate, cfg))
 
 
 def save_image(candidate: dict, cfg: dict, out_dir: Path, image) -> dict:
@@ -122,7 +101,8 @@ def generation_kwargs(candidate: dict, cfg: dict, generator) -> dict:
         "num_inference_steps": int(candidate.get("steps", 2)),
         "generator": generator,
     }
-    if candidate.get("negative_prompt") or cfg.get("negative_prompt"):
+    use_negative = candidate.get("use_negative_prompt", True)
+    if use_negative and (candidate.get("negative_prompt") or cfg.get("negative_prompt")):
         kwargs["negative_prompt"] = candidate.get("negative_prompt") or cfg.get("negative_prompt")
     if candidate.get("height") is not None:
         kwargs["height"] = int(candidate["height"])
@@ -130,6 +110,8 @@ def generation_kwargs(candidate: dict, cfg: dict, generator) -> dict:
         kwargs["width"] = int(candidate["width"])
     if candidate.get("guidance_scale") is not None:
         kwargs["guidance_scale"] = float(candidate["guidance_scale"])
+    for key, value in (candidate.get("extra_call_kwargs") or {}).items():
+        kwargs[key] = value
     return kwargs
 
 
@@ -154,10 +136,8 @@ def run_diffusers_text_to_image(candidate: dict, cfg: dict, out_dir: Path) -> di
     generate_seconds = round(now_seconds() - generate_started, 3)
     image_record = save_image(candidate, cfg, out_dir, image)
 
-    del pipe
-    del result
+    del pipe, result
     gc.collect()
-
     return {
         "status": "passed",
         "method": candidate.get("method"),
@@ -170,6 +150,7 @@ def run_diffusers_text_to_image(candidate: dict, cfg: dict, out_dir: Path) -> di
         "width": int(candidate.get("width", image.width)),
         "steps": int(candidate.get("steps", 2)),
         "guidance_scale": candidate.get("guidance_scale"),
+        "call_kwargs": {key: value for key, value in generation_kwargs(candidate, cfg, generator).items() if key != "generator"},
         **image_record,
         "execution_attempted": True,
         "max_rss_mb_after_candidate": max_rss_mb(),
@@ -221,7 +202,7 @@ def run_lora_text_to_image(candidate: dict, cfg: dict, out_dir: Path) -> dict:
     generator = torch.Generator(device="cpu").manual_seed(int(cfg.get("seed", 0)))
 
     load_started = now_seconds()
-    pipe = cls.from_pretrained(candidate["base_model_ref"], torch_dtype=torch_dtype_from_cfg(cfg))
+    pipe = cls.from_pretrained(candidate["base_model_ref"], torch_dtype=torch_dtype_from_cfg(candidate, cfg))
     pipe.scheduler = scheduler_cls.from_config(pipe.scheduler.config)
     pipe.load_lora_weights(candidate["lora_model_ref"])
     disable_safety_checker_when_supported(pipe)
@@ -234,10 +215,8 @@ def run_lora_text_to_image(candidate: dict, cfg: dict, out_dir: Path) -> dict:
     generate_seconds = round(now_seconds() - generate_started, 3)
     image_record = save_image(candidate, cfg, out_dir, image)
 
-    del pipe
-    del result
+    del pipe, result
     gc.collect()
-
     return {
         "status": "passed",
         "method": candidate.get("method"),
@@ -252,6 +231,7 @@ def run_lora_text_to_image(candidate: dict, cfg: dict, out_dir: Path) -> dict:
         "width": int(candidate.get("width", 256)),
         "steps": int(candidate.get("steps", 4)),
         "guidance_scale": candidate.get("guidance_scale"),
+        "call_kwargs": {key: value for key, value in generation_kwargs(candidate, cfg, generator).items() if key != "generator"},
         **image_record,
         "execution_attempted": True,
         "max_rss_mb_after_candidate": max_rss_mb(),
@@ -269,9 +249,8 @@ def run_lora_load_only(candidate: dict, cfg: dict, out_dir: Path) -> dict:
     cls = load_diffusers_class(pipeline_class)
     scheduler_cls = load_diffusers_class(scheduler_class)
     torch.set_num_threads(int(cfg.get("runtime", {}).get("num_threads", 1)))
-
     load_started = now_seconds()
-    pipe = cls.from_pretrained(candidate["base_model_ref"], torch_dtype=torch_dtype_from_cfg(cfg))
+    pipe = cls.from_pretrained(candidate["base_model_ref"], torch_dtype=torch_dtype_from_cfg(candidate, cfg))
     pipe.scheduler = scheduler_cls.from_config(pipe.scheduler.config)
     pipe.load_lora_weights(candidate["lora_model_ref"])
     disable_safety_checker_when_supported(pipe)
