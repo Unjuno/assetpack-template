@@ -7,8 +7,11 @@ import json
 import os
 import time
 from pathlib import Path
+from typing import Callable, TypeVar
 
 import yaml
+
+T = TypeVar("T")
 
 
 def load_config(path: str) -> dict:
@@ -20,9 +23,37 @@ def env_bool(name: str, default: bool = False) -> bool:
     return default if value in (None, "") else value.lower() in {"1", "true", "yes", "on"}
 
 
+def env_int(name: str, default: int) -> int:
+    value = os.getenv(name)
+    if value in (None, ""):
+        return default
+    return int(value)
+
+
 def write_report(out_dir: Path, report: dict) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def retry_operation(label: str, fn: Callable[[], T], attempts: int, sleep_seconds: int, report: dict) -> T:
+    records = []
+    report.setdefault("retry_records", {})[label] = records
+    for attempt in range(1, attempts + 1):
+        try:
+            result = fn()
+            records.append({"attempt": attempt, "status": "passed"})
+            return result
+        except BaseException as exc:
+            records.append({
+                "attempt": attempt,
+                "status": "failed",
+                "error_type": type(exc).__name__,
+                "error": str(exc)[:1000],
+            })
+            if attempt >= attempts:
+                raise
+            time.sleep(sleep_seconds)
+    raise RuntimeError(f"unreachable retry state for {label}")
 
 
 def node_arg_metadata(arg) -> dict:
@@ -229,11 +260,15 @@ def run(config_path: str, out_dir: str) -> int:
     export_attempt = env_bool("BONSAI_RUN_TRANSFORMER_ONNX_EXPORT", False)
     ort_load_attempt = env_bool("BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_LOAD", False)
     trig_cast_patch_attempt = env_bool("BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH", False)
+    hf_retry_attempts = env_int("BONSAI_HF_RETRY_ATTEMPTS", 3)
+    hf_retry_sleep_seconds = env_int("BONSAI_HF_RETRY_SLEEP_SECONDS", 20)
     report = {
-        "experiment_id": "bonsai-transformer-load-probe-v6",
+        "experiment_id": "bonsai-transformer-load-probe-v7",
         "model_ref": model_ref,
         "download_weights": True,
         "runtime_load": True,
+        "hf_retry_attempts": hf_retry_attempts,
+        "hf_retry_sleep_seconds": hf_retry_sleep_seconds,
         "onnx_export_attempted": export_attempt,
         "onnx_export_revision": os.getenv("BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION", ""),
         "onnxruntime_load_attempted": ort_load_attempt,
@@ -248,11 +283,23 @@ def run(config_path: str, out_dir: str) -> int:
         import diffusers
         from huggingface_hub import hf_hub_download
 
-        config_path = hf_hub_download(repo_id=model_ref, filename="transformer/config.json", repo_type="model")
+        config_path = retry_operation(
+            "hf_hub_download_transformer_config",
+            lambda: hf_hub_download(repo_id=model_ref, filename="transformer/config.json", repo_type="model"),
+            hf_retry_attempts,
+            hf_retry_sleep_seconds,
+            report,
+        )
         transformer_config = load_config(config_path)
         class_name = transformer_config.get("_class_name", "FluxTransformer2DModel")
         cls = getattr(diffusers, class_name)
-        model = cls.from_pretrained(model_ref, subfolder="transformer", torch_dtype=torch.float16, low_cpu_mem_usage=True)
+        model = retry_operation(
+            "diffusers_transformer_from_pretrained",
+            lambda: cls.from_pretrained(model_ref, subfolder="transformer", torch_dtype=torch.float16, low_cpu_mem_usage=True),
+            hf_retry_attempts,
+            hf_retry_sleep_seconds,
+            report,
+        )
         model.eval()
         param_count = 0
         dtype_counts = {}
