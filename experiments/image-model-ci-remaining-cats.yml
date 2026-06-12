@@ -1,4 +1,4 @@
-experiment_id: image-model-ci-remaining-cats-v2
+experiment_id: image-model-ci-remaining-cats-v3
 prompt: "a cute orange tabby cat sitting in a bonsai pot, detailed fur, natural cat anatomy, studio lighting, sharp focus"
 negative_prompt: "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a cat"
 seed: 12345
@@ -9,7 +9,7 @@ runtime:
   num_threads: 1
   save_images: true
   safety_checker: disabled_when_supported
-  default_timeout_note: "This run excludes the five initially reviewed candidates and the five quality-cats candidates that may already have been run."
+  default_timeout_note: "This run excludes already reviewed candidates and candidates judged visually invalid as cat images."
 excluded_already_reviewed:
   - tiny-stable-diffusion-pipe
   - small-stable-diffusion-v0
@@ -22,9 +22,15 @@ excluded_prior_quality_check:
   - segmind-vega-cat
   - ssd-1b-lcm-lora-cat
   - sdxl-lcm-lora-cat
+excluded_visual_invalid:
+  - bk-sdm-tiny-cat
+  - bk-sdm-small-cat
+  - bk-sdm-base-cat
+  - sdxl-base-cat
 candidates:
   - id: bk-sdm-tiny-cat
-    enabled: true
+    enabled: false
+    disabled_reason: "Visual review: generated image is heavily corrupted and not usable as a cat image."
     batch: remaining
     ci_stage: generation
     method: diffusers_text_to_image
@@ -37,7 +43,8 @@ candidates:
     expected_role: remaining_small_sd_candidate
 
   - id: bk-sdm-small-cat
-    enabled: true
+    enabled: false
+    disabled_reason: "Visual review: generated image is heavily corrupted and not usable as a cat image."
     batch: remaining
     ci_stage: generation
     method: diffusers_text_to_image
@@ -50,7 +57,8 @@ candidates:
     expected_role: remaining_small_sd_candidate
 
   - id: bk-sdm-base-cat
-    enabled: true
+    enabled: false
+    disabled_reason: "Visual review: generated image is heavily corrupted and not usable as a cat image."
     batch: remaining
     ci_stage: generation
     method: diffusers_text_to_image
@@ -149,7 +157,8 @@ candidates:
     expected_role: remaining_sd21_candidate
 
   - id: sdxl-base-cat
-    enabled: true
+    enabled: false
+    disabled_reason: "Visual review: generated image is architectural/abstract and not a cat image."
     batch: remaining
     ci_stage: generation
     method: diffusers_text_to_image
