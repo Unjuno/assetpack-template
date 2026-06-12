@@ -19,7 +19,7 @@ jobs:
     env:
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
       PYTHONUNBUFFERED: "1"
-      ORT_CPU_KERNEL_PROBE_REVISION: "v1"
+      ORT_CPU_KERNEL_PROBE_REVISION: "v2"
     steps:
       - uses: actions/checkout@v4
 
