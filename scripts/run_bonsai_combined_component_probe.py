@@ -13,6 +13,7 @@ from typing import Any, Callable
 import yaml
 
 PROMPT = "a small bonsai tree in a ceramic pot"
+PROBE_REVISION = "transformer-load-short-circuit-v3"
 
 
 def env_bool(name: str, default: bool) -> bool:
@@ -54,6 +55,21 @@ def skip_stage(name: str, allowed_claim: str, reason: str) -> dict[str, Any]:
 
 def load_config(path: str) -> dict[str, Any]:
     return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def write_report(out_dir: Path, model_ref: str, stages: list[dict[str, Any]], start: float, run_transformer_load: bool, require_all: bool, partial: bool = False) -> dict[str, Any]:
+    statuses = {s["name"]: s["status"] for s in stages}
+    report_stages = list(stages)
+    if not partial:
+        report_stages.append(dependency_blocked_stage("full_pipeline_composition", "bonsai_full_pipeline_composition_verified", {"tokenizer_execution": statuses.get("tokenizer_execution", "not_run"), "text_encoder_execution": statuses.get("text_encoder_execution", "not_run"), "scheduler_execution": statuses.get("scheduler_execution", "not_run"), "vae_execution": statuses.get("vae_execution", "not_run"), "transformer_weight_load": statuses.get("transformer_weight_load")}))
+        report_stages.append(dependency_blocked_stage("prompt_to_image_generation", "bonsai_prompt_to_image_generation_verified", {"full_pipeline_composition": report_stages[-1]["status"]}))
+        report_stages.append(dependency_blocked_stage("single_monolithic_multi_block_onnx", "bonsai_single_monolithic_multi_block_onnx_verified", {"full_pipeline_composition": report_stages[-2]["status"]}))
+    promotable = [s for s in report_stages if s.get("claim_promotable_to_manifest")]
+    failed = [s for s in report_stages if s.get("status") == "failed"]
+    report = {"experiment_id": "bonsai-combined-component-probe-v1", "probe_revision": PROBE_REVISION, "model_ref": model_ref, "status": "partial" if partial else ("passed" if promotable and not (require_all and failed) else "failed"), "ci_conclusion": "partial" if partial else ("success" if not (require_all and failed) else "failure"), "claim_promotable_to_manifest": bool(promotable) and not partial, "require_all": require_all, "run_transformer_load": run_transformer_load, "partial_report_before_heavy_load": partial, "promotable_claims": [{"name": s["name"], "allowed_claim": s["allowed_claim"]} for s in promotable], "stages": report_stages, "seconds": round(time.time() - start, 3)}
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return report
 
 
 def tokenizer_probe(model_ref: str) -> dict[str, Any]:
@@ -141,7 +157,7 @@ def transformer_load_probe(model_ref: str) -> dict[str, Any]:
     for param in model.parameters():
         param_count += int(param.numel())
         dtype_counts[str(param.dtype)] = dtype_counts.get(str(param.dtype), 0) + int(param.numel())
-    return {"component": "transformer", "load_kind": "weights", "class_name": cls.__name__, "param_count": param_count, "param_count_billion": round(param_count / 1_000_000_000, 3), "dtype_param_counts": dtype_counts}
+    return {"component": "transformer", "load_kind": "weights", "loading_strategy": "fp16_low_cpu_mem_usage", "class_name": cls.__name__, "param_count": param_count, "param_count_billion": round(param_count / 1_000_000_000, 3), "dtype_param_counts": dtype_counts}
 
 
 def dependency_blocked_stage(name: str, allowed_claim: str, dependencies: dict[str, str]) -> dict[str, Any]:
@@ -155,15 +171,13 @@ def run(args: argparse.Namespace) -> int:
     cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
     model_ref = cfg["candidate"]["model_ref"]
     out_dir = Path(args.out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
     run_transformer_load = env_bool("BONSAI_RUN_TRANSFORMER_LOAD", False)
     require_all = env_bool("BONSAI_REQUIRE_ALL_COMBINED_CLAIMS", False)
     start = time.time()
     if run_transformer_load:
-        stages = [
-            stage("transformer_config_load", "bonsai_transformer_config_boundary_verified_not_runtime_execution", lambda: transformer_config_probe(model_ref)),
-            stage("transformer_weight_load", "bonsai_real_transformer_weight_load_verified_not_onnx_execution", lambda: transformer_load_probe(model_ref)),
-        ]
+        stages = [stage("transformer_config_load", "bonsai_transformer_config_boundary_verified_not_runtime_execution", lambda: transformer_config_probe(model_ref))]
+        write_report(out_dir, model_ref, stages, start, run_transformer_load, require_all, partial=True)
+        stages.append(stage("transformer_weight_load", "bonsai_real_transformer_weight_load_verified_not_onnx_execution", lambda: transformer_load_probe(model_ref)))
     else:
         stages = [
             stage("tokenizer_execution", "bonsai_tokenizer_execution_verified", lambda: tokenizer_probe(model_ref)),
@@ -173,14 +187,7 @@ def run(args: argparse.Namespace) -> int:
             stage("transformer_config_load", "bonsai_transformer_config_boundary_verified_not_runtime_execution", lambda: transformer_config_probe(model_ref)),
             skip_stage("transformer_weight_load", "bonsai_real_transformer_weight_load_verified_not_onnx_execution", "set BONSAI_RUN_TRANSFORMER_LOAD=true to attempt heavy transformer weight load"),
         ]
-    statuses = {s["name"]: s["status"] for s in stages}
-    stages.append(dependency_blocked_stage("full_pipeline_composition", "bonsai_full_pipeline_composition_verified", {"tokenizer_execution": statuses.get("tokenizer_execution", "not_run"), "text_encoder_execution": statuses.get("text_encoder_execution", "not_run"), "scheduler_execution": statuses.get("scheduler_execution", "not_run"), "vae_execution": statuses.get("vae_execution", "not_run"), "transformer_weight_load": statuses.get("transformer_weight_load")}))
-    stages.append(dependency_blocked_stage("prompt_to_image_generation", "bonsai_prompt_to_image_generation_verified", {"full_pipeline_composition": stages[-1]["status"]}))
-    stages.append(dependency_blocked_stage("single_monolithic_multi_block_onnx", "bonsai_single_monolithic_multi_block_onnx_verified", {"full_pipeline_composition": stages[-2]["status"]}))
-    promotable = [s for s in stages if s.get("claim_promotable_to_manifest")]
-    failed = [s for s in stages if s.get("status") == "failed"]
-    report = {"experiment_id": "bonsai-combined-component-probe-v1", "model_ref": model_ref, "status": "passed" if promotable and not (require_all and failed) else "failed", "ci_conclusion": "success" if not (require_all and failed) else "failure", "claim_promotable_to_manifest": bool(promotable), "require_all": require_all, "run_transformer_load": run_transformer_load, "promotable_claims": [{"name": s["name"], "allowed_claim": s["allowed_claim"]} for s in promotable], "stages": stages, "seconds": round(time.time() - start, 3)}
-    (out_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    report = write_report(out_dir, model_ref, stages, start, run_transformer_load, require_all, partial=False)
     return 1 if report["ci_conclusion"] == "failure" else 0
 
 
