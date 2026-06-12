@@ -7,11 +7,11 @@
     "report_count": 32
   },
   "latest_ci_run": {
-    "run_id": 27372009301,
-    "head_sha": "64ecb8d0fb31a4e33fb4250f877eb607aa4c8ce1",
-    "artifact_id": 7574781425,
-    "artifact_name": "bonsai-lowbit-ten-by-two-chain-handoff-report-json",
-    "artifact_sha256": "5fdc2278ced66cbaed794943d3975c18dfbeda1cd849328e29a0a7b3cfabd5fb"
+    "run_id": 27399310016,
+    "head_sha": "76f119acb67b26b88acb2446276b1d851c3d37ac",
+    "artifact_id": 7584863386,
+    "artifact_name": "bonsai-lowbit-ten-by-two-input-boundary-report-json",
+    "artifact_sha256": "321133159edaa0136412c09efc04e59f61e53da502cc27d737282b565b8665ac"
   },
   "verified": [
     {
@@ -186,6 +186,47 @@
       "is_real_transformer_block": false,
       "is_full_bonsai_pipeline": false,
       "allowed_claim": "ten_by_two_split_persistent_onnx_segments_chain_state_handoffs_documented_without_lowbit_source_reload_not_single_monolithic_onnx_not_real_transformer_block_or_full_bonsai_pipeline"
+    },
+    {
+      "key": "ten_by_two_input_boundary_report",
+      "status": "verified",
+      "run_id": 27399310016,
+      "head_sha": "76f119acb67b26b88acb2446276b1d851c3d37ac",
+      "validation_job_name": "ten-by-two-persistent-validate",
+      "validation_job_conclusion": "success",
+      "artifact_id": 7584863386,
+      "artifact_name": "bonsai-lowbit-ten-by-two-input-boundary-report-json",
+      "artifact_sha256": "321133159edaa0136412c09efc04e59f61e53da502cc27d737282b565b8665ac",
+      "report_path": "report.json",
+      "report_ok": true,
+      "artifact_kind": "input_boundary_report",
+      "graph_kind": "ten_by_two_single_blocks_modulated_attention_to_out_residual_stack",
+      "sequence_block_count": 20,
+      "onnx_segment_count": 10,
+      "segment_block_indices": [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [10, 11], [12, 13], [14, 15], [16, 17], [18, 19]],
+      "persistent_onnx_artifacts": true,
+      "reusable_onnx_chain_artifact": true,
+      "validated_without_lowbit_source_reload": true,
+      "validated_from_persisted_onnx_files": true,
+      "external_onnx_inputs": ["hidden", "temb"],
+      "hidden_shape": [2, 4, 3072],
+      "temb_shape": [2, 3072],
+      "hidden_sha256_float32_le": "4a224a450f193db6bf9a255b032b8671cae679ff0d8695cafccd4a3f3e3cbd3b",
+      "temb_sha256_float32_le": "fc6a57f0a64287b7d65dbfaefcf8b7251ae4713a74c3dbbdf054577dab20fd75",
+      "hidden_dim": 3072,
+      "sequence_length": 4,
+      "semantic_to_out_internal_width": 12288,
+      "semantic_to_out_internal_width_note": "semantic_input_width is an internal diagnostic to_out input width, not external text encoder or prompt-token evidence",
+      "prompt_tokens_present": false,
+      "text_encoder_present": false,
+      "scheduler_present": false,
+      "vae_present": false,
+      "image_latents_present": false,
+      "real_bonsai_pipeline_inputs_present": false,
+      "is_single_monolithic_onnx": false,
+      "is_real_transformer_block": false,
+      "is_full_bonsai_pipeline": false,
+      "allowed_claim": "ten_by_two_split_persistent_onnx_segments_input_boundary_documented_hidden_temb_only_no_prompt_text_encoder_scheduler_vae_or_full_pipeline"
     }
   ],
   "pending": [],
@@ -196,6 +237,6 @@
     "single monolithic multi-block ONNX when the verified result is segmented"
   ],
   "next_execution_boundary": [
-    "decide next low-bit boundary after verified ten-by-two chain-state handoff report"
+    "decide next low-bit boundary after verified ten-by-two input boundary report"
   ]
 }
