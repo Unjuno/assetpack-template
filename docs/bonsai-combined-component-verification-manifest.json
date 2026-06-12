@@ -1,7 +1,8 @@
 {
   "schema_version": 1,
   "source": "docs/ci/bonsai-combined-component-probe-latest.json",
-  "source_report_sha": "3d5c205da8434fc2aaa09a1a12444b670f36e01f",
+  "source_report_sha": "429899409eed62fd323bf0c5901a7c03c8f69f51",
+  "source_report_commit": "bc59ac59f84f7d86dfb1e1843982f289776ec708",
   "experiment_id": "bonsai-combined-component-probe-v1",
   "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
   "report_status": "passed",
@@ -31,6 +32,19 @@
       "hidden_state_dtype": "float32",
       "hidden_state_sha256_float32_le": "6d4ce391fc0cb7664bc52303e8ec0f676023e124327983de943147be41d817b0",
       "allowed_claim": "bonsai_text_encoder_execution_verified"
+    },
+    {
+      "key": "bonsai_scheduler_execution",
+      "status": "verified",
+      "stage_name": "scheduler_execution",
+      "component": "scheduler",
+      "class_name": "FlowMatchEulerDiscreteScheduler",
+      "set_timesteps_kwargs": {"mu": 0.0},
+      "timesteps": [1000.0, 1.0],
+      "prev_sample_shape": [1, 4, 8, 8],
+      "prev_sample_dtype": "float32",
+      "prev_sample_sha256_float32_le": "e067c3fa7c505915ba6536e0f7a4ff1265605484327484df70785a51b8bbf281",
+      "allowed_claim": "bonsai_scheduler_step_execution_verified"
     },
     {
       "key": "bonsai_vae_decoder_execution",
@@ -67,13 +81,6 @@
   ],
   "not_verified": [
     {
-      "key": "bonsai_scheduler_execution",
-      "last_status": "failed",
-      "last_error": "`mu` must be passed when `use_dynamic_shifting` is set to be `True`",
-      "fix_commit": "f4b5063efcd3040349164d0a384d2be5b912af8b",
-      "promotion_rule": "wait for a new repo-persisted report where scheduler_execution has status=passed and claim_promotable_to_manifest=true"
-    },
-    {
       "key": "bonsai_real_transformer_weight_load",
       "last_status": "skipped",
       "reason": "BONSAI_RUN_TRANSFORMER_LOAD was false"
@@ -81,7 +88,7 @@
     {
       "key": "bonsai_full_pipeline_composition",
       "last_status": "blocked",
-      "blocked_by": ["scheduler_execution", "transformer_weight_load"]
+      "blocked_by": ["transformer_weight_load"]
     },
     {
       "key": "bonsai_prompt_to_image_generation",
