@@ -1,0 +1,298 @@
+{
+  "experiment_id": "image-model-ci-benchmark-v2",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "negative_prompt": "blurry, distorted, low quality",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+  },
+  "selection": {
+    "candidate_ids": [],
+    "batches": [
+      "smoke"
+    ],
+    "include_disabled": false,
+    "selected_count": 5
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61613146112,
+      "free_bytes": 93264265216
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 74360385536,
+      "free_bytes": 80517025792
+    },
+    "max_rss_mb_end": 3470.152
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "tiny-stable-diffusion-pipe",
+        "enabled": true,
+        "batch": "smoke",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "hf-internal-testing/tiny-stable-diffusion-pipe",
+        "pipeline_class": "DiffusionPipeline",
+        "height": 64,
+        "width": 64,
+        "steps": 2,
+        "guidance_scale": 1.0,
+        "expected_role": "ci_sentinel",
+        "notes": "Tiny pipeline for CI mechanics, not image quality."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286564.57,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61613146112,
+        "free_bytes": 93264265216
+      },
+      "max_rss_mb_before": 19.605,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "DiffusionPipeline",
+      "model_ref": "hf-internal-testing/tiny-stable-diffusion-pipe",
+      "load_seconds": 2.701,
+      "generate_seconds": 0.114,
+      "total_seconds": 2.965,
+      "height": 64,
+      "width": 64,
+      "steps": 2,
+      "guidance_scale": 1.0,
+      "image_path": "reports/image-model-ci-benchmark/smoke/images/tiny-stable-diffusion-pipe/cat.png",
+      "image_sha256": "94ebc5056423d00478272fa04f67c9c5849e7de56d46ac8e30371bf02fa4e455",
+      "image_size_bytes": 11420,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 427.168,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61622431744,
+        "free_bytes": 93254979584
+      }
+    },
+    {
+      "candidate": {
+        "id": "small-stable-diffusion-v0",
+        "enabled": true,
+        "batch": "smoke",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "OFA-Sys/small-stable-diffusion-v0",
+        "pipeline_class": "StableDiffusionPipeline",
+        "height": 256,
+        "width": 256,
+        "steps": 4,
+        "guidance_scale": 7.5,
+        "license_hint": "openrail",
+        "expected_role": "small_sd_candidate",
+        "notes": "Small Stable Diffusion candidate for CPU CI."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286570.761,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61622431744,
+        "free_bytes": 93254979584
+      },
+      "max_rss_mb_before": 427.168,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "StableDiffusionPipeline",
+      "model_ref": "OFA-Sys/small-stable-diffusion-v0",
+      "load_seconds": 14.937,
+      "generate_seconds": 19.536,
+      "total_seconds": 34.62,
+      "height": 256,
+      "width": 256,
+      "steps": 4,
+      "guidance_scale": 7.5,
+      "image_path": "reports/image-model-ci-benchmark/smoke/images/small-stable-diffusion-v0/cat.png",
+      "image_sha256": "5f0431d064d02d8a87e24a73e9e8117bab4c07c4b86272ef4ce7085cee46c269",
+      "image_size_bytes": 70665,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 3470.152,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 65985216512,
+        "free_bytes": 88892194816
+      }
+    },
+    {
+      "candidate": {
+        "id": "segmind-tiny-sd",
+        "enabled": true,
+        "batch": "smoke",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "segmind/tiny-sd",
+        "pipeline_class": "StableDiffusionPipeline",
+        "height": 256,
+        "width": 256,
+        "steps": 4,
+        "guidance_scale": 7.5,
+        "license_hint": "creativeml-openrail-m",
+        "expected_role": "small_sd_candidate",
+        "notes": "Tiny SD candidate. Failure is useful evidence if repo or pipeline metadata differs."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286605.382,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 65985220608,
+        "free_bytes": 88892190720
+      },
+      "max_rss_mb_before": 3470.152,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "StableDiffusionPipeline",
+      "model_ref": "segmind/tiny-sd",
+      "load_seconds": 4.925,
+      "generate_seconds": 18.495,
+      "total_seconds": 23.577,
+      "height": 256,
+      "width": 256,
+      "steps": 4,
+      "guidance_scale": 7.5,
+      "image_path": "reports/image-model-ci-benchmark/smoke/images/segmind-tiny-sd/cat.png",
+      "image_sha256": "d0b25828707e75680d83b313c9e8a5c22a6532c75aa1cb68842f0976cfaadf44",
+      "image_size_bytes": 70696,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 3470.152,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 67047608320,
+        "free_bytes": 87829803008
+      }
+    },
+    {
+      "candidate": {
+        "id": "bk-sdm-tiny-load",
+        "enabled": true,
+        "batch": "smoke",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "nota-ai/bk-sdm-tiny",
+        "pipeline_class": "StableDiffusionPipeline",
+        "height": 256,
+        "width": 256,
+        "steps": 4,
+        "guidance_scale": 7.5,
+        "expected_role": "small_sd_load_candidate",
+        "notes": "Load-only first because exact CI memory footprint should be measured before generation."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286628.96,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 67047608320,
+        "free_bytes": 87829803008
+      },
+      "max_rss_mb_before": 3470.152,
+      "method": "diffusers_load_only",
+      "pipeline_class": "StableDiffusionPipeline",
+      "model_ref": "nota-ai/bk-sdm-tiny",
+      "load_seconds": 11.8,
+      "generate_seconds": null,
+      "total_seconds": 11.93,
+      "components": [
+        "feature_extractor",
+        "image_encoder",
+        "safety_checker",
+        "scheduler",
+        "text_encoder",
+        "tokenizer",
+        "unet",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 3470.152,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 70386102272,
+        "free_bytes": 84491309056
+      }
+    },
+    {
+      "candidate": {
+        "id": "bk-sdm-small-load",
+        "enabled": true,
+        "batch": "smoke",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "nota-ai/bk-sdm-small",
+        "pipeline_class": "StableDiffusionPipeline",
+        "height": 256,
+        "width": 256,
+        "steps": 4,
+        "guidance_scale": 7.5,
+        "expected_role": "small_sd_load_candidate",
+        "notes": "Load-only first. Promote to generation after resource data."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286640.891,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 70386102272,
+        "free_bytes": 84491309056
+      },
+      "max_rss_mb_before": 3470.152,
+      "method": "diffusers_load_only",
+      "pipeline_class": "StableDiffusionPipeline",
+      "model_ref": "nota-ai/bk-sdm-small",
+      "load_seconds": 15.242,
+      "generate_seconds": null,
+      "total_seconds": 15.383,
+      "components": [
+        "feature_extractor",
+        "image_encoder",
+        "safety_checker",
+        "scheduler",
+        "text_encoder",
+        "tokenizer",
+        "unet",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 3470.152,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 74360381440,
+        "free_bytes": 80517029888
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "total": 5
+  },
+  "seconds_so_far": 91.729,
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "total": 5
+  },
+  "ci_conclusion": "success",
+  "seconds": 91.729
+}
