@@ -1,0 +1,117 @@
+{
+  "experiment_id": "image-model-ci-curated-foals-v1",
+  "prompt": "a cute miniature foal standing in a shallow bonsai pot, detailed coat, natural young horse anatomy, delicate legs, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a foal, not a horse, cat, dog, rabbit, toy",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Foal generation uses the strict seven candidates accepted from cat artifact review. Foal visual quality is unverified until this workflow is run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "ssd-1b-lcm-lora-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 76887154688,
+      "used_bytes": 58174324736,
+      "free_bytes": 18696052736
+    },
+    "disk_end": {
+      "total_bytes": 76887154688,
+      "used_bytes": 67317833728,
+      "free_bytes": 9552543744
+    },
+    "max_rss_mb_end": 10108.375
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "ssd-1b-lcm-lora-quality",
+        "enabled": true,
+        "batch": "curated_foal",
+        "ci_stage": "generation",
+        "method": "diffusers_lora_text_to_image",
+        "base_model_ref": "segmind/SSD-1B",
+        "lora_model_ref": "latent-consistency/lcm-lora-ssd-1b",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "scheduler_class": "LCMScheduler",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 1.0,
+        "expected_role": "foal_small_sdxl_lcm_candidate"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781301151.46,
+      "disk_before": {
+        "total_bytes": 76887154688,
+        "used_bytes": 58174324736,
+        "free_bytes": 18696052736
+      },
+      "max_rss_mb_before": 19.73,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_lora_text_to_image",
+      "pipeline_class": "StableDiffusionXLPipeline",
+      "scheduler_class": "LCMScheduler",
+      "base_model_ref": "segmind/SSD-1B",
+      "lora_model_ref": "latent-consistency/lcm-lora-ssd-1b",
+      "load_seconds": 36.962,
+      "generate_seconds": 90.891,
+      "total_seconds": 129.33,
+      "height": 512,
+      "width": 512,
+      "steps": 4,
+      "guidance_scale": 1.0,
+      "call_kwargs": {
+        "prompt": "a cute miniature foal standing in a shallow bonsai pot, detailed coat, natural young horse anatomy, delicate legs, studio lighting, sharp focus",
+        "num_inference_steps": 4,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a foal, not a horse, cat, dog, rabbit, toy",
+        "height": 512,
+        "width": 512,
+        "guidance_scale": 1.0
+      },
+      "image_path": "reports/image-model-ci-curated-foals/ssd-1b-lcm-lora-quality/images/ssd-1b-lcm-lora-quality/cat.png",
+      "image_sha256": "3d85dd7bfefb492175a32b351e44c51e91c131232bb2063c3d6248c0af460e41",
+      "image_size_bytes": 264889,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 10108.375,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 76887154688,
+        "used_bytes": 67317833728,
+        "free_bytes": 9552543744
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 132.284,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 132.285
+}
