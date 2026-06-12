@@ -1,0 +1,113 @@
+{
+  "experiment_id": "image-model-ci-remaining-cats-v2",
+  "prompt": "a cute orange tabby cat sitting in a bonsai pot, detailed fur, natural cat anatomy, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a cat",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "This run excludes the five initially reviewed candidates and the five quality-cats candidates that may already have been run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "bk-sdm-base-cat"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 60689567744,
+      "free_bytes": 94187843584
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 65051996160,
+      "free_bytes": 89825415168
+    },
+    "max_rss_mb_end": 3582.211
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "bk-sdm-base-cat",
+        "enabled": true,
+        "batch": "remaining",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "nota-ai/bk-sdm-base",
+        "pipeline_class": "StableDiffusionPipeline",
+        "height": 256,
+        "width": 256,
+        "steps": 6,
+        "guidance_scale": 7.5,
+        "expected_role": "remaining_small_sd_candidate"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781293556.019,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 60689567744,
+        "free_bytes": 94187843584
+      },
+      "max_rss_mb_before": 19.977,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "StableDiffusionPipeline",
+      "model_ref": "nota-ai/bk-sdm-base",
+      "load_seconds": 15.378,
+      "generate_seconds": 30.91,
+      "total_seconds": 46.47,
+      "height": 256,
+      "width": 256,
+      "steps": 6,
+      "guidance_scale": 7.5,
+      "call_kwargs": {
+        "prompt": "a cute orange tabby cat sitting in a bonsai pot, detailed fur, natural cat anatomy, studio lighting, sharp focus",
+        "num_inference_steps": 6,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a cat",
+        "height": 256,
+        "width": 256,
+        "guidance_scale": 7.5
+      },
+      "image_path": "reports/image-model-ci-remaining-cats/bk-sdm-base-cat/images/bk-sdm-base-cat/cat.png",
+      "image_sha256": "222e7ccf2a1ed2bba4deb353333488664f98ccdc22ceff134a8e6e472b799732",
+      "image_size_bytes": 124500,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 3582.211,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 65051996160,
+        "free_bytes": 89825415168
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 49.299,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 49.3
+}
