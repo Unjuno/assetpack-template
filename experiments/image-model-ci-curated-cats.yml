@@ -1,0 +1,214 @@
+experiment_id: image-model-ci-curated-cats-v1
+prompt: "a cute orange tabby cat sitting in a bonsai pot, detailed fur, natural cat anatomy, studio lighting, sharp focus"
+negative_prompt: "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a cat"
+seed: 12345
+output_root: reports/image-model-ci-curated-cats
+runtime:
+  device: cpu
+  torch_dtype: float32
+  num_threads: 1
+  save_images: true
+  safety_checker: disabled_when_supported
+  default_timeout_note: "Curated list keeps only candidates that produced a visually recognizable cat image in prior CI artifacts. Each candidate should still be treated as a measurement, not a model-quality claim."
+selection_policy:
+  keep_reason: "Prior CI artifact produced a visually recognizable cat-like image."
+  exclude_reason: "Prior CI artifact either did not produce an image, produced a non-cat/abstract image, produced a severe artifact, or is a placeholder/component-only runtime."
+  reviewed_runs:
+    - workflow: image-model-ci-quality-cats
+      run_id: 27439200166
+    - workflow: image-model-ci-remaining-cats
+      run_id: 27438992693
+kept_candidates:
+  - lcm-dreamshaper-v7-quality
+  - sd-turbo-quality
+  - sdxl-lcm-lora-quality
+  - sdxl-turbo-quality
+  - segmind-vega-quality
+  - ssd-1b-lcm-lora-quality
+  - ssd-1b-quality
+  - openjourney-v4-lcm-lora-cat
+  - playground-v25-cat
+  - sd15-lcm-lora-cat
+excluded_candidates:
+  no_or_failed_artifact:
+    - dreamshaper7-lcm-lora-cat
+    - sd21-base-cat
+    - sdxl-lightning-cat
+    - hyper-sd-cat
+    - pixart-alpha-cat
+    - pixart-sigma-cat
+    - sd35-medium-cat
+    - flux-schnell-cat
+    - qwen-image-cat
+    - taesd-component-placeholder
+    - openvino-small-sd-placeholder
+    - stable-diffusion-cpp-sd15-placeholder
+  visually_unusable_or_not_cat:
+    - segmind-tiny-sd-quality
+    - bk-sdm-tiny-cat
+    - bk-sdm-small-cat
+    - bk-sdm-base-cat
+    - sd14-baseline-cat
+    - sd15-baseline-cat
+    - sdxl-base-cat
+candidates:
+  - id: lcm-dreamshaper-v7-quality
+    enabled: true
+    batch: curated
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: SimianLuo/LCM_Dreamshaper_v7
+    pipeline_class: LatentConsistencyModelPipeline
+    height: 384
+    width: 384
+    steps: 4
+    guidance_scale: 8.0
+    expected_role: curated_lcm_reference
+    source_run_id: 27439200166
+    prior_visual_judgment: recognizable_cat
+
+  - id: sd-turbo-quality
+    enabled: true
+    batch: curated
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: stabilityai/sd-turbo
+    pipeline_class: AutoPipelineForText2Image
+    height: 384
+    width: 384
+    steps: 2
+    guidance_scale: 0.0
+    expected_role: curated_turbo_reference
+    license_hint: stability-ai-noncommercial-community
+    source_run_id: 27439200166
+    prior_visual_judgment: recognizable_cat_closeup
+
+  - id: sdxl-lcm-lora-quality
+    enabled: true
+    batch: curated
+    ci_stage: generation
+    method: diffusers_lora_text_to_image
+    base_model_ref: stabilityai/stable-diffusion-xl-base-1.0
+    lora_model_ref: latent-consistency/lcm-lora-sdxl
+    pipeline_class: StableDiffusionXLPipeline
+    scheduler_class: LCMScheduler
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: curated_sdxl_lcm_candidate
+    source_run_id: 27439200166
+    prior_visual_judgment: recognizable_cat_with_background_artifacts
+
+  - id: sdxl-turbo-quality
+    enabled: true
+    batch: curated
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: stabilityai/sdxl-turbo
+    pipeline_class: AutoPipelineForText2Image
+    height: 512
+    width: 512
+    steps: 1
+    guidance_scale: 0.0
+    expected_role: curated_sdxl_turbo_candidate
+    license_hint: stability-ai-noncommercial-community
+    source_run_id: 27439200166
+    prior_visual_judgment: recognizable_cat
+
+  - id: segmind-vega-quality
+    enabled: true
+    batch: curated
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: segmind/Segmind-Vega
+    pipeline_class: StableDiffusionXLPipeline
+    height: 512
+    width: 512
+    steps: 8
+    guidance_scale: 7.5
+    expected_role: curated_small_sdxl_candidate
+    source_run_id: 27439200166
+    prior_visual_judgment: recognizable_cat_with_bonsai_artifact
+
+  - id: ssd-1b-lcm-lora-quality
+    enabled: true
+    batch: curated
+    ci_stage: generation
+    method: diffusers_lora_text_to_image
+    base_model_ref: segmind/SSD-1B
+    lora_model_ref: latent-consistency/lcm-lora-ssd-1b
+    pipeline_class: StableDiffusionXLPipeline
+    scheduler_class: LCMScheduler
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: curated_small_sdxl_lcm_candidate
+    source_run_id: 27439200166
+    prior_visual_judgment: recognizable_cat
+
+  - id: ssd-1b-quality
+    enabled: true
+    batch: curated
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: segmind/SSD-1B
+    pipeline_class: StableDiffusionXLPipeline
+    height: 512
+    width: 512
+    steps: 8
+    guidance_scale: 7.5
+    expected_role: curated_small_sdxl_candidate
+    license_hint: apache-2.0
+    source_run_id: 27439200166
+    prior_visual_judgment: recognizable_cat
+
+  - id: openjourney-v4-lcm-lora-cat
+    enabled: true
+    batch: curated
+    ci_stage: generation
+    method: diffusers_lora_text_to_image
+    base_model_ref: prompthero/openjourney-v4
+    lora_model_ref: latent-consistency/lcm-lora-sdv1-5
+    pipeline_class: StableDiffusionPipeline
+    scheduler_class: LCMScheduler
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: curated_stylized_lcm_lora_candidate
+    source_run_id: 27438992693
+    prior_visual_judgment: stylized_recognizable_cat
+
+  - id: playground-v25-cat
+    enabled: true
+    batch: curated
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: playgroundai/playground-v2.5-1024px-aesthetic
+    pipeline_class: StableDiffusionXLPipeline
+    height: 512
+    width: 512
+    steps: 6
+    guidance_scale: 3.0
+    expected_role: curated_sdxl_quality_candidate
+    source_run_id: 27438992693
+    prior_visual_judgment: recognizable_cat
+
+  - id: sd15-lcm-lora-cat
+    enabled: true
+    batch: curated
+    ci_stage: generation
+    method: diffusers_lora_text_to_image
+    base_model_ref: stable-diffusion-v1-5/stable-diffusion-v1-5
+    lora_model_ref: latent-consistency/lcm-lora-sdv1-5
+    pipeline_class: StableDiffusionPipeline
+    scheduler_class: LCMScheduler
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: curated_sd15_lcm_lora_candidate
+    source_run_id: 27438992693
+    prior_visual_judgment: stylized_recognizable_cat
