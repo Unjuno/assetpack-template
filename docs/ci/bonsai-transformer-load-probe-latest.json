@@ -1,6 +1,6 @@
 {
   "experiment_id": "bonsai-combined-component-probe-v1",
-  "probe_revision": "transformer-minimal-model-call-v1",
+  "probe_revision": "transformer-minimal-model-call-v2",
   "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
   "status": "passed",
   "ci_conclusion": "success",
@@ -22,7 +22,7 @@
     {
       "name": "transformer_config_load",
       "status": "passed",
-      "seconds": 0.374,
+      "seconds": 0.377,
       "claim_promotable_to_manifest": true,
       "allowed_claim": "bonsai_transformer_config_boundary_verified_not_runtime_execution",
       "component": "transformer",
@@ -48,7 +48,7 @@
     {
       "name": "transformer_weight_load",
       "status": "passed",
-      "seconds": 33.603,
+      "seconds": 33.006,
       "claim_promotable_to_manifest": true,
       "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
       "component": "transformer",
@@ -59,6 +59,12 @@
       "param_count_billion": 3.876,
       "dtype_param_counts": {
         "torch.float16": 3875544576
+      },
+      "model_call_attempt": {
+        "status": "failed",
+        "claim_promotable_to_manifest": false,
+        "error_type": "TypeError",
+        "error": "Flux2Transformer2DModel.forward() got an unexpected keyword argument 'pooled_projections'"
       }
     },
     {
@@ -95,5 +101,5 @@
       }
     }
   ],
-  "seconds": 33.98
+  "seconds": 33.386
 }
