@@ -1,0 +1,60 @@
+experiment_id: image-model-ci-benchmark-v1
+prompt: "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting"
+negative_prompt: "blurry, distorted, low quality"
+seed: 12345
+output_root: reports/image-model-ci-benchmark
+runtime:
+  device: cpu
+  torch_dtype: float32
+  num_threads: 1
+  save_images: true
+  safety_checker: disabled_when_supported
+  default_timeout_note: "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+candidates:
+  - id: tiny-stable-diffusion-pipe
+    enabled: true
+    method: diffusers_text_to_image
+    model_ref: hf-internal-testing/tiny-stable-diffusion-pipe
+    pipeline_class: DiffusionPipeline
+    height: 64
+    width: 64
+    steps: 2
+    guidance_scale: 1.0
+    expected_role: ci_sentinel
+    notes: "Tiny pipeline for CI mechanics, not image quality."
+
+  - id: lcm-dreamshaper-v7
+    enabled: true
+    method: diffusers_text_to_image
+    model_ref: SimianLuo/LCM_Dreamshaper_v7
+    pipeline_class: LatentConsistencyModelPipeline
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 8.0
+    expected_role: few_step_quality_candidate
+    notes: "Few-step LCM candidate. If this is too heavy for standard GitHub runners, the report should preserve the failure boundary."
+
+  - id: sd15-lcm-lora-template
+    enabled: false
+    method: diffusers_lora_text_to_image
+    base_model_ref: runwayml/stable-diffusion-v1-5
+    lora_model_ref: latent-consistency/lcm-lora-sdv1-5
+    pipeline_class: StableDiffusionPipeline
+    scheduler_class: LCMScheduler
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: lcm_lora_candidate
+    notes: "Disabled by default because base model availability/license/auth can vary. Enable after metadata check."
+
+  - id: quantized-openvino-template
+    enabled: false
+    method: openvino_text_to_image
+    model_ref: "TODO: add preconverted OpenVINO or ONNX artifact"
+    height: 256
+    width: 256
+    steps: 2
+    expected_role: cpu_quantized_candidate
+    notes: "Placeholder for preconverted quantized artifacts. Do not quantize large models inside standard CI."
