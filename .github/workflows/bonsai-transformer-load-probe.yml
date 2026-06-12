@@ -7,7 +7,7 @@ on:
       - main
     paths:
       - .github/workflows/bonsai-transformer-load-probe.yml
-      - scripts/run_bonsai_combined_component_probe.py
+      - scripts/run_bonsai_transformer_load_probe.py
       - experiments/bonsai-onnx-smoke.yml
 
 permissions:
@@ -22,8 +22,6 @@ jobs:
       HF_HUB_DISABLE_TELEMETRY: "1"
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
       PYTHONUNBUFFERED: "1"
-      BONSAI_RUN_TRANSFORMER_LOAD: "true"
-      BONSAI_REQUIRE_ALL_COMBINED_CLAIMS: "false"
     steps:
       - uses: actions/checkout@v4
 
@@ -38,28 +36,24 @@ jobs:
           free -h
           nproc
 
-      - name: Install transformer load probe dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
           pip install --no-cache-dir pyyaml huggingface_hub hf_transfer safetensors diffusers transformers accelerate
 
-      - name: Self-test combined component probe
+      - name: Run transformer load probe
         run: |
-          python scripts/run_bonsai_combined_component_probe.py --self-test
+          python scripts/run_bonsai_transformer_load_probe.py --out-dir reports/bonsai-transformer-load-probe
 
-      - name: Run transformer weight load probe
-        run: |
-          python scripts/run_bonsai_combined_component_probe.py --out-dir reports/bonsai-transformer-load-probe
-
-      - name: Show transformer load probe summary
+      - name: Show report
         if: always()
         run: |
           if [ -f reports/bonsai-transformer-load-probe/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-transformer-load-probe/report.json').read_text()); print(json.dumps({'status': r.get('status'), 'ci_conclusion': r.get('ci_conclusion'), 'claim_promotable_to_manifest': r.get('claim_promotable_to_manifest'), 'run_transformer_load': r.get('run_transformer_load'), 'promotable_claims': r.get('promotable_claims'), 'stages': [(s.get('name'), s.get('status'), s.get('claim_promotable_to_manifest'), s.get('error_type')) for s in r.get('stages', [])]}, indent=2))"
+            python -m json.tool reports/bonsai-transformer-load-probe/report.json
           fi
 
-      - name: Upload transformer load probe report
+      - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -67,7 +61,7 @@ jobs:
           path: reports/bonsai-transformer-load-probe/report.json
           retention-days: 7
 
-      - name: Persist transformer load probe report in repo
+      - name: Persist report in repo
         if: always()
         run: |
           if [ -f reports/bonsai-transformer-load-probe/report.json ]; then
@@ -77,7 +71,7 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add docs/ci/bonsai-transformer-load-probe-latest.json
             if git diff --cached --quiet; then
-              echo "No transformer load probe report changes to commit."
+              echo "No report changes to commit."
             else
               git commit -m "Record Bonsai transformer load probe CI report"
               git push
