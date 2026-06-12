@@ -1,0 +1,217 @@
+{
+  "experiment_id": "image-model-ci-benchmark-v2",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "negative_prompt": "blurry, distorted, low quality",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+  },
+  "selection": {
+    "candidate_ids": [],
+    "batches": [
+      "lcm"
+    ],
+    "include_disabled": false,
+    "selected_count": 4
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 60681932800,
+      "free_bytes": 94195478528
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 82614771712,
+      "free_bytes": 72262639616
+    },
+    "max_rss_mb_end": 4840.453
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "lcm-dreamshaper-v7",
+        "enabled": true,
+        "batch": "lcm",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "SimianLuo/LCM_Dreamshaper_v7",
+        "pipeline_class": "LatentConsistencyModelPipeline",
+        "height": 256,
+        "width": 256,
+        "steps": 4,
+        "guidance_scale": 8.0,
+        "license_hint": "mit",
+        "expected_role": "few_step_quality_candidate",
+        "notes": "Few-step LCM candidate."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286563.2,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 60681932800,
+        "free_bytes": 94195478528
+      },
+      "max_rss_mb_before": 19.605,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "LatentConsistencyModelPipeline",
+      "model_ref": "SimianLuo/LCM_Dreamshaper_v7",
+      "load_seconds": 18.373,
+      "generate_seconds": 17.11,
+      "total_seconds": 35.654,
+      "height": 256,
+      "width": 256,
+      "steps": 4,
+      "guidance_scale": 8.0,
+      "image_path": "reports/image-model-ci-benchmark/lcm/images/lcm-dreamshaper-v7/cat.png",
+      "image_sha256": "1afacd0072821f072889dcf91b30b253206d3e544e4351fbb13b170b3c04618a",
+      "image_size_bytes": 85877,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 4840.453,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 66165465088,
+        "free_bytes": 88711946240
+      }
+    },
+    {
+      "candidate": {
+        "id": "sd15-lcm-lora",
+        "enabled": true,
+        "batch": "lcm",
+        "ci_stage": "generation",
+        "method": "diffusers_lora_text_to_image",
+        "base_model_ref": "runwayml/stable-diffusion-v1-5",
+        "lora_model_ref": "latent-consistency/lcm-lora-sdv1-5",
+        "pipeline_class": "StableDiffusionPipeline",
+        "scheduler_class": "LCMScheduler",
+        "height": 256,
+        "width": 256,
+        "steps": 4,
+        "guidance_scale": 1.0,
+        "license_hint": "openrail-plus-plus",
+        "expected_role": "lcm_lora_candidate",
+        "notes": "Core SD1.5 + LCM-LoRA benchmark candidate."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781286602.382,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 66165465088,
+        "free_bytes": 88711946240
+      },
+      "max_rss_mb_before": 4840.453,
+      "error_type": "ValueError",
+      "error": "PEFT backend is required for this method.",
+      "execution_attempted": false,
+      "total_seconds": 15.218,
+      "max_rss_mb_after_candidate": 4840.453,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 71648518144,
+        "free_bytes": 83228893184
+      }
+    },
+    {
+      "candidate": {
+        "id": "dreamshaper7-lcm-lora",
+        "enabled": true,
+        "batch": "lcm",
+        "ci_stage": "generation",
+        "method": "diffusers_lora_text_to_image",
+        "base_model_ref": "Lykon/dreamshaper-7",
+        "lora_model_ref": "latent-consistency/lcm-lora-sdv1-5",
+        "pipeline_class": "StableDiffusionPipeline",
+        "scheduler_class": "LCMScheduler",
+        "height": 256,
+        "width": 256,
+        "steps": 4,
+        "guidance_scale": 1.0,
+        "expected_role": "lcm_lora_quality_candidate",
+        "notes": "Quality base + LCM-LoRA. If gated or incompatible, report failure boundary."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781286617.603,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 71648522240,
+        "free_bytes": 83228889088
+      },
+      "max_rss_mb_before": 4840.453,
+      "error_type": "ValueError",
+      "error": "PEFT backend is required for this method.",
+      "execution_attempted": false,
+      "total_seconds": 19.175,
+      "max_rss_mb_after_candidate": 4840.453,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 77131710464,
+        "free_bytes": 77745700864
+      }
+    },
+    {
+      "candidate": {
+        "id": "openjourney-v4-lcm-lora",
+        "enabled": true,
+        "batch": "lcm",
+        "ci_stage": "generation",
+        "method": "diffusers_lora_text_to_image",
+        "base_model_ref": "prompthero/openjourney-v4",
+        "lora_model_ref": "latent-consistency/lcm-lora-sdv1-5",
+        "pipeline_class": "StableDiffusionPipeline",
+        "scheduler_class": "LCMScheduler",
+        "height": 256,
+        "width": 256,
+        "steps": 4,
+        "guidance_scale": 1.0,
+        "expected_role": "stylized_lcm_lora_candidate",
+        "notes": "Stylized SD1.5-family candidate. License and model availability are measured by CI."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781286636.782,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 77131710464,
+        "free_bytes": 77745700864
+      },
+      "max_rss_mb_before": 4840.453,
+      "error_type": "ValueError",
+      "error": "PEFT backend is required for this method.",
+      "execution_attempted": false,
+      "total_seconds": 15.97,
+      "max_rss_mb_after_candidate": 4840.453,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 82614771712,
+        "free_bytes": 72262639616
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 3,
+    "skipped": 0,
+    "total": 4
+  },
+  "seconds_so_far": 89.591,
+  "summary": {
+    "passed": 1,
+    "failed": 3,
+    "skipped": 0,
+    "total": 4
+  },
+  "ci_conclusion": "success_with_candidate_failures",
+  "seconds": 89.591
+}
