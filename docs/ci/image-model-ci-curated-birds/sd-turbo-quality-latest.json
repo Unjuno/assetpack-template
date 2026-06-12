@@ -1,0 +1,114 @@
+{
+  "experiment_id": "image-model-ci-curated-birds-v1",
+  "prompt": "a cute small songbird perched in a bonsai pot, detailed feathers, natural bird anatomy, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a bird, cat, dog, feline, canine",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Bird generation uses the strict seven candidates accepted from cat artifact review. Bird visual quality is unverified until this workflow is run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "sd-turbo-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61620862976,
+      "free_bytes": 93256548352
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 66783092736,
+      "free_bytes": 88094318592
+    },
+    "max_rss_mb_end": 5976.555
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sd-turbo-quality",
+        "enabled": true,
+        "batch": "curated_bird",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "stabilityai/sd-turbo",
+        "pipeline_class": "AutoPipelineForText2Image",
+        "height": 384,
+        "width": 384,
+        "steps": 2,
+        "guidance_scale": 0.0,
+        "license_hint": "stability-ai-noncommercial-community",
+        "expected_role": "bird_turbo_reference"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781300271.302,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61620862976,
+        "free_bytes": 93256548352
+      },
+      "max_rss_mb_before": 19.695,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "AutoPipelineForText2Image",
+      "model_ref": "stabilityai/sd-turbo",
+      "load_seconds": 20.382,
+      "generate_seconds": 18.989,
+      "total_seconds": 39.549,
+      "height": 384,
+      "width": 384,
+      "steps": 2,
+      "guidance_scale": 0.0,
+      "call_kwargs": {
+        "prompt": "a cute small songbird perched in a bonsai pot, detailed feathers, natural bird anatomy, studio lighting, sharp focus",
+        "num_inference_steps": 2,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a bird, cat, dog, feline, canine",
+        "height": 384,
+        "width": 384,
+        "guidance_scale": 0.0
+      },
+      "image_path": "reports/image-model-ci-curated-birds/sd-turbo-quality/images/sd-turbo-quality/cat.png",
+      "image_sha256": "457e146a8d356b37c900038b8c0c924c3496f887c6970b569e15bdeab9f9b8df",
+      "image_size_bytes": 235901,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 5976.555,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 66783092736,
+        "free_bytes": 88094318592
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 41.812,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 41.813
+}
