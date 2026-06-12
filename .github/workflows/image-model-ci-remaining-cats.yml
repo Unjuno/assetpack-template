@@ -71,7 +71,8 @@ jobs:
       HF_HUB_DISABLE_TELEMETRY: "1"
       HF_HUB_ETAG_TIMEOUT: "30"
       HF_HUB_DOWNLOAD_TIMEOUT: "600"
-      IMAGE_MODEL_CI_REMAINING_CATS_REVISION: "v1"
+      IMAGE_MODEL_CI_REMAINING_CATS_REVISION: "v2"
+      IMAGE_MODEL_CANDIDATE_TIMEOUT_SECONDS: "900"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -86,7 +87,7 @@ jobs:
           mkdir -p reports/image-model-ci-remaining-cats/${{ matrix.candidate_id }}
           cat > reports/image-model-ci-remaining-cats/${{ matrix.candidate_id }}/report.json <<JSON
           {
-            "experiment_id": "image-model-ci-remaining-cats-preflight-v1",
+            "experiment_id": "image-model-ci-remaining-cats-preflight-v2",
             "candidate_id": "${{ matrix.candidate_id }}",
             "status": "preflight_started",
             "ci_conclusion": "preflight_only",
@@ -94,7 +95,8 @@ jobs:
             "allowed_claim": "ci_image_model_remaining_cat_measurement_not_model_quality_claim",
             "prompt": "a cute orange tabby cat sitting in a bonsai pot, detailed fur, natural cat anatomy, studio lighting, sharp focus",
             "execution_attempted": false,
-            "note": "This preflight report is overwritten by scripts/run_image_model_ci_benchmark.py if benchmark execution runs."
+            "candidate_timeout_seconds": 900,
+            "note": "This preflight report is overwritten by scripts/run_image_model_ci_benchmark.py if benchmark execution runs. Each candidate is capped at 15 minutes by the runner."
           }
           JSON
 
@@ -116,7 +118,8 @@ jobs:
           python scripts/run_image_model_ci_benchmark.py \
             --config experiments/image-model-ci-remaining-cats.yml \
             --out-dir reports/image-model-ci-remaining-cats/${{ matrix.candidate_id }} \
-            --candidate-ids "${{ matrix.candidate_id }}"
+            --candidate-ids "${{ matrix.candidate_id }}" \
+            --candidate-timeout-seconds 900
 
       - name: Show remaining cat report
         if: always()
