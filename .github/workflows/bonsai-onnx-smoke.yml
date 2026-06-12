@@ -20,7 +20,7 @@ on:
       - experiments/bonsai-onnx-smoke.yml
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: bonsai-onnx-smoke-${{ github.event_name }}-${{ github.event.inputs.target || 'push-layout-boundary' }}
@@ -74,6 +74,23 @@ jobs:
           name: bonsai-layout-boundary-report-json
           path: reports/bonsai-layout-boundary/report.json
           retention-days: 7
+
+      - name: Persist Bonsai layout boundary report in repo
+        if: always()
+        run: |
+          if [ -f reports/bonsai-layout-boundary/report.json ]; then
+            mkdir -p docs/ci
+            cp reports/bonsai-layout-boundary/report.json docs/ci/bonsai-layout-boundary-latest.json
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add docs/ci/bonsai-layout-boundary-latest.json
+            if git diff --cached --quiet; then
+              echo "No Bonsai layout boundary report changes to commit."
+            else
+              git commit -m "Record Bonsai layout boundary CI report"
+              git push
+            fi
+          fi
 
   export:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.target == 'export' }}
