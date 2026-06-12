@@ -1,0 +1,118 @@
+{
+  "experiment_id": "image-model-ci-remaining-cats-v2",
+  "prompt": "a cute orange tabby cat sitting in a bonsai pot, detailed fur, natural cat anatomy, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a cat",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "This run excludes the five initially reviewed candidates and the five quality-cats candidates that may already have been run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "sd15-lcm-lora-cat"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61620674560,
+      "free_bytes": 93256736768
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 67238666240,
+      "free_bytes": 87638745088
+    },
+    "max_rss_mb_end": 4952.215
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sd15-lcm-lora-cat",
+        "enabled": true,
+        "batch": "remaining",
+        "ci_stage": "generation",
+        "method": "diffusers_lora_text_to_image",
+        "base_model_ref": "stable-diffusion-v1-5/stable-diffusion-v1-5",
+        "lora_model_ref": "latent-consistency/lcm-lora-sdv1-5",
+        "pipeline_class": "StableDiffusionPipeline",
+        "scheduler_class": "LCMScheduler",
+        "height": 256,
+        "width": 256,
+        "steps": 4,
+        "guidance_scale": 1.0,
+        "expected_role": "remaining_lcm_lora_candidate",
+        "notes": "Re-run after adding peft dependency."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781293654.534,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61620674560,
+        "free_bytes": 93256736768
+      },
+      "max_rss_mb_before": 19.883,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_lora_text_to_image",
+      "pipeline_class": "StableDiffusionPipeline",
+      "scheduler_class": "LCMScheduler",
+      "base_model_ref": "stable-diffusion-v1-5/stable-diffusion-v1-5",
+      "lora_model_ref": "latent-consistency/lcm-lora-sdv1-5",
+      "load_seconds": 22.23,
+      "generate_seconds": 18.501,
+      "total_seconds": 42.094,
+      "height": 256,
+      "width": 256,
+      "steps": 4,
+      "guidance_scale": 1.0,
+      "call_kwargs": {
+        "prompt": "a cute orange tabby cat sitting in a bonsai pot, detailed fur, natural cat anatomy, studio lighting, sharp focus",
+        "num_inference_steps": 4,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a cat",
+        "height": 256,
+        "width": 256,
+        "guidance_scale": 1.0
+      },
+      "image_path": "reports/image-model-ci-remaining-cats/sd15-lcm-lora-cat/images/sd15-lcm-lora-cat/cat.png",
+      "image_sha256": "4f6a00a8fbb01230959f57129e520077ee581017dab0d220c3caa0aeb853e05f",
+      "image_size_bytes": 90856,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 4952.215,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 67238666240,
+        "free_bytes": 87638745088
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 45.895,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 45.896
+}
