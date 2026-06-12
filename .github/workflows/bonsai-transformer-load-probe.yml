@@ -27,17 +27,39 @@ jobs:
       BONSAI_HF_RETRY_ATTEMPTS: "4"
       BONSAI_HF_RETRY_SLEEP_SECONDS: "30"
       BONSAI_RUN_TRANSFORMER_ONNX_EXPORT: "true"
-      BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION: "v4"
+      BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION: "v5"
       BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_LOAD: "true"
-      BONSAI_TRANSFORMER_ONNXRUNTIME_LOAD_REVISION: "v7"
+      BONSAI_TRANSFORMER_ONNXRUNTIME_LOAD_REVISION: "v8"
       BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH: "true"
-      BONSAI_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH_REVISION: "v4"
+      BONSAI_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH_REVISION: "v5"
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
+      - name: Write preflight report
+        run: |
+          mkdir -p reports/bonsai-transformer-load-probe
+          cat > reports/bonsai-transformer-load-probe/report.json <<'JSON'
+          {
+            "experiment_id": "bonsai-transformer-load-probe-preflight-v9",
+            "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
+            "status": "preflight_started",
+            "ci_conclusion": "preflight_only",
+            "claim_promotable_to_manifest": false,
+            "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
+            "onnx_export_attempted": true,
+            "onnx_export_revision": "v5",
+            "onnxruntime_load_attempted": true,
+            "onnxruntime_load_revision": "v8",
+            "onnxruntime_trig_cast_patch_attempted": true,
+            "onnxruntime_trig_cast_patch_revision": "v5",
+            "execution_attempted": false,
+            "note": "This preflight report is overwritten by scripts/run_bonsai_transformer_load_probe.py if dependency installation and probe execution run."
+          }
+          JSON
 
       - name: Show runner resources
         run: |
