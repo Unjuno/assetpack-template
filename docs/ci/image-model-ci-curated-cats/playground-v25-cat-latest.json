@@ -1,0 +1,113 @@
+{
+  "experiment_id": "image-model-ci-curated-cats-v2",
+  "prompt": "a cute orange tabby cat sitting in a bonsai pot, detailed fur, natural cat anatomy, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a cat",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Curated list keeps only candidates that produced a visually recognizable cat image in prior CI artifacts. Each candidate should still be treated as a measurement, not a model-quality claim."
+  },
+  "selection": {
+    "candidate_ids": [
+      "playground-v25-cat"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61395197952,
+      "free_bytes": 93482213376
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 75273416704,
+      "free_bytes": 79603994624
+    },
+    "max_rss_mb_end": 14326.453
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "playground-v25-cat",
+        "enabled": true,
+        "batch": "curated",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "playgroundai/playground-v2.5-1024px-aesthetic",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 6,
+        "guidance_scale": 3.0,
+        "expected_role": "curated_sdxl_quality_candidate"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781298680.75,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61395197952,
+        "free_bytes": 93482213376
+      },
+      "max_rss_mb_before": 19.758,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "StableDiffusionXLPipeline",
+      "model_ref": "playgroundai/playground-v2.5-1024px-aesthetic",
+      "load_seconds": 40.05,
+      "generate_seconds": 286.865,
+      "total_seconds": 329.544,
+      "height": 512,
+      "width": 512,
+      "steps": 6,
+      "guidance_scale": 3.0,
+      "call_kwargs": {
+        "prompt": "a cute orange tabby cat sitting in a bonsai pot, detailed fur, natural cat anatomy, studio lighting, sharp focus",
+        "num_inference_steps": 6,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a cat",
+        "height": 512,
+        "width": 512,
+        "guidance_scale": 3.0
+      },
+      "image_path": "reports/image-model-ci-curated-cats/playground-v25-cat/images/playground-v25-cat/cat.png",
+      "image_sha256": "55cd6be43aa3e482b6b14daa108d184320872f51320bfb7540a37ab155f9d5a6",
+      "image_size_bytes": 316514,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 14326.453,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 75273416704,
+        "free_bytes": 79603994624
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 332.965,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 332.967
+}
