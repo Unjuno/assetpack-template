@@ -95,7 +95,7 @@ reports/image-model-ci-benchmark/load_only/report.json -> docs/ci/image-model-ci
 reports/image-model-ci-benchmark/runtime/report.json   -> docs/ci/image-model-ci-benchmark-runtime-latest.json
 ```
 
-The `image-model-ci-candidate-matrix` workflow writes one repo-persisted report per candidate:
+The `image-model-ci-candidate-dynamic` workflow reads `experiments/image-model-ci-benchmark.yml` at runtime and writes one repo-persisted report per selected candidate:
 
 ```text
 reports/image-model-ci-candidate/<candidate-id>/report.json -> docs/ci/image-model-ci-candidates/<candidate-id>-latest.json
@@ -107,9 +107,9 @@ It also uploads a per-candidate artifact named:
 image-model-ci-candidate-<candidate-id>
 ```
 
-The artifact contains the candidate report and any generated `cat.png` image. PNGs are intentionally not committed to the repository; they are for human inspection from the Actions artifact UI.
+The artifact contains the candidate report and any generated `cat.png` image. PNGs are intentionally not committed to the repository; they are for human inspection from the Actions artifact UI. This dynamic workflow supersedes the removed static `image-model-ci-candidate-matrix` workflow.
 
-The `image-model-onnx-feasibility-matrix` workflow writes one repo-persisted ONNX feasibility report per candidate:
+The `image-model-onnx-feasibility-dynamic` workflow reads `experiments/image-model-ci-benchmark.yml` at runtime and writes one repo-persisted ONNX feasibility report per selected candidate:
 
 ```text
 reports/image-model-onnx-feasibility/<candidate-id>/report.json -> docs/ci/image-model-onnx-feasibility/<candidate-id>-latest.json
@@ -121,7 +121,7 @@ It also uploads a per-candidate artifact named:
 image-model-onnx-feasibility-<candidate-id>
 ```
 
-For Stable-Diffusion-style UNet candidates, the ONNX feasibility workflow attempts a minimal UNet ONNX export, ONNX Runtime CPU load, and ONNX Runtime dummy execution. For SDXL, Flux, Qwen, PixArt, adapter-only repositories, component-only methods, OpenVINO placeholders, and native runtime placeholders, the workflow records the skip or failure boundary instead of pretending a generic ONNX path is valid. These are feasibility measurements only; they do not verify a full prompt-to-image ONNX pipeline.
+For Stable-Diffusion-style UNet candidates, the ONNX feasibility workflow attempts a minimal UNet ONNX export, ONNX Runtime CPU load, and ONNX Runtime dummy execution. For SDXL, Flux, Qwen, PixArt, adapter-only repositories, component-only methods, OpenVINO placeholders, and native runtime placeholders, the workflow records the skip or failure boundary instead of pretending a generic ONNX path is valid. These are feasibility measurements only; they do not verify a full prompt-to-image ONNX pipeline. This dynamic workflow supersedes the removed static `image-model-onnx-feasibility-matrix` workflow.
 
 Those reports record CI measurements for candidate image-generation methods using a fixed cat prompt. Candidate-level records include load seconds, generation seconds, total seconds, image SHA-256, image size, disk snapshots, max RSS, method, pipeline class, and failure boundary. These reports are measurement evidence only; they are not model-quality claims, not general benchmark claims, and not prompt-to-image product claims beyond the specific CI run configuration.
 
