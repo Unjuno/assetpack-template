@@ -1,19 +1,20 @@
 {
-  "experiment_id": "bonsai-transformer-load-probe-v1",
+  "experiment_id": "bonsai-transformer-load-probe-v2",
   "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
-  "stage": "transformer_weight_load",
   "download_weights": true,
   "runtime_load": true,
-  "onnx_export": false,
+  "onnx_export_attempted": true,
   "claim_promotable_to_manifest": true,
   "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
   "status": "passed",
-  "ci_conclusion": "success",
+  "ci_conclusion": "success_with_probe_failure",
   "class_name": "Flux2Transformer2DModel",
   "param_count": 3875544576,
   "param_count_billion": 3.876,
   "dtype_param_counts": {
     "torch.float16": 3875544576
   },
-  "seconds": 33.313
+  "error_type": "ModuleNotFoundError",
+  "error": "No module named 'onnxscript'",
+  "seconds": 61.89
 }
