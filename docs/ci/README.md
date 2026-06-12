@@ -9,6 +9,7 @@ docs/ci/bonsai-layout-boundary-latest.json
 docs/ci/bonsai-combined-component-probe-latest.json
 docs/ci/bonsai-transformer-load-probe-latest.json
 docs/ci/ort-cpu-kernel-probe-latest.json
+docs/ci/image-model-ci-benchmark-latest.json
 ```
 
 `docs/ci/bonsai-layout-boundary-latest.json` is produced by the `bonsai-onnx-smoke` workflow when `target=layout-boundary` runs. It is copied from:
@@ -70,11 +71,21 @@ That report is synthetic ONNX Runtime CPUExecutionProvider evidence for `Cos` ty
 ```text
 Cos(FLOAT16) load: passed
 Cos(FLOAT32) load: passed
+Cos(DOUBLE) load: failed with Cos(7) NotImplemented
+Cast DOUBLE -> FLOAT -> Cos -> Cast back load: passed
 Cos(INT64) load: failed as invalid graph
 Cast INT64 -> FLOAT -> Cos -> Cast back load: passed
 ```
 
-This supports the diagnostic interpretation that an ONNX Runtime error such as `Cos(7)` is likely an INT64 trig input issue rather than a FLOAT16 kernel issue. It is not Bonsai model evidence by itself, not transformer graph evidence by itself, not execution evidence, and not a full pipeline claim.
+This supports the diagnostic interpretation that a Bonsai ONNX Runtime error such as `Cos(7)` can be caused by DOUBLE trig inputs on CPUExecutionProvider. It is not Bonsai model evidence by itself, not transformer graph evidence by itself, not execution evidence, and not a full pipeline claim.
+
+`docs/ci/image-model-ci-benchmark-latest.json` is produced by the `image-model-ci-benchmark` workflow. It is copied from:
+
+```text
+reports/image-model-ci-benchmark/report.json
+```
+
+That report records CI measurements for candidate image-generation methods using a fixed cat prompt. It records candidate-level load seconds, generation seconds, image SHA-256, image size, disk snapshots, and max RSS. It is measurement evidence only; it is not a model-quality claim, not a general benchmark claim, and not a prompt-to-image product claim beyond the specific CI run configuration.
 
 The workflow path filters intentionally do not include `docs/ci/**`, so committing report snapshots does not retrigger the workflows.
 
@@ -92,8 +103,8 @@ A repo-persisted report can be promoted to `docs/bonsai-combined-component-verif
 
 For combined reports, individual stages may be promotable even when later full-pipeline stages are blocked or not implemented. Promote only the explicit stage-level `allowed_claim` values with `claim_promotable_to_manifest=true`.
 
-Reports or stages with `external_rate_limited`, `failed`, `preflight_started`, `preflight_only`, or `blocked` are evidence records, but not verified manifest entries.
+Reports or stages with `external_rate_limited`, `failed`, `preflight_started`, `preflight_only`, or `blocked` are evidence records, but not verified manifest entries. Benchmark measurement reports are not verification manifest entries unless a separate explicit promotion gate is added.
 
 ## Non-claims
 
-Persisting a CI report into this directory does not by itself verify full Bonsai ONNX pipeline execution, real transformer ONNX execution, prompt-to-image generation, or single monolithic multi-block ONNX execution. Those require explicit successful report keys and successful evidence-gated promotion.
+Persisting a CI report into this directory does not by itself verify full Bonsai ONNX pipeline execution, real transformer ONNX execution, general model quality, general benchmark superiority, prompt-to-image product readiness, or single monolithic multi-block ONNX execution. Those require explicit successful report keys and successful evidence-gated promotion.
