@@ -1,0 +1,377 @@
+experiment_id: image-model-ci-remaining-cats-v1
+prompt: "a cute orange tabby cat sitting in a bonsai pot, detailed fur, natural cat anatomy, studio lighting, sharp focus"
+negative_prompt: "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a cat"
+seed: 12345
+output_root: reports/image-model-ci-remaining-cats
+runtime:
+  device: cpu
+  torch_dtype: float32
+  num_threads: 1
+  save_images: true
+  safety_checker: disabled_when_supported
+  default_timeout_note: "This run intentionally excludes the five already-reviewed candidates and attempts the remaining catalog within GitHub-hosted CPU constraints."
+excluded_already_reviewed:
+  - tiny-stable-diffusion-pipe
+  - small-stable-diffusion-v0
+  - segmind-tiny-sd
+  - lcm-dreamshaper-v7
+  - sd-turbo
+candidates:
+  - id: bk-sdm-tiny-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: nota-ai/bk-sdm-tiny
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 6
+    guidance_scale: 7.5
+    expected_role: remaining_small_sd_candidate
+
+  - id: bk-sdm-small-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: nota-ai/bk-sdm-small
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 6
+    guidance_scale: 7.5
+    expected_role: remaining_small_sd_candidate
+
+  - id: bk-sdm-base-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: nota-ai/bk-sdm-base
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 6
+    guidance_scale: 7.5
+    expected_role: remaining_small_sd_candidate
+
+  - id: sd15-lcm-lora-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_lora_text_to_image
+    base_model_ref: stable-diffusion-v1-5/stable-diffusion-v1-5
+    lora_model_ref: latent-consistency/lcm-lora-sdv1-5
+    pipeline_class: StableDiffusionPipeline
+    scheduler_class: LCMScheduler
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: remaining_lcm_lora_candidate
+    notes: "Re-run after adding peft dependency."
+
+  - id: dreamshaper7-lcm-lora-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_lora_text_to_image
+    base_model_ref: Lykon/dreamshaper-7
+    lora_model_ref: latent-consistency/lcm-lora-sdv1-5
+    pipeline_class: StableDiffusionPipeline
+    scheduler_class: LCMScheduler
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: remaining_lcm_lora_quality_candidate
+
+  - id: openjourney-v4-lcm-lora-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_lora_text_to_image
+    base_model_ref: prompthero/openjourney-v4
+    lora_model_ref: latent-consistency/lcm-lora-sdv1-5
+    pipeline_class: StableDiffusionPipeline
+    scheduler_class: LCMScheduler
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: remaining_stylized_lcm_lora_candidate
+    notes: "Re-run after adding peft dependency."
+
+  - id: sdxl-turbo-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: stabilityai/sdxl-turbo
+    pipeline_class: AutoPipelineForText2Image
+    height: 512
+    width: 512
+    steps: 1
+    guidance_scale: 0.0
+    expected_role: remaining_sdxl_turbo_candidate
+    license_hint: stability-ai-noncommercial-community
+
+  - id: ssd-1b-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: segmind/SSD-1B
+    pipeline_class: StableDiffusionXLPipeline
+    height: 512
+    width: 512
+    steps: 6
+    guidance_scale: 7.5
+    expected_role: remaining_small_sdxl_candidate
+    license_hint: apache-2.0
+
+  - id: segmind-vega-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: segmind/Segmind-Vega
+    pipeline_class: StableDiffusionXLPipeline
+    height: 512
+    width: 512
+    steps: 6
+    guidance_scale: 7.5
+    expected_role: remaining_small_sdxl_candidate
+
+  - id: ssd-1b-lcm-lora-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_lora_text_to_image
+    base_model_ref: segmind/SSD-1B
+    lora_model_ref: latent-consistency/lcm-lora-ssd-1b
+    pipeline_class: StableDiffusionXLPipeline
+    scheduler_class: LCMScheduler
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: remaining_small_sdxl_lcm_candidate
+
+  - id: sdxl-lcm-lora-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_lora_text_to_image
+    base_model_ref: stabilityai/stable-diffusion-xl-base-1.0
+    lora_model_ref: latent-consistency/lcm-lora-sdxl
+    pipeline_class: StableDiffusionXLPipeline
+    scheduler_class: LCMScheduler
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: remaining_sdxl_lcm_candidate
+
+  - id: sd15-baseline-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: stable-diffusion-v1-5/stable-diffusion-v1-5
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 8
+    guidance_scale: 7.5
+    expected_role: remaining_sd15_baseline_candidate
+
+  - id: sd14-baseline-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: CompVis/stable-diffusion-v1-4
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 8
+    guidance_scale: 7.5
+    expected_role: remaining_sd14_baseline_candidate
+
+  - id: sd21-base-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: stabilityai/stable-diffusion-2-1
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 8
+    guidance_scale: 7.5
+    expected_role: remaining_sd21_candidate
+
+  - id: sdxl-base-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: stabilityai/stable-diffusion-xl-base-1.0
+    pipeline_class: StableDiffusionXLPipeline
+    height: 512
+    width: 512
+    steps: 6
+    guidance_scale: 7.5
+    expected_role: remaining_sdxl_baseline_candidate
+
+  - id: sdxl-lightning-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: ByteDance/SDXL-Lightning
+    pipeline_class: DiffusionPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 0.0
+    expected_role: remaining_adapter_repo_boundary_candidate
+    notes: "May fail because this repo provides UNet/LoRA weights rather than a complete pipeline. Failure boundary is useful."
+
+  - id: hyper-sd-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: ByteDance/Hyper-SD
+    pipeline_class: DiffusionPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 0.0
+    expected_role: remaining_adapter_repo_boundary_candidate
+    notes: "May fail because this repo provides adapters/checkpoints rather than a complete pipeline. Failure boundary is useful."
+
+  - id: pixart-alpha-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: PixArt-alpha/PixArt-XL-2-1024-MS
+    pipeline_class: PixArtAlphaPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 4.5
+    expected_role: remaining_transformer_quality_candidate
+    license_hint: openrail-plus-plus
+    use_negative_prompt: false
+
+  - id: pixart-sigma-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: PixArt-alpha/PixArt-Sigma-XL-2-1024-MS
+    pipeline_class: PixArtSigmaPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 4.5
+    expected_role: remaining_transformer_quality_candidate
+    use_negative_prompt: false
+
+  - id: playground-v25-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: playgroundai/playground-v2.5-1024px-aesthetic
+    pipeline_class: StableDiffusionXLPipeline
+    height: 512
+    width: 512
+    steps: 6
+    guidance_scale: 3.0
+    expected_role: remaining_sdxl_quality_candidate
+
+  - id: sd35-medium-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: stabilityai/stable-diffusion-3.5-medium
+    pipeline_class: StableDiffusion3Pipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 4.5
+    expected_role: remaining_heavy_quality_candidate
+    notes: "Likely gated/heavy. Failure boundary is useful."
+
+  - id: flux-schnell-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: black-forest-labs/FLUX.1-schnell
+    pipeline_class: FluxPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 0.0
+    expected_role: remaining_flux_quality_candidate
+    license_hint: apache-2.0
+    use_negative_prompt: false
+    notes: "Likely gated/heavy. Failure boundary is useful."
+
+  - id: qwen-image-cat
+    enabled: true
+    batch: remaining
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: Qwen/Qwen-Image
+    pipeline_class: QwenImagePipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 0.0
+    expected_role: remaining_text_rendering_quality_candidate
+    license_hint: apache-2.0
+    use_negative_prompt: false
+    notes: "Likely heavy or pipeline-version-dependent. Failure boundary is useful."
+
+  - id: taesd-component-placeholder
+    enabled: true
+    batch: remaining
+    ci_stage: placeholder
+    method: component_load_placeholder
+    model_ref: madebyollin/taesd
+    expected_role: remaining_tiny_vae_method_candidate
+    license_hint: mit
+    notes: "Component-only, not a full text-to-image pipeline."
+
+  - id: openvino-small-sd-placeholder
+    enabled: true
+    batch: remaining
+    ci_stage: placeholder
+    method: openvino_text_to_image
+    model_ref: "TODO: add preconverted OpenVINO artifact"
+    height: 256
+    width: 256
+    steps: 2
+    expected_role: remaining_cpu_quantized_candidate
+    notes: "Placeholder."
+
+  - id: stable-diffusion-cpp-sd15-placeholder
+    enabled: true
+    batch: remaining
+    ci_stage: placeholder
+    method: stable_diffusion_cpp_text_to_image
+    model_ref: "TODO: add quantized gguf/ggml artifact"
+    height: 256
+    width: 256
+    steps: 4
+    expected_role: remaining_native_quantized_runtime_candidate
+    notes: "Placeholder."
