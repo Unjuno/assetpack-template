@@ -1,0 +1,114 @@
+{
+  "experiment_id": "image-model-ci-curated-chameleons-v1",
+  "prompt": "a cute chameleon perched on a bonsai branch in a bonsai pot, detailed scales, natural chameleon anatomy, curled tail, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a chameleon, cat, dog, rabbit, bird, toy",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Chameleon generation uses the strict seven candidates accepted from cat artifact review. Chameleon visual quality is unverified until this workflow is run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "sdxl-turbo-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61395312640,
+      "free_bytes": 93482098688
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 75273662464,
+      "free_bytes": 79603748864
+    },
+    "max_rss_mb_end": 14347.562
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sdxl-turbo-quality",
+        "enabled": true,
+        "batch": "curated_chameleon",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "stabilityai/sdxl-turbo",
+        "pipeline_class": "AutoPipelineForText2Image",
+        "height": 512,
+        "width": 512,
+        "steps": 1,
+        "guidance_scale": 0.0,
+        "license_hint": "stability-ai-noncommercial-community",
+        "expected_role": "chameleon_sdxl_turbo_candidate"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781301007.128,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61395312640,
+        "free_bytes": 93482098688
+      },
+      "max_rss_mb_before": 19.621,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "AutoPipelineForText2Image",
+      "model_ref": "stabilityai/sdxl-turbo",
+      "load_seconds": 40.639,
+      "generate_seconds": 51.409,
+      "total_seconds": 94.82,
+      "height": 512,
+      "width": 512,
+      "steps": 1,
+      "guidance_scale": 0.0,
+      "call_kwargs": {
+        "prompt": "a cute chameleon perched on a bonsai branch in a bonsai pot, detailed scales, natural chameleon anatomy, curled tail, studio lighting, sharp focus",
+        "num_inference_steps": 1,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a chameleon, cat, dog, rabbit, bird, toy",
+        "height": 512,
+        "width": 512,
+        "guidance_scale": 0.0
+      },
+      "image_path": "reports/image-model-ci-curated-chameleons/sdxl-turbo-quality/images/sdxl-turbo-quality/cat.png",
+      "image_sha256": "6e74e4a36cab0460a298ec3c0a6b377307f328afaf244a7ddd21aa1e66a91550",
+      "image_size_bytes": 373188,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 14347.562,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 75273662464,
+        "free_bytes": 79603748864
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 99.59,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 99.591
+}
