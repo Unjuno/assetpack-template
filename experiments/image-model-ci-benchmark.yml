@@ -1,4 +1,4 @@
-experiment_id: image-model-ci-benchmark-v1
+experiment_id: image-model-ci-benchmark-v2
 prompt: "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting"
 negative_prompt: "blurry, distorted, low quality"
 seed: 12345
@@ -10,9 +10,18 @@ runtime:
   save_images: true
   safety_checker: disabled_when_supported
   default_timeout_note: "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+
+# Batches:
+#   smoke: tiny/sentinel and small direct-generation candidates.
+#   lcm: latent-consistency and few-step candidates likely to be useful on CPU.
+#   turbo: distilled/turbo/lightning/hyper candidates; some are likely too heavy on standard runners.
+#   load_only: quality baselines or heavy models checked only for load feasibility.
+#   runtime: quantized/OpenVINO/cpp placeholders; enable after artifact selection.
 candidates:
   - id: tiny-stable-diffusion-pipe
     enabled: true
+    batch: smoke
+    ci_stage: generation
     method: diffusers_text_to_image
     model_ref: hf-internal-testing/tiny-stable-diffusion-pipe
     pipeline_class: DiffusionPipeline
@@ -23,8 +32,68 @@ candidates:
     expected_role: ci_sentinel
     notes: "Tiny pipeline for CI mechanics, not image quality."
 
+  - id: small-stable-diffusion-v0
+    enabled: true
+    batch: smoke
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: OFA-Sys/small-stable-diffusion-v0
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 7.5
+    expected_role: small_sd_candidate
+    license_hint: openrail
+    notes: "Small Stable Diffusion candidate for CPU CI."
+
+  - id: segmind-tiny-sd
+    enabled: true
+    batch: smoke
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: segmind/tiny-sd
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 7.5
+    expected_role: small_sd_candidate
+    license_hint: creativeml-openrail-m
+    notes: "Tiny SD candidate. Failure is useful evidence if repo or pipeline metadata differs."
+
+  - id: bk-sdm-tiny-load
+    enabled: true
+    batch: smoke
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: nota-ai/bk-sdm-tiny
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 7.5
+    expected_role: small_sd_load_candidate
+    notes: "Load-only first because exact CI memory footprint should be measured before generation."
+
+  - id: bk-sdm-small-load
+    enabled: true
+    batch: smoke
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: nota-ai/bk-sdm-small
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 7.5
+    expected_role: small_sd_load_candidate
+    notes: "Load-only first. Promote to generation after resource data."
+
   - id: lcm-dreamshaper-v7
     enabled: true
+    batch: lcm
+    ci_stage: generation
     method: diffusers_text_to_image
     model_ref: SimianLuo/LCM_Dreamshaper_v7
     pipeline_class: LatentConsistencyModelPipeline
@@ -33,10 +102,13 @@ candidates:
     steps: 4
     guidance_scale: 8.0
     expected_role: few_step_quality_candidate
-    notes: "Few-step LCM candidate. If this is too heavy for standard GitHub runners, the report should preserve the failure boundary."
+    license_hint: mit
+    notes: "Few-step LCM candidate."
 
-  - id: sd15-lcm-lora-template
-    enabled: false
+  - id: sd15-lcm-lora
+    enabled: true
+    batch: lcm
+    ci_stage: generation
     method: diffusers_lora_text_to_image
     base_model_ref: runwayml/stable-diffusion-v1-5
     lora_model_ref: latent-consistency/lcm-lora-sdv1-5
@@ -47,14 +119,209 @@ candidates:
     steps: 4
     guidance_scale: 1.0
     expected_role: lcm_lora_candidate
-    notes: "Disabled by default because base model availability/license/auth can vary. Enable after metadata check."
+    license_hint: openrail-plus-plus
+    notes: "Core SD1.5 + LCM-LoRA benchmark candidate."
 
-  - id: quantized-openvino-template
-    enabled: false
+  - id: dreamshaper7-lcm-lora
+    enabled: true
+    batch: lcm
+    ci_stage: generation
+    method: diffusers_lora_text_to_image
+    base_model_ref: Lykon/dreamshaper-7
+    lora_model_ref: latent-consistency/lcm-lora-sdv1-5
+    pipeline_class: StableDiffusionPipeline
+    scheduler_class: LCMScheduler
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: lcm_lora_quality_candidate
+    notes: "Quality base + LCM-LoRA. If gated or incompatible, report failure boundary."
+
+  - id: openjourney-v4-lcm-lora
+    enabled: true
+    batch: lcm
+    ci_stage: generation
+    method: diffusers_lora_text_to_image
+    base_model_ref: prompthero/openjourney-v4
+    lora_model_ref: latent-consistency/lcm-lora-sdv1-5
+    pipeline_class: StableDiffusionPipeline
+    scheduler_class: LCMScheduler
+    height: 256
+    width: 256
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: stylized_lcm_lora_candidate
+    notes: "Stylized SD1.5-family candidate. License and model availability are measured by CI."
+
+  - id: sd-turbo
+    enabled: true
+    batch: turbo
+    ci_stage: generation
+    method: diffusers_text_to_image
+    model_ref: stabilityai/sd-turbo
+    pipeline_class: AutoPipelineForText2Image
+    height: 256
+    width: 256
+    steps: 2
+    guidance_scale: 0.0
+    expected_role: turbo_candidate
+    license_hint: stability-ai-noncommercial-community
+    notes: "Turbo candidate. Generation may fail if pipeline class or license access changes."
+
+  - id: sdxl-turbo-load
+    enabled: true
+    batch: turbo
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: stabilityai/sdxl-turbo
+    pipeline_class: AutoPipelineForText2Image
+    height: 512
+    width: 512
+    steps: 1
+    guidance_scale: 0.0
+    expected_role: heavy_turbo_load_candidate
+    license_hint: stability-ai-noncommercial-community
+    notes: "Load-only first due SDXL memory/disk risk."
+
+  - id: ssd-1b-load
+    enabled: true
+    batch: turbo
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: segmind/SSD-1B
+    pipeline_class: StableDiffusionXLPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 0.0
+    expected_role: small_sdxl_load_candidate
+    license_hint: apache-2.0
+    notes: "Small SDXL-class model. Load-only first."
+
+  - id: ssd-1b-lcm-lora-load
+    enabled: true
+    batch: turbo
+    ci_stage: load_only
+    method: diffusers_lora_load_only
+    base_model_ref: segmind/SSD-1B
+    lora_model_ref: latent-consistency/lcm-lora-ssd-1b
+    pipeline_class: StableDiffusionXLPipeline
+    scheduler_class: LCMScheduler
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: small_sdxl_lcm_load_candidate
+    notes: "Load-only first. Promote to generation only if memory/disk are acceptable."
+
+  - id: sdxl-lcm-lora-load
+    enabled: true
+    batch: turbo
+    ci_stage: load_only
+    method: diffusers_lora_load_only
+    base_model_ref: stabilityai/stable-diffusion-xl-base-1.0
+    lora_model_ref: latent-consistency/lcm-lora-sdxl
+    pipeline_class: StableDiffusionXLPipeline
+    scheduler_class: LCMScheduler
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 1.0
+    expected_role: sdxl_lcm_load_candidate
+    notes: "Likely heavy on standard runners; load-only evidence first."
+
+  - id: sd15-load-baseline
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: runwayml/stable-diffusion-v1-5
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 20
+    guidance_scale: 7.5
+    expected_role: baseline_load_candidate
+    notes: "Baseline load feasibility. Generation disabled initially."
+
+  - id: sd21-base-load
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: stabilityai/stable-diffusion-2-1-base
+    pipeline_class: StableDiffusionPipeline
+    height: 256
+    width: 256
+    steps: 20
+    guidance_scale: 7.5
+    expected_role: baseline_load_candidate
+    notes: "SD2.1 load-only baseline."
+
+  - id: sdxl-base-load
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: stabilityai/stable-diffusion-xl-base-1.0
+    pipeline_class: StableDiffusionXLPipeline
+    height: 512
+    width: 512
+    steps: 20
+    guidance_scale: 7.5
+    expected_role: heavy_baseline_load_candidate
+    notes: "SDXL load-only baseline."
+
+  - id: flux-schnell-load
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: black-forest-labs/FLUX.1-schnell
+    pipeline_class: FluxPipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 0.0
+    expected_role: heavy_quality_load_candidate
+    license_hint: apache-2.0
+    notes: "Likely too heavy for standard CI; load-only evidence is useful."
+
+  - id: qwen-image-load
+    enabled: true
+    batch: load_only
+    ci_stage: load_only
+    method: diffusers_load_only
+    model_ref: Qwen/Qwen-Image
+    pipeline_class: QwenImagePipeline
+    height: 512
+    width: 512
+    steps: 4
+    guidance_scale: 0.0
+    expected_role: heavy_text_rendering_load_candidate
+    notes: "Likely too heavy or unavailable depending on installed diffusers version. Failure boundary is useful."
+
+  - id: openvino-small-sd-placeholder
+    enabled: true
+    batch: runtime
+    ci_stage: placeholder
     method: openvino_text_to_image
-    model_ref: "TODO: add preconverted OpenVINO or ONNX artifact"
+    model_ref: "TODO: add preconverted OpenVINO artifact"
     height: 256
     width: 256
     steps: 2
     expected_role: cpu_quantized_candidate
-    notes: "Placeholder for preconverted quantized artifacts. Do not quantize large models inside standard CI."
+    notes: "Placeholder. Do not quantize large models inside standard CI."
+
+  - id: stable-diffusion-cpp-sd15-placeholder
+    enabled: true
+    batch: runtime
+    ci_stage: placeholder
+    method: stable_diffusion_cpp_text_to_image
+    model_ref: "TODO: add quantized gguf/ggml artifact"
+    height: 256
+    width: 256
+    steps: 4
+    expected_role: native_quantized_runtime_candidate
+    notes: "Placeholder for native quantized runtime."
