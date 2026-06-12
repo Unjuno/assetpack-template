@@ -76,10 +76,10 @@ def run(out_dir: str) -> int:
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     report: dict = {
-        "experiment_id": "ort-cpu-kernel-probe-v2",
-        "purpose": "Synthetic ONNX Runtime CPUExecutionProvider kernel probe for Cos FLOAT16 and FLOAT cast workaround.",
+        "experiment_id": "ort-cpu-kernel-probe-v3",
+        "purpose": "Synthetic ONNX Runtime CPUExecutionProvider kernel probe for Cos FLOAT16, INT64, and FLOAT cast workarounds.",
         "claim_promotable_to_manifest": False,
-        "allowed_claim": "synthetic_ort_cpu_cos_float16_cast_workaround_evidence_not_bonsai_pipeline",
+        "allowed_claim": "synthetic_ort_cpu_cos_int64_cast_workaround_evidence_not_bonsai_pipeline",
     }
     try:
         import onnx
@@ -94,26 +94,32 @@ def run(out_dir: str) -> int:
         models = {
             "cos_float16_original": make_cos_model(out / "cos_float16_original.onnx", TensorProto.FLOAT16, patched=False),
             "cos_float32_original": make_cos_model(out / "cos_float32_original.onnx", TensorProto.FLOAT, patched=False),
+            "cos_int64_original": make_cos_model(out / "cos_int64_original.onnx", TensorProto.INT64, patched=False),
+            "cos_int64_with_float32_cast_patch": make_cos_model(out / "cos_int64_with_float32_cast_patch.onnx", TensorProto.INT64, patched=True),
             "cos_float16_with_float32_cast_patch": make_cos_model(out / "cos_float16_with_float32_cast_patch.onnx", TensorProto.FLOAT16, patched=True),
         }
         loads = {name: try_load(Path(meta["path"])) for name, meta in models.items()}
         report["models"] = models
         report["onnxruntime_loads"] = loads
-        fp16_original_failed = loads["cos_float16_original"]["status"] == "failed"
+        fp16_original_passed = loads["cos_float16_original"]["status"] == "passed"
         fp32_original_passed = loads["cos_float32_original"]["status"] == "passed"
+        int64_original_failed = loads["cos_int64_original"]["status"] == "failed"
+        int64_patched_passed = loads["cos_int64_with_float32_cast_patch"]["status"] == "passed"
         fp16_patched_passed = loads["cos_float16_with_float32_cast_patch"]["status"] == "passed"
         report["inference"] = {
-            "cos_float16_original_load_failed": fp16_original_failed,
+            "cos_float16_original_load_passed": fp16_original_passed,
             "cos_float32_original_load_passed": fp32_original_passed,
+            "cos_int64_original_load_failed": int64_original_failed,
+            "cos_int64_with_float32_cast_patch_load_passed": int64_patched_passed,
             "cos_float16_with_float32_cast_patch_load_passed": fp16_patched_passed,
-            "supports_bonsai_interpretation": fp16_original_failed and fp32_original_passed and fp16_patched_passed,
+            "supports_bonsai_cos7_interpretation": int64_original_failed and fp32_original_passed and int64_patched_passed,
         }
-        if fp16_original_failed and fp32_original_passed and fp16_patched_passed:
+        if int64_original_failed and fp32_original_passed and int64_patched_passed:
             report.update({
                 "status": "passed",
                 "ci_conclusion": "success",
                 "claim_promotable_to_manifest": True,
-                "allowed_claim": "synthetic_ort_cpu_cos_float16_cast_workaround_verified_not_bonsai_pipeline",
+                "allowed_claim": "synthetic_ort_cpu_cos_int64_cast_workaround_verified_not_bonsai_pipeline",
             })
         else:
             report.update({
