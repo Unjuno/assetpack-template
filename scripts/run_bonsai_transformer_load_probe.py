@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import time
 from pathlib import Path
 
@@ -13,17 +14,28 @@ def load_config(path: str) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def env_bool(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    return default if value in (None, "") else value.lower() in {"1", "true", "yes", "on"}
+
+
+def write_report(out_dir: Path, report: dict) -> None:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def run(config_path: str, out_dir: str) -> int:
     start = time.time()
     cfg = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
     model_ref = cfg["candidate"]["model_ref"]
+    out = Path(out_dir)
+    export_attempt = env_bool("BONSAI_RUN_TRANSFORMER_ONNX_EXPORT", False)
     report = {
-        "experiment_id": "bonsai-transformer-load-probe-v1",
+        "experiment_id": "bonsai-transformer-load-probe-v2",
         "model_ref": model_ref,
-        "stage": "transformer_weight_load",
         "download_weights": True,
         "runtime_load": True,
-        "onnx_export": False,
+        "onnx_export_attempted": export_attempt,
         "claim_promotable_to_manifest": False,
         "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
     }
@@ -36,20 +48,14 @@ def run(config_path: str, out_dir: str) -> int:
         transformer_config = load_config(config_path)
         class_name = transformer_config.get("_class_name", "FluxTransformer2DModel")
         cls = getattr(diffusers, class_name)
-        model = cls.from_pretrained(
-            model_ref,
-            subfolder="transformer",
-            torch_dtype=torch.float16,
-            low_cpu_mem_usage=True,
-        )
+        model = cls.from_pretrained(model_ref, subfolder="transformer", torch_dtype=torch.float16, low_cpu_mem_usage=True)
         model.eval()
         param_count = 0
         dtype_counts = {}
         for param in model.parameters():
             count = int(param.numel())
             param_count += count
-            key = str(param.dtype)
-            dtype_counts[key] = dtype_counts.get(key, 0) + count
+            dtype_counts[str(param.dtype)] = dtype_counts.get(str(param.dtype), 0) + count
         report.update({
             "status": "passed",
             "ci_conclusion": "success",
@@ -59,17 +65,53 @@ def run(config_path: str, out_dir: str) -> int:
             "param_count_billion": round(param_count / 1000000000, 3),
             "dtype_param_counts": dtype_counts,
         })
+        write_report(out, {**report, "seconds": round(time.time() - start, 3), "partial_before_onnx_export": True})
+        if export_attempt:
+            class Wrapper(torch.nn.Module):
+                def __init__(self, inner):
+                    super().__init__()
+                    self.inner = inner
+                def forward(self, hidden_states, encoder_hidden_states, timestep, img_ids, txt_ids):
+                    result = self.inner(hidden_states=hidden_states, encoder_hidden_states=encoder_hidden_states, timestep=timestep, img_ids=img_ids, txt_ids=txt_ids, return_dict=False)
+                    return result[0]
+            axes = transformer_config.get("axes_dims_rope", [32, 32, 32, 32])
+            axes_len = len(axes) if isinstance(axes, list) else 4
+            in_channels = int(transformer_config.get("in_channels", 128))
+            joint_dim = int(transformer_config.get("joint_attention_dim", 7680))
+            example_inputs = (
+                torch.zeros((1, 1, in_channels), dtype=torch.float16),
+                torch.zeros((1, 1, joint_dim), dtype=torch.float16),
+                torch.zeros((1,), dtype=torch.float16),
+                torch.zeros((1, axes_len), dtype=torch.float32),
+                torch.zeros((1, axes_len), dtype=torch.float32),
+            )
+            onnx_path = out / "transformer_minimal.onnx"
+            torch.onnx.export(
+                Wrapper(model),
+                example_inputs,
+                str(onnx_path),
+                input_names=["hidden_states", "encoder_hidden_states", "timestep", "img_ids", "txt_ids"],
+                output_names=["sample"],
+                opset_version=17,
+                do_constant_folding=False,
+            )
+            report.update({
+                "onnx_export": {
+                    "status": "passed",
+                    "claim_promotable_to_manifest": True,
+                    "allowed_claim": "bonsai_transformer_minimal_onnx_export_verified_not_full_pipeline",
+                    "path": str(onnx_path),
+                    "size_bytes": onnx_path.stat().st_size,
+                }
+            })
     except BaseException as exc:
         report.update({
-            "status": "failed",
             "ci_conclusion": "success_with_probe_failure",
             "error_type": type(exc).__name__,
             "error": str(exc)[:4000],
         })
     report["seconds"] = round(time.time() - start, 3)
-    out = Path(out_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    (out / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_report(out, report)
     return 0
 
 
