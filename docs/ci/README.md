@@ -41,11 +41,28 @@ transformer_weight_load: passed
 reports/bonsai-transformer-load-probe/report.json
 ```
 
+The current canonical transformer minimal ONNX export evidence is in:
+
+```text
+docs/ci/bonsai-transformer-load-probe-latest.json
+```
+
+with:
+
+```text
+onnx_export_attempted: true
+onnx_export.status: passed
+onnx_export.allowed_claim: bonsai_transformer_minimal_onnx_export_verified_not_full_pipeline
+onnx_export.external_data_enabled: true
+```
+
+This verifies only the minimal standalone transformer ONNX export boundary. It does not verify ONNX Runtime execution, full pipeline composition, prompt-to-image generation, or a single monolithic multi-block ONNX graph.
+
 The workflow path filters intentionally do not include `docs/ci/**`, so committing report snapshots does not retrigger the workflows.
 
 ## Promotion rule
 
-A repo-persisted report can be promoted to `docs/bonsai-lowbit-verification-manifest.json` only when the specific stage or report claim itself says:
+A repo-persisted report can be promoted to `docs/bonsai-combined-component-verification-manifest.json` only when the specific stage or report claim itself says:
 
 ```json
 {
