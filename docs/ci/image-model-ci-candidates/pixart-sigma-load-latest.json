@@ -25,15 +25,15 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 61613305856,
-      "free_bytes": 93264105472
+      "used_bytes": 60683100160,
+      "free_bytes": 94194311168
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 83442020352,
-      "free_bytes": 71435390976
+      "used_bytes": 82511785984,
+      "free_bytes": 72365625344
     },
-    "max_rss_mb_end": 4043.004
+    "max_rss_mb_end": 4031.324
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -56,19 +56,19 @@
         "notes": "PixArt Sigma load-only candidate. Failure boundary is useful if pipeline class is unavailable."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781287450.42,
+      "started_at_monotonic_seconds": 1781290553.28,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613305856,
-        "free_bytes": 93264105472
+        "used_bytes": 60683100160,
+        "free_bytes": 94194311168
       },
       "max_rss_mb_before": 19.73,
       "method": "diffusers_load_only",
       "pipeline_class": "PixArtSigmaPipeline",
       "model_ref": "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
-      "load_seconds": 59.35,
+      "load_seconds": 58.761,
       "generate_seconds": null,
-      "total_seconds": 59.485,
+      "total_seconds": 58.944,
       "components": [
         "scheduler",
         "text_encoder",
@@ -78,12 +78,12 @@
       ],
       "execution_attempted": false,
       "load_only": true,
-      "max_rss_mb_after_candidate": 4043.004,
+      "max_rss_mb_after_candidate": 4031.324,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 83442020352,
-        "free_bytes": 71435390976
+        "used_bytes": 82511785984,
+        "free_bytes": 72365625344
       }
     }
   ],
@@ -93,7 +93,7 @@
     "skipped": 0,
     "total": 1
   },
-  "seconds_so_far": 63.692,
+  "seconds_so_far": 61.892,
   "summary": {
     "passed": 1,
     "failed": 0,
@@ -101,5 +101,5 @@
     "total": 1
   },
   "ci_conclusion": "success",
-  "seconds": 63.692
+  "seconds": 61.893
 }
