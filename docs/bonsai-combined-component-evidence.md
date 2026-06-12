@@ -21,6 +21,7 @@ status: passed
 ci_conclusion: success
 claim_promotable_to_manifest: true
 run_transformer_load: false
+source_report_commit: bc59ac59f84f7d86dfb1e1843982f289776ec708
 ```
 
 The following stage-level claims are verified and promotable:
@@ -28,6 +29,7 @@ The following stage-level claims are verified and promotable:
 ```text
 bonsai_tokenizer_execution_verified
 bonsai_text_encoder_execution_verified
+bonsai_scheduler_step_execution_verified
 bonsai_vae_decoder_execution_verified
 bonsai_transformer_config_boundary_verified_not_runtime_execution
 ```
@@ -54,6 +56,19 @@ class: Qwen3Model
 hidden_state_shape: [1, 9, 2560]
 hidden_state_dtype: float32
 hidden_state_sha256_float32_le: 6d4ce391fc0cb7664bc52303e8ec0f676023e124327983de943147be41d817b0
+```
+
+## Scheduler execution
+
+```text
+stage: scheduler_execution
+component: scheduler
+class: FlowMatchEulerDiscreteScheduler
+set_timesteps_kwargs: {"mu": 0.0}
+timesteps: [1000.0, 1.0]
+prev_sample_shape: [1, 4, 8, 8]
+prev_sample_dtype: float32
+prev_sample_sha256_float32_le: e067c3fa7c505915ba6536e0f7a4ff1265605484327484df70785a51b8bbf281
 ```
 
 ## VAE decoder execution
@@ -90,7 +105,6 @@ This is not transformer runtime execution. It is a transformer configuration bou
 The current combined report did not verify:
 
 ```text
-scheduler execution
 real transformer weight load
 real transformer ONNX execution
 full Bonsai pipeline composition
@@ -98,21 +112,7 @@ prompt-to-image generation
 single monolithic multi-block ONNX
 ```
 
-Scheduler execution failed in the first combined report because the scheduler required `mu` when dynamic shifting is enabled. The script was updated in commit:
-
-```text
-f4b5063efcd3040349164d0a384d2be5b912af8b
-```
-
-Do not promote scheduler execution until a new repo-persisted report shows:
-
-```json
-{
-  "name": "scheduler_execution",
-  "status": "passed",
-  "claim_promotable_to_manifest": true
-}
-```
+Full pipeline composition is now blocked only by transformer weight load in the current combined report. Scheduler execution is no longer blocking the full pipeline composition boundary.
 
 ## Evidence boundary
 
