@@ -25,15 +25,15 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 60681973760,
-      "free_bytes": 94195437568
+      "used_bytes": 60682326016,
+      "free_bytes": 94195085312
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 82614558720,
-      "free_bytes": 72262852608
+      "used_bytes": 82614927360,
+      "free_bytes": 72262483968
     },
-    "max_rss_mb_end": 4815.141
+    "max_rss_mb_end": 4805.402
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -57,33 +57,41 @@
         "notes": "Few-step LCM candidate."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781286854.75,
+      "started_at_monotonic_seconds": 1781292424.603,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 60681973760,
-        "free_bytes": 94195437568
+        "used_bytes": 60682326016,
+        "free_bytes": 94195085312
       },
-      "max_rss_mb_before": 19.605,
+      "max_rss_mb_before": 19.859,
       "method": "diffusers_text_to_image",
       "pipeline_class": "LatentConsistencyModelPipeline",
       "model_ref": "SimianLuo/LCM_Dreamshaper_v7",
-      "load_seconds": 18.979,
-      "generate_seconds": 18.3,
-      "total_seconds": 37.471,
+      "load_seconds": 18.48,
+      "generate_seconds": 18.374,
+      "total_seconds": 37.053,
       "height": 256,
       "width": 256,
       "steps": 4,
       "guidance_scale": 8.0,
+      "call_kwargs": {
+        "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+        "num_inference_steps": 4,
+        "negative_prompt": "blurry, distorted, low quality",
+        "height": 256,
+        "width": 256,
+        "guidance_scale": 8.0
+      },
       "image_path": "reports/image-model-ci-benchmark/lcm/images/lcm-dreamshaper-v7/cat.png",
       "image_sha256": "1afacd0072821f072889dcf91b30b253206d3e544e4351fbb13b170b3c04618a",
       "image_size_bytes": 85877,
       "execution_attempted": true,
-      "max_rss_mb_after_candidate": 4815.141,
+      "max_rss_mb_after_candidate": 4805.402,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 66165493760,
-        "free_bytes": 88711917568
+        "used_bytes": 66165854208,
+        "free_bytes": 88711557120
       }
     },
     {
@@ -106,22 +114,22 @@
         "notes": "Core SD1.5 + LCM-LoRA benchmark candidate."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781286895.625,
+      "started_at_monotonic_seconds": 1781292464.673,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 66165493760,
-        "free_bytes": 88711917568
+        "used_bytes": 66165854208,
+        "free_bytes": 88711557120
       },
-      "max_rss_mb_before": 4815.141,
+      "max_rss_mb_before": 4805.402,
       "error_type": "ValueError",
       "error": "PEFT backend is required for this method.",
       "execution_attempted": false,
-      "total_seconds": 15.161,
-      "max_rss_mb_after_candidate": 4815.141,
+      "total_seconds": 15.85,
+      "max_rss_mb_after_candidate": 4805.402,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 71648555008,
-        "free_bytes": 83228856320
+        "used_bytes": 71648919552,
+        "free_bytes": 83228491776
       }
     },
     {
@@ -143,22 +151,22 @@
         "notes": "Quality base + LCM-LoRA. If gated or incompatible, report failure boundary."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781286910.789,
+      "started_at_monotonic_seconds": 1781292480.527,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 71648559104,
-        "free_bytes": 83228852224
+        "used_bytes": 71648923648,
+        "free_bytes": 83228487680
       },
-      "max_rss_mb_before": 4815.141,
+      "max_rss_mb_before": 4805.402,
       "error_type": "ValueError",
       "error": "PEFT backend is required for this method.",
       "execution_attempted": false,
-      "total_seconds": 17.494,
-      "max_rss_mb_after_candidate": 4815.141,
+      "total_seconds": 15.427,
+      "max_rss_mb_after_candidate": 4805.402,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 77131505664,
-        "free_bytes": 77745905664
+        "used_bytes": 77131870208,
+        "free_bytes": 77745541120
       }
     },
     {
@@ -180,22 +188,22 @@
         "notes": "Stylized SD1.5-family candidate. License and model availability are measured by CI."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781286928.288,
+      "started_at_monotonic_seconds": 1781292495.967,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 77131505664,
-        "free_bytes": 77745905664
+        "used_bytes": 77131870208,
+        "free_bytes": 77745541120
       },
-      "max_rss_mb_before": 4815.141,
+      "max_rss_mb_before": 4805.402,
       "error_type": "ValueError",
       "error": "PEFT backend is required for this method.",
       "execution_attempted": false,
-      "total_seconds": 15.702,
-      "max_rss_mb_after_candidate": 4815.141,
+      "total_seconds": 16.088,
+      "max_rss_mb_after_candidate": 4805.402,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 82614558720,
-        "free_bytes": 72262852608
+        "used_bytes": 82614927360,
+        "free_bytes": 72262483968
       }
     }
   ],
@@ -205,7 +213,7 @@
     "skipped": 0,
     "total": 4
   },
-  "seconds_so_far": 89.273,
+  "seconds_so_far": 87.485,
   "summary": {
     "passed": 1,
     "failed": 3,
@@ -213,5 +221,5 @@
     "total": 4
   },
   "ci_conclusion": "success_with_candidate_failures",
-  "seconds": 89.274
+  "seconds": 87.485
 }
