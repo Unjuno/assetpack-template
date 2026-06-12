@@ -1,0 +1,110 @@
+{
+  "experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "negative_prompt": "blurry, distorted, low quality",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+  },
+  "selection": {
+    "candidate_ids": [
+      "sdxl-turbo-load"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61613260800,
+      "free_bytes": 93264150528
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 75490938880,
+      "free_bytes": 79386472448
+    },
+    "max_rss_mb_end": 4097.73
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sdxl-turbo-load",
+        "enabled": true,
+        "batch": "turbo",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "stabilityai/sdxl-turbo",
+        "pipeline_class": "AutoPipelineForText2Image",
+        "height": 512,
+        "width": 512,
+        "steps": 1,
+        "guidance_scale": 0.0,
+        "license_hint": "stability-ai-noncommercial-community",
+        "expected_role": "heavy_turbo_load_candidate",
+        "notes": "Load-only first due SDXL memory/disk risk."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781287108.699,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61613260800,
+        "free_bytes": 93264150528
+      },
+      "max_rss_mb_before": 19.82,
+      "method": "diffusers_load_only",
+      "pipeline_class": "AutoPipelineForText2Image",
+      "model_ref": "stabilityai/sdxl-turbo",
+      "load_seconds": 79.216,
+      "generate_seconds": null,
+      "total_seconds": 79.365,
+      "components": [
+        "feature_extractor",
+        "image_encoder",
+        "scheduler",
+        "text_encoder",
+        "text_encoder_2",
+        "tokenizer",
+        "tokenizer_2",
+        "unet",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 4097.73,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 75490938880,
+        "free_bytes": 79386472448
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 81.605,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 81.606
+}
