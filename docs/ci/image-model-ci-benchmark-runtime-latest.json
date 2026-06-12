@@ -1,5 +1,5 @@
 {
-  "experiment_id": "image-model-ci-benchmark-v2",
+  "experiment_id": "image-model-ci-benchmark-v3",
   "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
   "negative_prompt": "blurry, distorted, low quality",
   "seed": 12345,
@@ -17,7 +17,7 @@
       "runtime"
     ],
     "include_disabled": false,
-    "selected_count": 2
+    "selected_count": 3
   },
   "system": {
     "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
@@ -25,20 +25,49 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 61613125632,
-      "free_bytes": 93264285696
+      "used_bytes": 61613219840,
+      "free_bytes": 93264191488
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 61613125632,
-      "free_bytes": 93264285696
+      "used_bytes": 61613223936,
+      "free_bytes": 93264187392
     },
-    "max_rss_mb_end": 19.605
+    "max_rss_mb_end": 19.621
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
   "status": "failed",
   "candidates": [
+    {
+      "candidate": {
+        "id": "taesd-component-placeholder",
+        "enabled": true,
+        "batch": "runtime",
+        "ci_stage": "placeholder",
+        "method": "component_load_placeholder",
+        "model_ref": "madebyollin/taesd",
+        "license_hint": "mit",
+        "expected_role": "tiny_vae_method_candidate",
+        "notes": "TAESD is a component/method candidate, not a full text-to-image pipeline. Implement component probe separately."
+      },
+      "status": "skipped",
+      "started_at_monotonic_seconds": 1781286856.835,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61613219840,
+        "free_bytes": 93264191488
+      },
+      "max_rss_mb_before": 19.621,
+      "reason": "Placeholder or unsupported runtime; add an implementation before enabling execution.",
+      "execution_attempted": false,
+      "load_only": false,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61613219840,
+        "free_bytes": 93264191488
+      }
+    },
     {
       "candidate": {
         "id": "openvino-small-sd-placeholder",
@@ -54,20 +83,20 @@
         "notes": "Placeholder. Do not quantize large models inside standard CI."
       },
       "status": "skipped",
-      "started_at_monotonic_seconds": 1781286567.016,
+      "started_at_monotonic_seconds": 1781286856.836,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613125632,
-        "free_bytes": 93264285696
+        "used_bytes": 61613219840,
+        "free_bytes": 93264191488
       },
-      "max_rss_mb_before": 19.605,
+      "max_rss_mb_before": 19.621,
       "reason": "Placeholder or unsupported runtime; add an implementation before enabling execution.",
       "execution_attempted": false,
       "load_only": false,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613125632,
-        "free_bytes": 93264285696
+        "used_bytes": 61613219840,
+        "free_bytes": 93264191488
       }
     },
     {
@@ -85,36 +114,36 @@
         "notes": "Placeholder for native quantized runtime."
       },
       "status": "skipped",
-      "started_at_monotonic_seconds": 1781286567.016,
+      "started_at_monotonic_seconds": 1781286856.837,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613125632,
-        "free_bytes": 93264285696
+        "used_bytes": 61613219840,
+        "free_bytes": 93264191488
       },
-      "max_rss_mb_before": 19.605,
+      "max_rss_mb_before": 19.621,
       "reason": "Placeholder or unsupported runtime; add an implementation before enabling execution.",
       "execution_attempted": false,
       "load_only": false,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613125632,
-        "free_bytes": 93264285696
+        "used_bytes": 61613219840,
+        "free_bytes": 93264191488
       }
     }
   ],
   "summary_so_far": {
     "passed": 0,
     "failed": 0,
-    "skipped": 2,
-    "total": 2
+    "skipped": 3,
+    "total": 3
   },
-  "seconds_so_far": 0.024,
+  "seconds_so_far": 0.061,
   "summary": {
     "passed": 0,
     "failed": 0,
-    "skipped": 2,
-    "total": 2
+    "skipped": 3,
+    "total": 3
   },
   "ci_conclusion": "success_with_candidate_failures",
-  "seconds": 0.024
+  "seconds": 0.062
 }
