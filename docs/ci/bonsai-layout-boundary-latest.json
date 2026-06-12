@@ -1,0 +1,110 @@
+{
+  "experiment_id": "bonsai-onnx-smoke-v2",
+  "model_id": "bonsai-image-4b-binary-unpacked",
+  "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
+  "backend": "onnxruntime-cpu-component-export",
+  "status": "passed",
+  "ci_conclusion": "success",
+  "required_milestone": "layout_probe",
+  "milestone_reached": "layout_probe",
+  "download_weights": false,
+  "export_component": "transformer",
+  "layout_probe_mode": "boundary_files",
+  "claim_promotable_to_manifest": true,
+  "stages": [
+    {
+      "name": "layout_probe",
+      "status": "passed",
+      "seconds": 0.705,
+      "analysis": {
+        "file_count": 6,
+        "top_level_entries": [
+          "model_index.json",
+          "scheduler",
+          "text_encoder",
+          "tokenizer",
+          "transformer",
+          "vae"
+        ],
+        "has_model_index_json": true,
+        "configs": [
+          "model_index.json",
+          "scheduler/scheduler_config.json",
+          "text_encoder/config.json",
+          "tokenizer/tokenizer_config.json",
+          "transformer/config.json",
+          "vae/config.json"
+        ],
+        "safetensors_count": 0,
+        "safetensors_total_mb": 0.0,
+        "safetensors": [],
+        "component_candidates": {
+          "transformer": {
+            "present": true,
+            "file_count": 1,
+            "has_config": true,
+            "sample_files": [
+              "transformer/config.json"
+            ]
+          },
+          "vae": {
+            "present": true,
+            "file_count": 1,
+            "has_config": true,
+            "sample_files": [
+              "vae/config.json"
+            ]
+          },
+          "text_encoder": {
+            "present": true,
+            "file_count": 1,
+            "has_config": true,
+            "sample_files": [
+              "text_encoder/config.json"
+            ]
+          },
+          "text_encoder_2": {
+            "present": false,
+            "file_count": 0,
+            "has_config": false,
+            "sample_files": []
+          },
+          "tokenizer": {
+            "present": true,
+            "file_count": 1,
+            "has_config": true,
+            "sample_files": [
+              "tokenizer/tokenizer_config.json"
+            ]
+          },
+          "tokenizer_2": {
+            "present": false,
+            "file_count": 0,
+            "has_config": false,
+            "sample_files": []
+          },
+          "scheduler": {
+            "present": true,
+            "file_count": 1,
+            "has_config": true,
+            "sample_files": [
+              "scheduler/scheduler_config.json"
+            ]
+          }
+        }
+      },
+      "probe_mode": "boundary_files",
+      "probed_paths": [
+        "model_index.json",
+        "transformer/config.json",
+        "vae/config.json",
+        "text_encoder/config.json",
+        "text_encoder_2/config.json",
+        "tokenizer/tokenizer_config.json",
+        "tokenizer_2/tokenizer_config.json",
+        "scheduler/scheduler_config.json"
+      ]
+    }
+  ],
+  "seconds": 0.705
+}
