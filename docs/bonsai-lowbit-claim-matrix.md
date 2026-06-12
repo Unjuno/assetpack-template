@@ -16,7 +16,7 @@ Source: `docs/bonsai-lowbit-verification-manifest.json` is canonical. This matri
 | Twenty blocks via 10x2 chained export probe | `verified` | 20 | 10 | no | no | true | 8.58306884765625e-06 | false | false |
 | Twenty blocks via split persistent ONNX artifacts | `verified` | 20 | 10 | yes | yes | true | 8.58306884765625e-06 | false | false |
 | Ten-by-two chain-state handoff report | `verified` | 20 | 10 | yes | yes | n/a | n/a | false | false |
-| Ten-by-two input boundary report | `implemented; artifact pending` | 20 | 10 | yes | yes | n/a | n/a | false | false |
+| Ten-by-two input boundary report | `verified` | 20 | 10 | yes | yes | n/a | n/a | false | false |
 
 ## Claim boundary
 
@@ -26,7 +26,7 @@ The split persistent ONNX artifact stage verifies a stronger boundary: ten indiv
 
 The chain-state handoff report documents the tensor handoff between the ten persisted two-block ONNX segments. It records that each segment after segment 0_1 consumes the previous segment's block1 output as its hidden input.
 
-The input boundary report is implemented but is not manifest-verified until a CI artifact is available. Its purpose is to document that this ONNX chain takes only `hidden` and `temb` as external ONNX inputs and does not include prompt tokens, a text encoder, a scheduler, VAE, image latents, or full Bonsai pipeline inputs.
+The input boundary report documents that this ONNX chain takes only `hidden` and `temb` as external ONNX inputs and does not include prompt tokens, a text encoder, scheduler, VAE, image latents, or full Bonsai pipeline inputs. It also clarifies that the historical `semantic_input_width` field is an internal diagnostic `to_out` input width, not evidence of external prompt-token or text-encoder input.
 
 None of these stages verifies a full Bonsai ONNX pipeline, prompt-to-image generation, a real transformer block, or a single monolithic 20-block ONNX graph.
 
@@ -124,10 +124,27 @@ None of these stages verifies a full Bonsai ONNX pipeline, prompt-to-image gener
 - Validated without low-bit source reload: yes
 - Claim: `ten_by_two_split_persistent_onnx_segments_chain_state_handoffs_documented_without_lowbit_source_reload_not_single_monolithic_onnx_not_real_transformer_block_or_full_bonsai_pipeline`
 
+### Ten-by-two input boundary report
+
+- Run: `27399310016`
+- Head SHA: `76f119acb67b26b88acb2446276b1d851c3d37ac`
+- Artifact: `bonsai-lowbit-ten-by-two-input-boundary-report-json` / `7584863386`
+- Artifact SHA-256: `321133159edaa0136412c09efc04e59f61e53da502cc27d737282b565b8665ac`
+- External ONNX inputs: `hidden`, `temb`
+- Hidden shape: `[2, 4, 3072]`
+- Temb shape: `[2, 3072]`
+- Prompt tokens present: no
+- Text encoder present: no
+- Scheduler present: no
+- VAE present: no
+- Image latents present: no
+- Real Bonsai pipeline inputs present: no
+- Claim: `ten_by_two_split_persistent_onnx_segments_input_boundary_documented_hidden_temb_only_no_prompt_text_encoder_scheduler_vae_or_full_pipeline`
+
 ## Pending artifacts
 
-- `bonsai-lowbit-ten-by-two-input-boundary-report-json`: workflow and writer are implemented, but the CI artifact is not yet manifest-verified.
+None for the current low-bit critical-path scope through ten-by-two input-boundary documentation.
 
 ## Next execution boundary
 
-Verify the ten-by-two input boundary report artifact. Forbidden claims still remain forbidden unless a new manifest entry verifies them.
+Decide the next low-bit boundary after the verified ten-by-two input boundary report. Forbidden claims still remain forbidden unless a new manifest entry verifies them.
