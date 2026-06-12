@@ -25,15 +25,15 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 61613252608,
-      "free_bytes": 93264158720
+      "used_bytes": 61614116864,
+      "free_bytes": 93263294464
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 75491008512,
-      "free_bytes": 79386402816
+      "used_bytes": 75491852288,
+      "free_bytes": 79385559040
     },
-    "max_rss_mb_end": 3311.5
+    "max_rss_mb_end": 3334.855
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -56,19 +56,19 @@
         "notes": "Quality SDXL-family candidate. Load-only first."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781287457.059,
+      "started_at_monotonic_seconds": 1781290588.385,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613252608,
-        "free_bytes": 93264158720
+        "used_bytes": 61614116864,
+        "free_bytes": 93263294464
       },
-      "max_rss_mb_before": 19.633,
+      "max_rss_mb_before": 19.66,
       "method": "diffusers_load_only",
       "pipeline_class": "StableDiffusionXLPipeline",
       "model_ref": "playgroundai/playground-v2.5-1024px-aesthetic",
-      "load_seconds": 40.329,
+      "load_seconds": 40.611,
       "generate_seconds": null,
-      "total_seconds": 40.454,
+      "total_seconds": 40.747,
       "components": [
         "feature_extractor",
         "image_encoder",
@@ -82,12 +82,12 @@
       ],
       "execution_attempted": false,
       "load_only": true,
-      "max_rss_mb_after_candidate": 3311.5,
+      "max_rss_mb_after_candidate": 3334.855,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 75491008512,
-        "free_bytes": 79386402816
+        "used_bytes": 75491852288,
+        "free_bytes": 79385559040
       }
     }
   ],
@@ -97,7 +97,7 @@
     "skipped": 0,
     "total": 1
   },
-  "seconds_so_far": 43.465,
+  "seconds_so_far": 43.593,
   "summary": {
     "passed": 1,
     "failed": 0,
@@ -105,5 +105,5 @@
     "total": 1
   },
   "ci_conclusion": "success",
-  "seconds": 43.466
+  "seconds": 43.594
 }
