@@ -25,15 +25,15 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 61613322240,
-      "free_bytes": 93264089088
+      "used_bytes": 61613780992,
+      "free_bytes": 93263630336
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 146029383680,
-      "free_bytes": 8848027648
+      "used_bytes": 146029719552,
+      "free_bytes": 8847691776
     },
-    "max_rss_mb_end": 6565.441
+    "max_rss_mb_end": 6445.902
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -56,19 +56,19 @@
         "notes": "Baseline load feasibility. Generation disabled initially."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781286851.924,
+      "started_at_monotonic_seconds": 1781292424.197,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61613322240,
-        "free_bytes": 93264089088
+        "used_bytes": 61613780992,
+        "free_bytes": 93263630336
       },
-      "max_rss_mb_before": 19.73,
+      "max_rss_mb_before": 19.855,
       "method": "diffusers_load_only",
       "pipeline_class": "StableDiffusionPipeline",
       "model_ref": "stable-diffusion-v1-5/stable-diffusion-v1-5",
-      "load_seconds": 17.426,
+      "load_seconds": 18.402,
       "generate_seconds": null,
-      "total_seconds": 17.609,
+      "total_seconds": 18.545,
       "components": [
         "feature_extractor",
         "image_encoder",
@@ -81,12 +81,12 @@
       ],
       "execution_attempted": false,
       "load_only": true,
-      "max_rss_mb_after_candidate": 2678.875,
+      "max_rss_mb_after_candidate": 3151.406,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 67096297472,
-        "free_bytes": 87781113856
+        "used_bytes": 67096870912,
+        "free_bytes": 87780540416
       }
     },
     {
@@ -106,19 +106,19 @@
         "notes": "SD1.4 load-only baseline."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781286872.608,
+      "started_at_monotonic_seconds": 1781292446.41,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 67096297472,
-        "free_bytes": 87781113856
+        "used_bytes": 67096870912,
+        "free_bytes": 87780540416
       },
-      "max_rss_mb_before": 2678.875,
+      "max_rss_mb_before": 3151.406,
       "method": "diffusers_load_only",
       "pipeline_class": "StableDiffusionPipeline",
       "model_ref": "CompVis/stable-diffusion-v1-4",
-      "load_seconds": 14.541,
+      "load_seconds": 16.819,
       "generate_seconds": null,
-      "total_seconds": 14.717,
+      "total_seconds": 16.967,
       "components": [
         "feature_extractor",
         "image_encoder",
@@ -131,12 +131,12 @@
       ],
       "execution_attempted": false,
       "load_only": true,
-      "max_rss_mb_after_candidate": 2678.875,
+      "max_rss_mb_after_candidate": 3151.406,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 72579313664,
-        "free_bytes": 82298097664
+        "used_bytes": 72579899392,
+        "free_bytes": 82297511936
       }
     },
     {
@@ -156,22 +156,22 @@
         "notes": "SD2.1 load-only baseline. If unavailable, CI records repo/access failure."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781286887.326,
+      "started_at_monotonic_seconds": 1781292463.378,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 72579317760,
-        "free_bytes": 82298093568
+        "used_bytes": 72579903488,
+        "free_bytes": 82297507840
       },
-      "max_rss_mb_before": 2678.875,
+      "max_rss_mb_before": 3151.406,
       "error_type": "OSError",
       "error": "Cannot load model stabilityai/stable-diffusion-2-1: model is not cached locally and an error occurred while trying to fetch metadata from the Hub. Please check out the root cause in the stacktrace above.",
       "execution_attempted": false,
-      "total_seconds": 0.03,
-      "max_rss_mb_after_candidate": 2678.875,
+      "total_seconds": 0.079,
+      "max_rss_mb_after_candidate": 3151.406,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 72579317760,
-        "free_bytes": 82298093568
+        "used_bytes": 72579903488,
+        "free_bytes": 82297507840
       }
     },
     {
@@ -191,19 +191,19 @@
         "notes": "SDXL load-only baseline."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781286887.356,
+      "started_at_monotonic_seconds": 1781292463.458,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 72579317760,
-        "free_bytes": 82298093568
+        "used_bytes": 72579903488,
+        "free_bytes": 82297507840
       },
-      "max_rss_mb_before": 2678.875,
+      "max_rss_mb_before": 3151.406,
       "method": "diffusers_load_only",
       "pipeline_class": "StableDiffusionXLPipeline",
       "model_ref": "stabilityai/stable-diffusion-xl-base-1.0",
-      "load_seconds": 37.601,
+      "load_seconds": 38.438,
       "generate_seconds": null,
-      "total_seconds": 37.786,
+      "total_seconds": 38.592,
       "components": [
         "feature_extractor",
         "image_encoder",
@@ -217,12 +217,12 @@
       ],
       "execution_attempted": false,
       "load_only": true,
-      "max_rss_mb_after_candidate": 3433.371,
+      "max_rss_mb_after_candidate": 3562.035,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 86791700480,
-        "free_bytes": 68085710848
+        "used_bytes": 86792298496,
+        "free_bytes": 68085112832
       }
     },
     {
@@ -243,22 +243,22 @@
         "notes": "Repo-level load-only check; may fail because Lightning provides UNet/LoRA weights rather than a complete pipeline."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781286925.144,
+      "started_at_monotonic_seconds": 1781292502.051,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 86791700480,
-        "free_bytes": 68085710848
+        "used_bytes": 86792298496,
+        "free_bytes": 68085112832
       },
-      "max_rss_mb_before": 3433.371,
+      "max_rss_mb_before": 3562.035,
       "error_type": "RemoteEntryNotFoundError",
-      "error": "404 Client Error. (Request ID: Root=1-6a2c480d-3b608fe0696db5797799b029;a3f166c7-e4bf-405e-8a42-593ccf8eced6)\n\nEntry Not Found for url: https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/model_index.json.",
+      "error": "404 Client Error. (Request ID: Root=1-6a2c5dd6-2d3be604391a8a3c3254d9c6;c1872f8f-c086-4fd2-94b2-4397d03a04f4)\n\nEntry Not Found for url: https://huggingface.co/ByteDance/SDXL-Lightning/resolve/main/model_index.json.",
       "execution_attempted": false,
-      "total_seconds": 0.055,
-      "max_rss_mb_after_candidate": 3433.371,
+      "total_seconds": 0.091,
+      "max_rss_mb_after_candidate": 3562.035,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 86791720960,
-        "free_bytes": 68085690368
+        "used_bytes": 86792318976,
+        "free_bytes": 68085092352
       }
     },
     {
@@ -278,22 +278,22 @@
         "notes": "Repo-level load-only check; may fail because Hyper-SD provides adapters/checkpoints rather than a single complete pipeline."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781286925.199,
+      "started_at_monotonic_seconds": 1781292502.142,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 86791725056,
-        "free_bytes": 68085686272
+        "used_bytes": 86792323072,
+        "free_bytes": 68085088256
       },
-      "max_rss_mb_before": 3433.371,
+      "max_rss_mb_before": 3562.035,
       "error_type": "RemoteEntryNotFoundError",
-      "error": "404 Client Error. (Request ID: Root=1-6a2c480d-672be3bf7c04a6de02c6b925;85930500-aec8-44cd-b657-7f1daec65b97)\n\nEntry Not Found for url: https://huggingface.co/ByteDance/Hyper-SD/resolve/main/model_index.json.",
+      "error": "404 Client Error. (Request ID: Root=1-6a2c5dd6-4926378026ed713157e83dcd;4ac72b4f-2c04-4a1d-a5f6-d6b872485c27)\n\nEntry Not Found for url: https://huggingface.co/ByteDance/Hyper-SD/resolve/main/model_index.json.",
       "execution_attempted": false,
-      "total_seconds": 0.045,
-      "max_rss_mb_after_candidate": 3433.371,
+      "total_seconds": 0.089,
+      "max_rss_mb_after_candidate": 3562.035,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 86791745536,
-        "free_bytes": 68085665792
+        "used_bytes": 86792343552,
+        "free_bytes": 68085067776
       }
     },
     {
@@ -314,19 +314,19 @@
         "notes": "Transformer-family quality candidate. Load-only on standard CI."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781286925.245,
+      "started_at_monotonic_seconds": 1781292502.231,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 86791745536,
-        "free_bytes": 68085665792
+        "used_bytes": 86792343552,
+        "free_bytes": 68085067776
       },
-      "max_rss_mb_before": 3433.371,
+      "max_rss_mb_before": 3562.035,
       "method": "diffusers_load_only",
       "pipeline_class": "PixArtAlphaPipeline",
       "model_ref": "PixArt-alpha/PixArt-XL-2-1024-MS",
-      "load_seconds": 57.413,
+      "load_seconds": 58.324,
       "generate_seconds": null,
-      "total_seconds": 57.603,
+      "total_seconds": 58.498,
       "components": [
         "scheduler",
         "text_encoder",
@@ -336,12 +336,12 @@
       ],
       "execution_attempted": false,
       "load_only": true,
-      "max_rss_mb_after_candidate": 3930.93,
+      "max_rss_mb_after_candidate": 4017.609,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 108624486400,
-        "free_bytes": 46252924928
+        "used_bytes": 108625076224,
+        "free_bytes": 46252335104
       }
     },
     {
@@ -361,19 +361,19 @@
         "notes": "PixArt Sigma load-only candidate. Failure boundary is useful if pipeline class is unavailable."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781286982.85,
+      "started_at_monotonic_seconds": 1781292560.731,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 108624486400,
-        "free_bytes": 46252924928
+        "used_bytes": 108625076224,
+        "free_bytes": 46252335104
       },
-      "max_rss_mb_before": 3930.93,
+      "max_rss_mb_before": 4017.609,
       "method": "diffusers_load_only",
       "pipeline_class": "PixArtSigmaPipeline",
       "model_ref": "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
-      "load_seconds": 55.875,
+      "load_seconds": 59.096,
       "generate_seconds": null,
-      "total_seconds": 56.072,
+      "total_seconds": 59.273,
       "components": [
         "scheduler",
         "text_encoder",
@@ -383,12 +383,12 @@
       ],
       "execution_attempted": false,
       "load_only": true,
-      "max_rss_mb_after_candidate": 4004.457,
+      "max_rss_mb_after_candidate": 4049.391,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 130453262336,
-        "free_bytes": 24424148992
+        "used_bytes": 130453864448,
+        "free_bytes": 24423546880
       }
     },
     {
@@ -408,19 +408,19 @@
         "notes": "Quality SDXL-family candidate. Load-only first."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781287038.924,
+      "started_at_monotonic_seconds": 1781292620.005,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 130453266432,
-        "free_bytes": 24424144896
+        "used_bytes": 130453868544,
+        "free_bytes": 24423542784
       },
-      "max_rss_mb_before": 4004.457,
+      "max_rss_mb_before": 4049.391,
       "method": "diffusers_load_only",
       "pipeline_class": "StableDiffusionXLPipeline",
       "model_ref": "playgroundai/playground-v2.5-1024px-aesthetic",
-      "load_seconds": 39.323,
+      "load_seconds": 37.506,
       "generate_seconds": null,
-      "total_seconds": 39.505,
+      "total_seconds": 37.666,
       "components": [
         "feature_extractor",
         "image_encoder",
@@ -434,12 +434,12 @@
       ],
       "execution_attempted": false,
       "load_only": true,
-      "max_rss_mb_after_candidate": 4004.457,
+      "max_rss_mb_after_candidate": 4049.391,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 144330973184,
-        "free_bytes": 10546438144
+        "used_bytes": 144331575296,
+        "free_bytes": 10545836032
       }
     },
     {
@@ -459,22 +459,22 @@
         "notes": "Likely too heavy or gated for standard CI. Load-only failure boundary is useful."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781287078.431,
+      "started_at_monotonic_seconds": 1781292657.673,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 144330973184,
-        "free_bytes": 10546438144
+        "used_bytes": 144331575296,
+        "free_bytes": 10545836032
       },
-      "max_rss_mb_before": 4004.457,
+      "max_rss_mb_before": 4049.391,
       "error_type": "GatedRepoError",
-      "error": "401 Client Error. (Request ID: Root=1-6a2c48a6-1eddfe283d4b0ed72c8970ef;627a0431-1491-4e84-86aa-6235a23ff553)\n\nCannot access gated repo for url https://huggingface.co/stabilityai/stable-diffusion-3.5-medium/resolve/main/model_index.json.\nAccess to model stabilityai/stable-diffusion-3.5-medium is restricted. You must have access to it and be authenticated to access it. Please log in.",
+      "error": "401 Client Error. (Request ID: Root=1-6a2c5e71-2b87fa476cfca43f108fea53;054febda-6fd6-413e-8fab-bf9b44c60a0c)\n\nCannot access gated repo for url https://huggingface.co/stabilityai/stable-diffusion-3.5-medium/resolve/main/model_index.json.\nAccess to model stabilityai/stable-diffusion-3.5-medium is restricted. You must have access to it and be authenticated to access it. Please log in.",
       "execution_attempted": false,
-      "total_seconds": 0.086,
-      "max_rss_mb_after_candidate": 4004.457,
+      "total_seconds": 0.083,
+      "max_rss_mb_after_candidate": 4049.391,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 144330973184,
-        "free_bytes": 10546438144
+        "used_bytes": 144331575296,
+        "free_bytes": 10545836032
       }
     },
     {
@@ -495,22 +495,22 @@
         "notes": "Gated and likely too heavy for standard CI; load-only evidence is useful."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781287078.518,
+      "started_at_monotonic_seconds": 1781292657.756,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 144330973184,
-        "free_bytes": 10546438144
+        "used_bytes": 144331575296,
+        "free_bytes": 10545836032
       },
-      "max_rss_mb_before": 4004.457,
+      "max_rss_mb_before": 4049.391,
       "error_type": "GatedRepoError",
-      "error": "401 Client Error. (Request ID: Root=1-6a2c48a6-76cf54bf5f987f0e452f3878;6684124b-be79-4c0d-b80f-dae733ae3539)\n\nCannot access gated repo for url https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/model_index.json.\nAccess to model black-forest-labs/FLUX.1-schnell is restricted. You must have access to it and be authenticated to access it. Please log in.",
+      "error": "401 Client Error. (Request ID: Root=1-6a2c5e71-118b09ae60fabbda386340ee;8e02fc71-68be-4834-9f13-6df4a49f7d5d)\n\nCannot access gated repo for url https://huggingface.co/black-forest-labs/FLUX.1-schnell/resolve/main/model_index.json.\nAccess to model black-forest-labs/FLUX.1-schnell is restricted. You must have access to it and be authenticated to access it. Please log in.",
       "execution_attempted": false,
-      "total_seconds": 0.035,
-      "max_rss_mb_after_candidate": 4004.457,
+      "total_seconds": 0.077,
+      "max_rss_mb_after_candidate": 4049.391,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 144330973184,
-        "free_bytes": 10546438144
+        "used_bytes": 144331575296,
+        "free_bytes": 10545836032
       }
     },
     {
@@ -531,22 +531,22 @@
         "notes": "Likely too heavy or unavailable depending on installed diffusers version. Failure boundary is useful."
       },
       "status": "failed",
-      "started_at_monotonic_seconds": 1781287078.554,
+      "started_at_monotonic_seconds": 1781292657.834,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 144330977280,
-        "free_bytes": 10546434048
+        "used_bytes": 144331579392,
+        "free_bytes": 10545831936
       },
-      "max_rss_mb_before": 4004.457,
+      "max_rss_mb_before": 4049.391,
       "error_type": "RuntimeError",
       "error": "Task error: File reconstruction error: Internal Writer Error: Background writer channel closed",
       "execution_attempted": false,
-      "total_seconds": 63.778,
-      "max_rss_mb_after_candidate": 6565.441,
+      "total_seconds": 53.88,
+      "max_rss_mb_after_candidate": 6445.902,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 146029383680,
-        "free_bytes": 8848027648
+        "used_bytes": 146029719552,
+        "free_bytes": 8847691776
       }
     }
   ],
@@ -556,7 +556,7 @@
     "skipped": 0,
     "total": 12
   },
-  "seconds_so_far": 290.438,
+  "seconds_so_far": 287.551,
   "summary": {
     "passed": 6,
     "failed": 6,
@@ -564,5 +564,5 @@
     "total": 12
   },
   "ci_conclusion": "success_with_candidate_failures",
-  "seconds": 290.439
+  "seconds": 287.557
 }
