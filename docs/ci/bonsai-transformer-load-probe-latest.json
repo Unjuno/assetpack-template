@@ -1,16 +1,16 @@
 {
-  "experiment_id": "bonsai-transformer-load-probe-v5",
+  "experiment_id": "bonsai-transformer-load-probe-preflight-v10",
   "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
-  "download_weights": true,
-  "runtime_load": true,
-  "onnx_export_attempted": true,
-  "onnx_export_revision": "v3",
-  "onnxruntime_load_attempted": true,
-  "onnxruntime_load_revision": "v3",
+  "status": "preflight_started",
+  "ci_conclusion": "preflight_only",
   "claim_promotable_to_manifest": false,
   "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
-  "ci_conclusion": "success_with_probe_failure",
-  "error_type": "LocalEntryNotFoundError",
-  "error": "An error happened while trying to locate the file on the Hub and we cannot find the requested files in the local cache. Please check your connection and try again or make sure your Internet connection is on.",
-  "seconds": 26.384
+  "onnx_export_attempted": true,
+  "onnx_export_revision": "v6",
+  "onnxruntime_load_attempted": true,
+  "onnxruntime_load_revision": "v9",
+  "onnxruntime_trig_cast_patch_attempted": true,
+  "onnxruntime_trig_cast_patch_revision": "v6",
+  "execution_attempted": false,
+  "note": "This preflight report is committed before dependency installation. It is overwritten by scripts/run_bonsai_transformer_load_probe.py if dependency installation and probe execution run."
 }
