@@ -117,6 +117,110 @@ def onnx_graph_diagnostics(onnx_path: Path, focus_ops: tuple[str, ...] = ("Cos",
     return diagnostics
 
 
+def patch_trig_fp16_for_ort_cpu(src_path: Path, patched_path: Path) -> dict:
+    import onnx
+    from onnx import TensorProto, helper, shape_inference
+
+    model = onnx.load(str(src_path), load_external_data=False)
+    try:
+        typed_model = shape_inference.infer_shapes(model, strict_mode=False, data_prop=False)
+        shape_inference_status = "passed"
+    except BaseException as exc:
+        typed_model = model
+        shape_inference_status = "failed"
+        shape_inference_error = {"error_type": type(exc).__name__, "error": str(exc)[:1000]}
+    value_types = collect_value_types(typed_model)
+    new_nodes = []
+    patched_nodes = []
+    for index, node in enumerate(model.graph.node):
+        should_patch = (
+            node.op_type in {"Cos", "Sin"}
+            and len(node.input) == 1
+            and len(node.output) == 1
+            and value_types.get(node.input[0]) == TensorProto.FLOAT16
+        )
+        if not should_patch:
+            new_nodes.append(node)
+            continue
+        base_name = node.name or f"{node.op_type.lower()}_{index}"
+        original_input = node.input[0]
+        original_output = node.output[0]
+        float_input = f"{original_input}__{base_name}_float32"
+        float_output = f"{original_output}__{base_name}_float32"
+        cast_in = helper.make_node(
+            "Cast",
+            inputs=[original_input],
+            outputs=[float_input],
+            name=f"{base_name}_cast_input_to_float32",
+            to=TensorProto.FLOAT,
+        )
+        trig = helper.make_node(
+            node.op_type,
+            inputs=[float_input],
+            outputs=[float_output],
+            name=f"{base_name}_float32",
+        )
+        cast_out = helper.make_node(
+            "Cast",
+            inputs=[float_output],
+            outputs=[original_output],
+            name=f"{base_name}_cast_output_to_float16",
+            to=TensorProto.FLOAT16,
+        )
+        new_nodes.extend([cast_in, trig, cast_out])
+        patched_nodes.append({
+            "name": node.name,
+            "op_type": node.op_type,
+            "input": original_input,
+            "output": original_output,
+            "input_type": tensor_elem_type_name(value_types.get(original_input)),
+            "patch": "Cast FLOAT16->FLOAT, op in FLOAT, Cast FLOAT->FLOAT16",
+        })
+    del model.graph.node[:]
+    model.graph.node.extend(new_nodes)
+    onnx.save_model(model, str(patched_path))
+    report = {
+        "status": "passed",
+        "source_path": str(src_path),
+        "patched_path": str(patched_path),
+        "patch_kind": "fp16_trig_cast_for_onnxruntime_cpu_load",
+        "shape_inference_status": shape_inference_status,
+        "patched_node_count": len(patched_nodes),
+        "patched_nodes": patched_nodes[:100],
+        "external_data_reused_from_source": True,
+    }
+    if shape_inference_status == "failed":
+        report.update(shape_inference_error)
+    return report
+
+
+def make_ort_session(onnx_path: Path):
+    import onnxruntime as ort
+
+    sess_options = ort.SessionOptions()
+    sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_DISABLE_ALL
+    sess_options.intra_op_num_threads = 1
+    sess_options.inter_op_num_threads = 1
+    return ort.InferenceSession(
+        str(onnx_path),
+        sess_options=sess_options,
+        providers=["CPUExecutionProvider"],
+    )
+
+
+def ort_session_metadata(session) -> dict:
+    import onnxruntime as ort
+
+    return {
+        "providers": session.get_providers(),
+        "available_providers": ort.get_available_providers(),
+        "inputs": [node_arg_metadata(arg) for arg in session.get_inputs()],
+        "outputs": [node_arg_metadata(arg) for arg in session.get_outputs()],
+        "graph_optimization_level": "ORT_DISABLE_ALL",
+        "execution_attempted": False,
+    }
+
+
 def run(config_path: str, out_dir: str) -> int:
     start = time.time()
     cfg = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
@@ -124,8 +228,9 @@ def run(config_path: str, out_dir: str) -> int:
     out = Path(out_dir)
     export_attempt = env_bool("BONSAI_RUN_TRANSFORMER_ONNX_EXPORT", False)
     ort_load_attempt = env_bool("BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_LOAD", False)
+    trig_cast_patch_attempt = env_bool("BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH", False)
     report = {
-        "experiment_id": "bonsai-transformer-load-probe-v5",
+        "experiment_id": "bonsai-transformer-load-probe-v6",
         "model_ref": model_ref,
         "download_weights": True,
         "runtime_load": True,
@@ -133,6 +238,8 @@ def run(config_path: str, out_dir: str) -> int:
         "onnx_export_revision": os.getenv("BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION", ""),
         "onnxruntime_load_attempted": ort_load_attempt,
         "onnxruntime_load_revision": os.getenv("BONSAI_TRANSFORMER_ONNXRUNTIME_LOAD_REVISION", ""),
+        "onnxruntime_trig_cast_patch_attempted": trig_cast_patch_attempt,
+        "onnxruntime_trig_cast_patch_revision": os.getenv("BONSAI_TRANSFORMER_ONNXRUNTIME_TRIG_CAST_PATCH_REVISION", ""),
         "claim_promotable_to_manifest": False,
         "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
     }
@@ -220,29 +327,16 @@ def run(config_path: str, out_dir: str) -> int:
             write_report(out, {**report, "seconds": round(time.time() - start, 3), "partial_before_onnxruntime_load": True})
             if ort_load_attempt:
                 ort_load_start = time.time()
+                original_ort_load_passed = False
                 try:
-                    import onnxruntime as ort
-
-                    sess_options = ort.SessionOptions()
-                    sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_DISABLE_ALL
-                    sess_options.intra_op_num_threads = 1
-                    sess_options.inter_op_num_threads = 1
-                    session = ort.InferenceSession(
-                        str(onnx_path),
-                        sess_options=sess_options,
-                        providers=["CPUExecutionProvider"],
-                    )
+                    session = make_ort_session(onnx_path)
+                    original_ort_load_passed = True
                     report["onnxruntime_load"] = {
                         "status": "passed",
                         "claim_promotable_to_manifest": True,
                         "allowed_claim": "bonsai_transformer_minimal_onnxruntime_load_verified_not_execution",
                         "path": str(onnx_path),
-                        "providers": session.get_providers(),
-                        "available_providers": ort.get_available_providers(),
-                        "inputs": [node_arg_metadata(arg) for arg in session.get_inputs()],
-                        "outputs": [node_arg_metadata(arg) for arg in session.get_outputs()],
-                        "graph_optimization_level": "ORT_DISABLE_ALL",
-                        "execution_attempted": False,
+                        **ort_session_metadata(session),
                         "seconds": round(time.time() - ort_load_start, 3),
                     }
                 except BaseException as ort_exc:
@@ -259,6 +353,43 @@ def run(config_path: str, out_dir: str) -> int:
                         "seconds": round(time.time() - ort_load_start, 3),
                     }
                     report["ci_conclusion"] = "success_with_probe_failure"
+                if trig_cast_patch_attempt:
+                    patch_start = time.time()
+                    if original_ort_load_passed:
+                        report["onnxruntime_trig_cast_patch"] = {
+                            "status": "skipped",
+                            "reason": "Original ONNX Runtime CPU load passed; patch not needed.",
+                            "claim_promotable_to_manifest": False,
+                            "execution_attempted": False,
+                        }
+                    else:
+                        try:
+                            patched_path = out / "transformer_minimal_ort_cpu_trig_cast.onnx"
+                            patch_report = patch_trig_fp16_for_ort_cpu(onnx_path, patched_path)
+                            patched_session = make_ort_session(patched_path)
+                            patched_files = sorted(p.name for p in out.glob("transformer_minimal_ort_cpu_trig_cast.onnx*"))
+                            report["onnxruntime_trig_cast_patch"] = {
+                                "status": "passed",
+                                "claim_promotable_to_manifest": True,
+                                "allowed_claim": "bonsai_transformer_minimal_onnxruntime_cpu_load_with_trig_cast_patch_verified_not_execution",
+                                "source_path": str(onnx_path),
+                                "patched_path": str(patched_path),
+                                "files": patched_files,
+                                "patch": patch_report,
+                                "onnxruntime_load": ort_session_metadata(patched_session),
+                                "seconds": round(time.time() - patch_start, 3),
+                            }
+                        except BaseException as patch_exc:
+                            report["onnxruntime_trig_cast_patch"] = {
+                                "status": "failed",
+                                "claim_promotable_to_manifest": False,
+                                "allowed_claim": "bonsai_transformer_minimal_onnxruntime_cpu_load_with_trig_cast_patch_verified_not_execution",
+                                "execution_attempted": False,
+                                "error_type": type(patch_exc).__name__,
+                                "error": str(patch_exc)[:4000],
+                                "seconds": round(time.time() - patch_start, 3),
+                            }
+                            report["ci_conclusion"] = "success_with_probe_failure"
         elif ort_load_attempt:
             report["onnxruntime_load"] = {
                 "status": "blocked",
