@@ -1,0 +1,91 @@
+{
+  "experiment_id": "image-model-ci-remaining-cats-v2",
+  "prompt": "a cute orange tabby cat sitting in a bonsai pot, detailed fur, natural cat anatomy, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a cat",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "This run excludes the five initially reviewed candidates and the five quality-cats candidates that may already have been run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "stable-diffusion-cpp-sd15-placeholder"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61620625408,
+      "free_bytes": 93256785920
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61620625408,
+      "free_bytes": 93256785920
+    },
+    "max_rss_mb_end": 20.078
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "failed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "stable-diffusion-cpp-sd15-placeholder",
+        "enabled": true,
+        "batch": "remaining",
+        "ci_stage": "placeholder",
+        "method": "stable_diffusion_cpp_text_to_image",
+        "model_ref": "TODO: add quantized gguf/ggml artifact",
+        "height": 256,
+        "width": 256,
+        "steps": 4,
+        "expected_role": "remaining_native_quantized_runtime_candidate",
+        "notes": "Placeholder."
+      },
+      "status": "skipped",
+      "started_at_monotonic_seconds": 1781294890.847,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61620625408,
+        "free_bytes": 93256785920
+      },
+      "max_rss_mb_before": 20.078,
+      "candidate_timeout_seconds": 900,
+      "reason": "Placeholder or unsupported runtime; add an implementation before enabling execution.",
+      "execution_attempted": false,
+      "load_only": false,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61620625408,
+        "free_bytes": 93256785920
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 1,
+    "total": 1
+  },
+  "seconds_so_far": 0.019,
+  "summary": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 1,
+    "total": 1
+  },
+  "ci_conclusion": "success_with_candidate_failures",
+  "seconds": 0.02
+}
