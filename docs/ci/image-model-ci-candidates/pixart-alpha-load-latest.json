@@ -25,15 +25,15 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 60682149888,
-      "free_bytes": 94195261440
+      "used_bytes": 61614280704,
+      "free_bytes": 93263130624
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 82514808832,
-      "free_bytes": 72362602496
+      "used_bytes": 83446972416,
+      "free_bytes": 71430438912
     },
-    "max_rss_mb_end": 3757.996
+    "max_rss_mb_end": 3858.336
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -57,19 +57,19 @@
         "notes": "Transformer-family quality candidate. Load-only on standard CI."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781287448.18,
+      "started_at_monotonic_seconds": 1781290548.26,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 60682149888,
-        "free_bytes": 94195261440
+        "used_bytes": 61614280704,
+        "free_bytes": 93263130624
       },
-      "max_rss_mb_before": 19.727,
+      "max_rss_mb_before": 19.609,
       "method": "diffusers_load_only",
       "pipeline_class": "PixArtAlphaPipeline",
       "model_ref": "PixArt-alpha/PixArt-XL-2-1024-MS",
-      "load_seconds": 59.992,
+      "load_seconds": 59.026,
       "generate_seconds": null,
-      "total_seconds": 60.152,
+      "total_seconds": 59.155,
       "components": [
         "scheduler",
         "text_encoder",
@@ -79,12 +79,12 @@
       ],
       "execution_attempted": false,
       "load_only": true,
-      "max_rss_mb_after_candidate": 3757.996,
+      "max_rss_mb_after_candidate": 3858.336,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 82514808832,
-        "free_bytes": 72362602496
+        "used_bytes": 83446972416,
+        "free_bytes": 71430438912
       }
     }
   ],
@@ -94,7 +94,7 @@
     "skipped": 0,
     "total": 1
   },
-  "seconds_so_far": 63.201,
+  "seconds_so_far": 63.076,
   "summary": {
     "passed": 1,
     "failed": 0,
@@ -102,5 +102,5 @@
     "total": 1
   },
   "ci_conclusion": "success",
-  "seconds": 63.201
+  "seconds": 63.076
 }
