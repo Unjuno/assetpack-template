@@ -1,0 +1,110 @@
+{
+  "experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "negative_prompt": "blurry, distorted, low quality",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+  },
+  "selection": {
+    "candidate_ids": [
+      "ssd-1b-load"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61615509504,
+      "free_bytes": 93261901824
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 70548570112,
+      "free_bytes": 84328841216
+    },
+    "max_rss_mb_end": 3800.391
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "ssd-1b-load",
+        "enabled": true,
+        "batch": "turbo",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "segmind/SSD-1B",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 0.0,
+        "license_hint": "apache-2.0",
+        "expected_role": "small_sdxl_load_candidate",
+        "notes": "Small SDXL-class model. Load-only first."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781287169.722,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61615509504,
+        "free_bytes": 93261901824
+      },
+      "max_rss_mb_before": 19.613,
+      "method": "diffusers_load_only",
+      "pipeline_class": "StableDiffusionXLPipeline",
+      "model_ref": "segmind/SSD-1B",
+      "load_seconds": 35.877,
+      "generate_seconds": null,
+      "total_seconds": 36.052,
+      "components": [
+        "feature_extractor",
+        "image_encoder",
+        "scheduler",
+        "text_encoder",
+        "text_encoder_2",
+        "tokenizer",
+        "tokenizer_2",
+        "unet",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 3800.391,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 70548570112,
+        "free_bytes": 84328841216
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 39.327,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 39.328
+}
