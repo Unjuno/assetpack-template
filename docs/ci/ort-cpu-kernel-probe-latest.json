@@ -76,7 +76,7 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.002393
+      "seconds": 0.002684
     },
     "cos_float32_original": {
       "status": "passed",
@@ -108,7 +108,7 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.000154
+      "seconds": 0.00017
     },
     "cos_float16_with_float32_cast_patch": {
       "status": "passed",
@@ -140,7 +140,7 @@
         }
       ],
       "execution_attempted": false,
-      "seconds": 0.00019
+      "seconds": 0.000218
     }
   },
   "inference": {
@@ -151,5 +151,5 @@
   },
   "status": "failed",
   "ci_conclusion": "success_with_probe_failure",
-  "seconds": 0.179896
+  "seconds": 0.177316
 }
