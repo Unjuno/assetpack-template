@@ -77,7 +77,9 @@ def text_encoder_probe(model_ref: str) -> dict[str, Any]:
     model.eval()
     with torch.no_grad():
         output = model(**tokenizer(PROMPT, return_tensors="pt"))
-    hidden = getattr(output, "last_hidden_state", None) or (output[0] if isinstance(output, tuple) and output else None)
+    hidden = getattr(output, "last_hidden_state", None)
+    if hidden is None and isinstance(output, tuple) and output:
+        hidden = output[0]
     if hidden is None:
         raise RuntimeError("text encoder did not return hidden state")
     return {"component": "text_encoder", "class_name": model.__class__.__name__, "hidden_state": tensor_summary(hidden)}
@@ -97,8 +99,13 @@ def scheduler_probe(model_ref: str) -> dict[str, Any]:
         set_kwargs["mu"] = 0.0
     scheduler.set_timesteps(2, **set_kwargs)
     sample = torch.zeros((1, 4, 8, 8), dtype=torch.float32)
-    result = scheduler.step(torch.ones_like(sample) * 0.01, scheduler.timesteps[0], sample, return_dict=True)
-    prev = getattr(result, "prev_sample", None) or (result[0] if isinstance(result, tuple) and result else None)
+    step_kwargs: dict[str, Any] = {}
+    if "return_dict" in inspect.signature(scheduler.step).parameters:
+        step_kwargs["return_dict"] = True
+    result = scheduler.step(torch.ones_like(sample) * 0.01, scheduler.timesteps[0], sample, **step_kwargs)
+    prev = getattr(result, "prev_sample", None)
+    if prev is None and isinstance(result, tuple) and result:
+        prev = result[0]
     if prev is None:
         raise RuntimeError("scheduler.step did not return prev_sample")
     return {"component": "scheduler", "class_name": class_name, "set_timesteps_kwargs": set_kwargs, "timesteps": [float(x) for x in scheduler.timesteps.detach().cpu().float().tolist()[:2]], "prev_sample": tensor_summary(prev)}
