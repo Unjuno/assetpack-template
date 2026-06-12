@@ -1,0 +1,175 @@
+{
+  "experiment_id": "bonsai-combined-component-probe-v1",
+  "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
+  "status": "passed",
+  "ci_conclusion": "success",
+  "claim_promotable_to_manifest": true,
+  "require_all": false,
+  "run_transformer_load": false,
+  "promotable_claims": [
+    {
+      "name": "tokenizer_execution",
+      "allowed_claim": "bonsai_tokenizer_execution_verified"
+    },
+    {
+      "name": "text_encoder_execution",
+      "allowed_claim": "bonsai_text_encoder_execution_verified"
+    },
+    {
+      "name": "vae_execution",
+      "allowed_claim": "bonsai_vae_decoder_execution_verified"
+    },
+    {
+      "name": "transformer_config_load",
+      "allowed_claim": "bonsai_transformer_config_boundary_verified_not_runtime_execution"
+    }
+  ],
+  "stages": [
+    {
+      "name": "tokenizer_execution",
+      "status": "passed",
+      "seconds": 7.071,
+      "claim_promotable_to_manifest": true,
+      "allowed_claim": "bonsai_tokenizer_execution_verified",
+      "component": "tokenizer",
+      "prompt": "a small bonsai tree in a ceramic pot",
+      "class_name": "Qwen2Tokenizer",
+      "vocab_size": 151643,
+      "model_max_length": 131072,
+      "input_ids_shape": [
+        1,
+        9
+      ],
+      "input_ids_sha256_int64_le": "a3c323ac42dc29072a5896a724ab160c1192d596bd617128113630855b763b68",
+      "attention_mask_shape": [
+        1,
+        9
+      ],
+      "attention_mask_sha256_int64_le": "df070c0849900928e1e85833cce32020c89d2303a9e960510c3c3b79746448b7"
+    },
+    {
+      "name": "text_encoder_execution",
+      "status": "passed",
+      "seconds": 127.881,
+      "claim_promotable_to_manifest": true,
+      "allowed_claim": "bonsai_text_encoder_execution_verified",
+      "component": "text_encoder",
+      "class_name": "Qwen3Model",
+      "hidden_state": {
+        "shape": [
+          1,
+          9,
+          2560
+        ],
+        "dtype": "float32",
+        "min": -28.810636520385742,
+        "max": 67.63907623291016,
+        "mean": 0.06100994348526001,
+        "sha256_float32_le": "6d4ce391fc0cb7664bc52303e8ec0f676023e124327983de943147be41d817b0"
+      }
+    },
+    {
+      "name": "scheduler_execution",
+      "status": "failed",
+      "seconds": 1.869,
+      "claim_promotable_to_manifest": false,
+      "allowed_claim": "bonsai_scheduler_step_execution_verified",
+      "error_type": "ValueError",
+      "error": "`mu` must be passed when `use_dynamic_shifting` is set to be `True`"
+    },
+    {
+      "name": "vae_execution",
+      "status": "passed",
+      "seconds": 4.241,
+      "claim_promotable_to_manifest": true,
+      "allowed_claim": "bonsai_vae_decoder_execution_verified",
+      "component": "vae_decoder",
+      "class_name": "AutoencoderKL",
+      "input_shape": [
+        1,
+        32,
+        8,
+        8
+      ],
+      "decoded_sample": {
+        "shape": [
+          1,
+          3,
+          64,
+          64
+        ],
+        "dtype": "float32",
+        "min": -0.7699174880981445,
+        "max": 0.5026676654815674,
+        "mean": -0.09306952357292175,
+        "sha256_float32_le": "6107e6c616b578184ceac14b086f5fe9fe32569113184f0727d498b3b96004dc"
+      }
+    },
+    {
+      "name": "transformer_config_load",
+      "status": "passed",
+      "seconds": 0.107,
+      "claim_promotable_to_manifest": true,
+      "allowed_claim": "bonsai_transformer_config_boundary_verified_not_runtime_execution",
+      "component": "transformer",
+      "load_kind": "config_only",
+      "class_name": "Flux2Transformer2DModel",
+      "selected_config": {
+        "in_channels": 128,
+        "out_channels": null,
+        "num_layers": 5,
+        "num_single_layers": 20,
+        "attention_head_dim": 128,
+        "num_attention_heads": 24,
+        "joint_attention_dim": 7680,
+        "guidance_embeds": false,
+        "axes_dims_rope": [
+          32,
+          32,
+          32,
+          32
+        ]
+      }
+    },
+    {
+      "name": "transformer_weight_load",
+      "status": "skipped",
+      "seconds": 0.0,
+      "claim_promotable_to_manifest": false,
+      "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
+      "skip_reason": "set BONSAI_RUN_TRANSFORMER_LOAD=true to attempt heavy transformer weight load"
+    },
+    {
+      "name": "full_pipeline_composition",
+      "status": "blocked",
+      "seconds": 0.0,
+      "claim_promotable_to_manifest": false,
+      "allowed_claim": "bonsai_full_pipeline_composition_verified",
+      "blocked_by": {
+        "scheduler_execution": "failed",
+        "transformer_weight_load": "skipped"
+      }
+    },
+    {
+      "name": "prompt_to_image_generation",
+      "status": "blocked",
+      "seconds": 0.0,
+      "claim_promotable_to_manifest": false,
+      "allowed_claim": "bonsai_prompt_to_image_generation_verified",
+      "blocked_by": {
+        "full_pipeline_composition": "blocked"
+      }
+    },
+    {
+      "name": "single_monolithic_multi_block_onnx",
+      "status": "blocked",
+      "seconds": 0.0,
+      "claim_promotable_to_manifest": false,
+      "allowed_claim": "bonsai_single_monolithic_multi_block_onnx_verified",
+      "blocked_by": {
+        "full_pipeline_composition": "blocked"
+      }
+    }
+  ],
+  "seconds": 141.17
+}
