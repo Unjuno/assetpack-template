@@ -1,0 +1,91 @@
+{
+  "experiment_id": "image-model-onnx-feasibility-v1",
+  "source_experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "selection": {
+    "candidate_ids": [
+      "openvino-small-sd-placeholder"
+    ],
+    "batches": [],
+    "selected_count": 1
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 60859092992,
+      "free_bytes": 94018318336
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 60859047936,
+      "free_bytes": 94018363392
+    },
+    "max_rss_mb_end": 313.574
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_onnx_feasibility_measurement_not_full_pipeline",
+  "status": "failed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "openvino-small-sd-placeholder",
+        "enabled": true,
+        "batch": "runtime",
+        "ci_stage": "placeholder",
+        "method": "openvino_text_to_image",
+        "model_ref": "TODO: add preconverted OpenVINO artifact",
+        "height": 256,
+        "width": 256,
+        "steps": 2,
+        "expected_role": "cpu_quantized_candidate",
+        "notes": "Placeholder. Do not quantize large models inside standard CI."
+      },
+      "status": "skipped",
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 60859092992,
+        "free_bytes": 94018318336
+      },
+      "max_rss_mb_before": 21.113,
+      "pipeline_load": {
+        "status": "skipped",
+        "reason": "Method openvino_text_to_image is not a diffusers pipeline for generic ONNX probing.",
+        "seconds": 0.0
+      },
+      "components": {},
+      "onnx_export": {
+        "status": "skipped",
+        "reason": "Method openvino_text_to_image is not a diffusers pipeline for generic ONNX probing."
+      },
+      "onnxruntime": {
+        "status": "skipped",
+        "reason": "No ONNX artifact was produced."
+      },
+      "seconds": 3.643,
+      "max_rss_mb_after_candidate": 313.574,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 60859047936,
+        "free_bytes": 94018363392
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 1,
+    "total": 1
+  },
+  "seconds_so_far": 3.784,
+  "summary": {
+    "passed": 0,
+    "failed": 0,
+    "skipped": 1,
+    "total": 1
+  },
+  "ci_conclusion": "success_with_candidate_failures",
+  "seconds": 3.784
+}
