@@ -1,11 +1,11 @@
 {
-  "experiment_id": "bonsai-transformer-load-probe-preflight-v11",
+  "experiment_id": "bonsai-transformer-load-probe-dependencies-v11",
   "model_ref": "prism-ml/bonsai-image-binary-4B-unpacked",
-  "status": "preflight_started",
-  "ci_conclusion": "preflight_only",
+  "status": "torch_dependency_installed",
+  "ci_conclusion": "dependency_stage_only",
   "claim_promotable_to_manifest": false,
   "allowed_claim": "bonsai_real_transformer_weight_load_verified_not_onnx_execution",
-  "dependency_stage": "pre_dependency_install",
+  "dependency_stage": "torch_installed_before_runtime_deps",
   "onnx_export_attempted": true,
   "onnx_export_revision": "v7",
   "onnxruntime_load_attempted": true,
@@ -13,5 +13,5 @@
   "onnxruntime_trig_cast_patch_attempted": true,
   "onnxruntime_trig_cast_patch_revision": "v7",
   "execution_attempted": false,
-  "note": "This preflight report is committed before dependency installation. Later workflow stages overwrite it if they are reached."
+  "note": "Torch CPU dependency installation completed. Runtime dependencies and Bonsai probe have not yet completed at this stage."
 }
