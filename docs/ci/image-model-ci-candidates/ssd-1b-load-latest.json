@@ -25,15 +25,15 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 61615509504,
-      "free_bytes": 93261901824
+      "used_bytes": 60683001856,
+      "free_bytes": 94194409472
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 70548570112,
-      "free_bytes": 84328841216
+      "used_bytes": 69616041984,
+      "free_bytes": 85261369344
     },
-    "max_rss_mb_end": 3800.391
+    "max_rss_mb_end": 3221.293
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -57,19 +57,19 @@
         "notes": "Small SDXL-class model. Load-only first."
       },
       "status": "passed",
-      "started_at_monotonic_seconds": 1781287169.722,
+      "started_at_monotonic_seconds": 1781290275.44,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 61615509504,
-        "free_bytes": 93261901824
+        "used_bytes": 60683001856,
+        "free_bytes": 94194409472
       },
-      "max_rss_mb_before": 19.613,
+      "max_rss_mb_before": 19.664,
       "method": "diffusers_load_only",
       "pipeline_class": "StableDiffusionXLPipeline",
       "model_ref": "segmind/SSD-1B",
-      "load_seconds": 35.877,
+      "load_seconds": 26.349,
       "generate_seconds": null,
-      "total_seconds": 36.052,
+      "total_seconds": 26.501,
       "components": [
         "feature_extractor",
         "image_encoder",
@@ -83,12 +83,12 @@
       ],
       "execution_attempted": false,
       "load_only": true,
-      "max_rss_mb_after_candidate": 3800.391,
+      "max_rss_mb_after_candidate": 3221.293,
       "diffusers_version": "0.38.0",
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 70548570112,
-        "free_bytes": 84328841216
+        "used_bytes": 69616041984,
+        "free_bytes": 85261369344
       }
     }
   ],
@@ -98,7 +98,7 @@
     "skipped": 0,
     "total": 1
   },
-  "seconds_so_far": 39.327,
+  "seconds_so_far": 30.221,
   "summary": {
     "passed": 1,
     "failed": 0,
@@ -106,5 +106,5 @@
     "total": 1
   },
   "ci_conclusion": "success",
-  "seconds": 39.328
+  "seconds": 30.222
 }
