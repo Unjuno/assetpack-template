@@ -1,0 +1,213 @@
+{
+  "experiment_id": "image-model-onnx-feasibility-v1",
+  "source_experiment_id": "image-model-ci-benchmark-v3",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "selection": {
+    "candidate_ids": [
+      "bk-sdm-small-load"
+    ],
+    "batches": [],
+    "selected_count": 1
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 60859240448,
+      "free_bytes": 94018170880
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 66765758464,
+      "free_bytes": 88111652864
+    },
+    "max_rss_mb_end": 4720.785
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_onnx_feasibility_measurement_not_full_pipeline",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "bk-sdm-small-load",
+        "enabled": true,
+        "batch": "smoke",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "nota-ai/bk-sdm-small",
+        "pipeline_class": "StableDiffusionPipeline",
+        "height": 256,
+        "width": 256,
+        "steps": 4,
+        "guidance_scale": 7.5,
+        "expected_role": "small_sd_load_candidate",
+        "notes": "Load-only first. Promote to generation after resource data."
+      },
+      "status": "passed",
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 60859240448,
+        "free_bytes": 94018170880
+      },
+      "max_rss_mb_before": 21.117,
+      "pipeline_load": {
+        "status": "passed",
+        "pipeline_class": "StableDiffusionPipeline",
+        "seconds": 15.411
+      },
+      "components": {
+        "pipeline_class": "StableDiffusionPipeline",
+        "component_keys": [
+          "feature_extractor",
+          "image_encoder",
+          "safety_checker",
+          "scheduler",
+          "text_encoder",
+          "tokenizer",
+          "unet",
+          "vae"
+        ],
+        "has_unet": true,
+        "has_transformer": false,
+        "has_vae": true,
+        "unet_class": "UNet2DConditionModel",
+        "transformer_class": null,
+        "vae_class": "AutoencoderKL"
+      },
+      "onnx_strategy": {
+        "component": "unet",
+        "supported_by_generic_probe": true,
+        "reason": "Generic Stable-Diffusion-style UNet export probe is supported."
+      },
+      "onnx_export": {
+        "status": "passed",
+        "kind": "unet_minimal_onnx_export",
+        "path": "reports/image-model-onnx-feasibility/bk-sdm-small-load/candidates/bk-sdm-small-load/onnx/unet_minimal.onnx",
+        "files": [
+          "unet_minimal.onnx",
+          "unet_minimal.onnx.data"
+        ],
+        "size_bytes": 2471173,
+        "opset_imports": [
+          {
+            "domain": "",
+            "version": 18
+          }
+        ],
+        "ir_version": 10,
+        "node_count": 930,
+        "initializer_count": 449,
+        "seconds": 12.77,
+        "dummy_inputs": {
+          "sample_shape": [
+            1,
+            4,
+            32,
+            32
+          ],
+          "timestep_shape": [
+            1
+          ],
+          "encoder_hidden_states_shape": [
+            1,
+            77,
+            768
+          ]
+        }
+      },
+      "onnxruntime": {
+        "status": "passed",
+        "providers": [
+          "CPUExecutionProvider"
+        ],
+        "available_providers": [
+          "AzureExecutionProvider",
+          "CPUExecutionProvider"
+        ],
+        "inputs": [
+          {
+            "name": "sample",
+            "shape": [
+              1,
+              4,
+              32,
+              32
+            ],
+            "type": "tensor(float)"
+          },
+          {
+            "name": "timestep",
+            "shape": [
+              1
+            ],
+            "type": "tensor(int64)"
+          },
+          {
+            "name": "encoder_hidden_states",
+            "shape": [
+              1,
+              77,
+              768
+            ],
+            "type": "tensor(float)"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "latent",
+            "shape": [
+              1,
+              4,
+              32,
+              32
+            ],
+            "type": "tensor(float)"
+          }
+        ],
+        "load_seconds": 0.368,
+        "run_seconds": 1.401,
+        "total_seconds": 1.77,
+        "execution_attempted": true,
+        "output_shapes": [
+          [
+            1,
+            4,
+            32,
+            32
+          ]
+        ],
+        "output_sha256": [
+          "4af223014749c268843a8c2a4b8de4f51301e0b020e84dc6d256cb53b48b5d25"
+        ]
+      },
+      "versions": {
+        "torch": "2.12.0+cpu",
+        "diffusers": "0.38.0"
+      },
+      "seconds": 32.725,
+      "max_rss_mb_after_candidate": 4720.785,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 66765754368,
+        "free_bytes": 88111656960
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 33.013,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 33.013
+}
