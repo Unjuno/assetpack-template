@@ -1,0 +1,117 @@
+{
+  "experiment_id": "image-model-ci-curated-butterflies-v1",
+  "prompt": "a beautiful butterfly perched on a bonsai branch in a bonsai pot, detailed symmetrical wings, natural butterfly anatomy, delicate legs, studio lighting, sharp focus",
+  "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a butterfly, cat, dog, rabbit, bird, chameleon, toy",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "Butterfly generation uses the strict seven candidates accepted from cat artifact review. Butterfly visual quality is unverified until this workflow is run."
+  },
+  "selection": {
+    "candidate_ids": [
+      "sdxl-lcm-lora-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 900,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61621084160,
+      "free_bytes": 93256327168
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 76227911680,
+      "free_bytes": 78649499648
+    },
+    "max_rss_mb_end": 14504.883
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sdxl-lcm-lora-quality",
+        "enabled": true,
+        "batch": "curated_butterfly",
+        "ci_stage": "generation",
+        "method": "diffusers_lora_text_to_image",
+        "base_model_ref": "stabilityai/stable-diffusion-xl-base-1.0",
+        "lora_model_ref": "latent-consistency/lcm-lora-sdxl",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "scheduler_class": "LCMScheduler",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 1.0,
+        "expected_role": "butterfly_sdxl_lcm_candidate"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781300878.545,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61621084160,
+        "free_bytes": 93256327168
+      },
+      "max_rss_mb_before": 19.727,
+      "candidate_timeout_seconds": 900,
+      "method": "diffusers_lora_text_to_image",
+      "pipeline_class": "StableDiffusionXLPipeline",
+      "scheduler_class": "LCMScheduler",
+      "base_model_ref": "stabilityai/stable-diffusion-xl-base-1.0",
+      "lora_model_ref": "latent-consistency/lcm-lora-sdxl",
+      "load_seconds": 45.315,
+      "generate_seconds": 120.658,
+      "total_seconds": 170.45,
+      "height": 512,
+      "width": 512,
+      "steps": 4,
+      "guidance_scale": 1.0,
+      "call_kwargs": {
+        "prompt": "a beautiful butterfly perched on a bonsai branch in a bonsai pot, detailed symmetrical wings, natural butterfly anatomy, delicate legs, studio lighting, sharp focus",
+        "num_inference_steps": 4,
+        "negative_prompt": "blurry, distorted, deformed, extra limbs, melted face, low quality, abstract object, not a butterfly, cat, dog, rabbit, bird, chameleon, toy",
+        "height": 512,
+        "width": 512,
+        "guidance_scale": 1.0
+      },
+      "image_path": "reports/image-model-ci-curated-butterflies/sdxl-lcm-lora-quality/images/sdxl-lcm-lora-quality/cat.png",
+      "image_sha256": "4fae90e21a483a60ba8e5db20e763f51e57f7c4de2cc8e4a48226261875af4ff",
+      "image_size_bytes": 343391,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 14504.883,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 76227911680,
+        "free_bytes": 78649499648
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds_so_far": 174.104,
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "ci_conclusion": "success",
+  "seconds": 174.105
+}
