@@ -25,15 +25,15 @@
     "cwd": "/home/runner/work/assetpack-template/assetpack-template",
     "disk_start": {
       "total_bytes": 154894188544,
-      "used_bytes": 60682051584,
-      "free_bytes": 94195359744
+      "used_bytes": 60682997760,
+      "free_bytes": 94194413568
     },
     "disk_end": {
       "total_bytes": 154894188544,
-      "used_bytes": 60682051584,
-      "free_bytes": 94195359744
+      "used_bytes": 60682997760,
+      "free_bytes": 94194413568
     },
-    "max_rss_mb_end": 19.48
+    "max_rss_mb_end": 19.613
   },
   "claim_promotable_to_manifest": false,
   "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
@@ -54,20 +54,20 @@
         "notes": "Placeholder for native quantized runtime."
       },
       "status": "skipped",
-      "started_at_monotonic_seconds": 1781287653.586,
+      "started_at_monotonic_seconds": 1781290765.506,
       "disk_before": {
         "total_bytes": 154894188544,
-        "used_bytes": 60682051584,
-        "free_bytes": 94195359744
+        "used_bytes": 60682997760,
+        "free_bytes": 94194413568
       },
-      "max_rss_mb_before": 19.48,
+      "max_rss_mb_before": 19.613,
       "reason": "Placeholder or unsupported runtime; add an implementation before enabling execution.",
       "execution_attempted": false,
       "load_only": false,
       "disk_after": {
         "total_bytes": 154894188544,
-        "used_bytes": 60682051584,
-        "free_bytes": 94195359744
+        "used_bytes": 60682997760,
+        "free_bytes": 94194413568
       }
     }
   ],
@@ -77,7 +77,7 @@
     "skipped": 1,
     "total": 1
   },
-  "seconds_so_far": 0.029,
+  "seconds_so_far": 0.032,
   "summary": {
     "passed": 0,
     "failed": 0,
@@ -85,5 +85,5 @@
     "total": 1
   },
   "ci_conclusion": "success_with_candidate_failures",
-  "seconds": 0.029
+  "seconds": 0.032
 }
