@@ -24,7 +24,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
       BONSAI_RUN_TRANSFORMER_LOAD: "true"
       BONSAI_REQUIRE_ALL_COMBINED_CLAIMS: "false"
-      BONSAI_COMBINED_PROBE_REVISION: "transformer-minimal-model-call-v2"
+      BONSAI_COMBINED_PROBE_REVISION: "transformer-minimal-model-call-v3"
     steps:
       - uses: actions/checkout@v4
 
