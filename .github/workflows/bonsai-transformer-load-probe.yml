@@ -23,6 +23,7 @@ jobs:
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
       PYTHONUNBUFFERED: "1"
       BONSAI_RUN_TRANSFORMER_ONNX_EXPORT: "true"
+      BONSAI_TRANSFORMER_ONNX_EXPORT_REVISION: "v2"
     steps:
       - uses: actions/checkout@v4
 
