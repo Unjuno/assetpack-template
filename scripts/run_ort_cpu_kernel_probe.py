@@ -12,19 +12,21 @@ def write_report(out_dir: Path, report: dict) -> None:
     (out_dir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def make_cos_model(path: Path, elem_type: int, patched: bool) -> dict:
+def make_cos_model(path: Path, elem_type: int, patched: bool, cast_back: bool = True) -> dict:
     import onnx
     from onnx import TensorProto, helper
 
     path.parent.mkdir(parents=True, exist_ok=True)
     input_info = helper.make_tensor_value_info("x", elem_type, [1, 4])
-    output_info = helper.make_tensor_value_info("y", elem_type, [1, 4])
+    output_elem_type = elem_type if cast_back else TensorProto.FLOAT
+    output_info = helper.make_tensor_value_info("y", output_elem_type, [1, 4])
     if patched:
         nodes = [
             helper.make_node("Cast", ["x"], ["x_float32"], name="cast_input_to_float32", to=TensorProto.FLOAT),
-            helper.make_node("Cos", ["x_float32"], ["y_float32"], name="cos_float32"),
-            helper.make_node("Cast", ["y_float32"], ["y"], name="cast_output_to_original", to=elem_type),
+            helper.make_node("Cos", ["x_float32"], ["y_float32" if cast_back else "y"], name="cos_float32"),
         ]
+        if cast_back:
+            nodes.append(helper.make_node("Cast", ["y_float32"], ["y"], name="cast_output_to_original", to=elem_type))
     else:
         nodes = [helper.make_node("Cos", ["x"], ["y"], name="cos_original")]
     graph = helper.make_graph(nodes, path.stem, [input_info], [output_info])
@@ -35,7 +37,9 @@ def make_cos_model(path: Path, elem_type: int, patched: bool) -> dict:
     return {
         "path": str(path),
         "elem_type": TensorProto.DataType.Name(int(elem_type)),
+        "output_elem_type": TensorProto.DataType.Name(int(output_elem_type)),
         "patched": patched,
+        "cast_back": cast_back,
         "node_types": [node.op_type for node in nodes],
         "opset": 17,
         "ir_version": int(model.ir_version),
@@ -76,10 +80,10 @@ def run(out_dir: str) -> int:
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     report: dict = {
-        "experiment_id": "ort-cpu-kernel-probe-v3",
-        "purpose": "Synthetic ONNX Runtime CPUExecutionProvider kernel probe for Cos FLOAT16, INT64, and FLOAT cast workarounds.",
+        "experiment_id": "ort-cpu-kernel-probe-v4",
+        "purpose": "Synthetic ONNX Runtime CPUExecutionProvider kernel probe for Cos FLOAT16, FLOAT32, DOUBLE, INT64, and FLOAT cast workarounds.",
         "claim_promotable_to_manifest": False,
-        "allowed_claim": "synthetic_ort_cpu_cos_int64_cast_workaround_evidence_not_bonsai_pipeline",
+        "allowed_claim": "synthetic_ort_cpu_cos_double_cast_workaround_evidence_not_bonsai_pipeline",
     }
     try:
         import onnx
@@ -94,32 +98,41 @@ def run(out_dir: str) -> int:
         models = {
             "cos_float16_original": make_cos_model(out / "cos_float16_original.onnx", TensorProto.FLOAT16, patched=False),
             "cos_float32_original": make_cos_model(out / "cos_float32_original.onnx", TensorProto.FLOAT, patched=False),
+            "cos_double_original": make_cos_model(out / "cos_double_original.onnx", TensorProto.DOUBLE, patched=False),
+            "cos_double_with_float32_cast_patch": make_cos_model(out / "cos_double_with_float32_cast_patch.onnx", TensorProto.DOUBLE, patched=True, cast_back=True),
+            "cos_double_with_float32_output_patch": make_cos_model(out / "cos_double_with_float32_output_patch.onnx", TensorProto.DOUBLE, patched=True, cast_back=False),
             "cos_int64_original": make_cos_model(out / "cos_int64_original.onnx", TensorProto.INT64, patched=False),
-            "cos_int64_with_float32_cast_patch": make_cos_model(out / "cos_int64_with_float32_cast_patch.onnx", TensorProto.INT64, patched=True),
-            "cos_float16_with_float32_cast_patch": make_cos_model(out / "cos_float16_with_float32_cast_patch.onnx", TensorProto.FLOAT16, patched=True),
+            "cos_int64_with_float32_cast_patch": make_cos_model(out / "cos_int64_with_float32_cast_patch.onnx", TensorProto.INT64, patched=True, cast_back=True),
+            "cos_float16_with_float32_cast_patch": make_cos_model(out / "cos_float16_with_float32_cast_patch.onnx", TensorProto.FLOAT16, patched=True, cast_back=True),
         }
         loads = {name: try_load(Path(meta["path"])) for name, meta in models.items()}
         report["models"] = models
         report["onnxruntime_loads"] = loads
         fp16_original_passed = loads["cos_float16_original"]["status"] == "passed"
         fp32_original_passed = loads["cos_float32_original"]["status"] == "passed"
+        double_original_failed = loads["cos_double_original"]["status"] == "failed"
+        double_cast_back_passed = loads["cos_double_with_float32_cast_patch"]["status"] == "passed"
+        double_float_output_passed = loads["cos_double_with_float32_output_patch"]["status"] == "passed"
         int64_original_failed = loads["cos_int64_original"]["status"] == "failed"
         int64_patched_passed = loads["cos_int64_with_float32_cast_patch"]["status"] == "passed"
         fp16_patched_passed = loads["cos_float16_with_float32_cast_patch"]["status"] == "passed"
         report["inference"] = {
             "cos_float16_original_load_passed": fp16_original_passed,
             "cos_float32_original_load_passed": fp32_original_passed,
+            "cos_double_original_load_failed": double_original_failed,
+            "cos_double_with_float32_cast_back_load_passed": double_cast_back_passed,
+            "cos_double_with_float32_output_load_passed": double_float_output_passed,
             "cos_int64_original_load_failed": int64_original_failed,
             "cos_int64_with_float32_cast_patch_load_passed": int64_patched_passed,
             "cos_float16_with_float32_cast_patch_load_passed": fp16_patched_passed,
-            "supports_bonsai_cos7_interpretation": int64_original_failed and fp32_original_passed and int64_patched_passed,
+            "supports_bonsai_cos7_interpretation": double_original_failed and fp32_original_passed and (double_cast_back_passed or double_float_output_passed),
         }
-        if int64_original_failed and fp32_original_passed and int64_patched_passed:
+        if double_original_failed and fp32_original_passed and (double_cast_back_passed or double_float_output_passed):
             report.update({
                 "status": "passed",
                 "ci_conclusion": "success",
                 "claim_promotable_to_manifest": True,
-                "allowed_claim": "synthetic_ort_cpu_cos_int64_cast_workaround_verified_not_bonsai_pipeline",
+                "allowed_claim": "synthetic_ort_cpu_cos_double_cast_workaround_verified_not_bonsai_pipeline",
             })
         else:
             report.update({
