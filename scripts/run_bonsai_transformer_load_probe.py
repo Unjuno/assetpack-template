@@ -33,6 +33,90 @@ def node_arg_metadata(arg) -> dict:
     }
 
 
+def tensor_elem_type_name(elem_type: int | None) -> str | None:
+    if elem_type is None:
+        return None
+    try:
+        import onnx
+
+        return onnx.TensorProto.DataType.Name(int(elem_type))
+    except BaseException:
+        return str(elem_type)
+
+
+def value_info_elem_type(value_info) -> int | None:
+    tensor_type = value_info.type.tensor_type
+    if not tensor_type.HasField("elem_type"):
+        return None
+    return int(tensor_type.elem_type)
+
+
+def collect_value_types(model) -> dict[str, int]:
+    value_types: dict[str, int] = {}
+    for value_info in list(model.graph.input) + list(model.graph.value_info) + list(model.graph.output):
+        elem_type = value_info_elem_type(value_info)
+        if elem_type is not None:
+            value_types[value_info.name] = elem_type
+    for initializer in model.graph.initializer:
+        value_types[initializer.name] = int(initializer.data_type)
+    return value_types
+
+
+def onnx_graph_diagnostics(onnx_path: Path, focus_ops: tuple[str, ...] = ("Cos", "Sin")) -> dict:
+    import onnx
+    from onnx import shape_inference
+
+    diagnostics: dict = {
+        "path": str(onnx_path),
+        "load_external_data": False,
+        "shape_inference_attempted": True,
+    }
+    model = onnx.load(str(onnx_path), load_external_data=False)
+    diagnostics["opset_imports"] = [
+        {"domain": opset.domain, "version": int(opset.version)} for opset in model.opset_import
+    ]
+    diagnostics["ir_version"] = int(model.ir_version)
+    diagnostics["node_count"] = len(model.graph.node)
+    diagnostics["initializer_count"] = len(model.graph.initializer)
+    diagnostics["external_initializer_count"] = sum(
+        1 for initializer in model.graph.initializer if initializer.data_location == onnx.TensorProto.EXTERNAL
+    )
+    diagnostics["op_type_counts"] = {}
+    for node in model.graph.node:
+        diagnostics["op_type_counts"][node.op_type] = diagnostics["op_type_counts"].get(node.op_type, 0) + 1
+    try:
+        inferred = shape_inference.infer_shapes(model, strict_mode=False, data_prop=False)
+        diagnostics["shape_inference_status"] = "passed"
+        typed_model = inferred
+    except BaseException as exc:
+        diagnostics["shape_inference_status"] = "failed"
+        diagnostics["shape_inference_error_type"] = type(exc).__name__
+        diagnostics["shape_inference_error"] = str(exc)[:1000]
+        typed_model = model
+    value_types = collect_value_types(typed_model)
+    focus_nodes = []
+    for node in typed_model.graph.node:
+        if node.op_type not in focus_ops:
+            continue
+        focus_nodes.append({
+            "name": node.name,
+            "op_type": node.op_type,
+            "input_types": [tensor_elem_type_name(value_types.get(name)) for name in node.input],
+            "output_types": [tensor_elem_type_name(value_types.get(name)) for name in node.output],
+            "inputs": list(node.input),
+            "outputs": list(node.output),
+        })
+    diagnostics["focus_ops"] = list(focus_ops)
+    diagnostics["focus_nodes"] = focus_nodes[:100]
+    diagnostics["focus_node_count"] = len(focus_nodes)
+    diagnostics["focus_node_type_counts"] = {}
+    for node in focus_nodes:
+        for elem_type in node["input_types"]:
+            key = elem_type if elem_type is not None else "UNKNOWN"
+            diagnostics["focus_node_type_counts"][key] = diagnostics["focus_node_type_counts"].get(key, 0) + 1
+    return diagnostics
+
+
 def run(config_path: str, out_dir: str) -> int:
     start = time.time()
     cfg = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
@@ -41,7 +125,7 @@ def run(config_path: str, out_dir: str) -> int:
     export_attempt = env_bool("BONSAI_RUN_TRANSFORMER_ONNX_EXPORT", False)
     ort_load_attempt = env_bool("BONSAI_RUN_TRANSFORMER_ONNXRUNTIME_LOAD", False)
     report = {
-        "experiment_id": "bonsai-transformer-load-probe-v4",
+        "experiment_id": "bonsai-transformer-load-probe-v5",
         "model_ref": model_ref,
         "download_weights": True,
         "runtime_load": True,
@@ -125,6 +209,14 @@ def run(config_path: str, out_dir: str) -> int:
                     "external_data_enabled": "external_data" in kwargs or "use_external_data_format" in kwargs,
                 }
             })
+            try:
+                report["onnx_graph_diagnostics"] = onnx_graph_diagnostics(onnx_path)
+            except BaseException as diag_exc:
+                report["onnx_graph_diagnostics"] = {
+                    "status": "failed",
+                    "error_type": type(diag_exc).__name__,
+                    "error": str(diag_exc)[:1000],
+                }
             write_report(out, {**report, "seconds": round(time.time() - start, 3), "partial_before_onnxruntime_load": True})
             if ort_load_attempt:
                 ort_load_start = time.time()
@@ -162,6 +254,8 @@ def run(config_path: str, out_dir: str) -> int:
                         "execution_attempted": False,
                         "error_type": type(ort_exc).__name__,
                         "error": str(ort_exc)[:4000],
+                        "likely_failure_boundary": "onnxruntime_session_initialization_kernel_resolution",
+                        "diagnostic_hint": "Inspect onnx_graph_diagnostics.focus_nodes for Cos/Sin input dtypes; CPUExecutionProvider may lack kernels for specific low-precision element types.",
                         "seconds": round(time.time() - ort_load_start, 3),
                     }
                     report["ci_conclusion"] = "success_with_probe_failure"
