@@ -15,7 +15,7 @@
     {
       "name": "layout_probe",
       "status": "passed",
-      "seconds": 0.705,
+      "seconds": 1.978,
       "analysis": {
         "file_count": 6,
         "top_level_entries": [
@@ -106,5 +106,5 @@
       ]
     }
   ],
-  "seconds": 0.705
+  "seconds": 1.978
 }
