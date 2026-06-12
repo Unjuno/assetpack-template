@@ -1,0 +1,283 @@
+{
+  "experiment_id": "image-model-ci-benchmark-v2",
+  "prompt": "a cute orange tabby cat sitting on a bonsai pot, simple studio lighting",
+  "negative_prompt": "blurry, distorted, low quality",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true,
+    "safety_checker": "disabled_when_supported",
+    "default_timeout_note": "GitHub-hosted standard ubuntu runners are CPU-only; candidates should keep image size and steps small."
+  },
+  "selection": {
+    "candidate_ids": [],
+    "batches": [
+      "turbo"
+    ],
+    "include_disabled": false,
+    "selected_count": 5
+  },
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61613182976,
+      "free_bytes": 93264228352
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 103798448128,
+      "free_bytes": 51078963200
+    },
+    "max_rss_mb_end": 5677.996
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "ci_image_model_benchmark_measurement_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sd-turbo",
+        "enabled": true,
+        "batch": "turbo",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "stabilityai/sd-turbo",
+        "pipeline_class": "AutoPipelineForText2Image",
+        "height": 256,
+        "width": 256,
+        "steps": 2,
+        "guidance_scale": 0.0,
+        "license_hint": "stability-ai-noncommercial-community",
+        "expected_role": "turbo_candidate",
+        "notes": "Turbo candidate. Generation may fail if pipeline class or license access changes."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286565.925,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61613182976,
+        "free_bytes": 93264228352
+      },
+      "max_rss_mb_before": 19.484,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "AutoPipelineForText2Image",
+      "model_ref": "stabilityai/sd-turbo",
+      "load_seconds": 17.573,
+      "generate_seconds": 13.478,
+      "total_seconds": 31.251,
+      "height": 256,
+      "width": 256,
+      "steps": 2,
+      "guidance_scale": 0.0,
+      "image_path": "reports/image-model-ci-benchmark/turbo/images/sd-turbo/cat.png",
+      "image_sha256": "9d5e98a59dbb80198810172b174f5287f6aeaaa8b3303c48ceb6bde66e770ab5",
+      "image_size_bytes": 110219,
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 5677.996,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 66775285760,
+        "free_bytes": 88102125568
+      }
+    },
+    {
+      "candidate": {
+        "id": "sdxl-turbo-load",
+        "enabled": true,
+        "batch": "turbo",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "stabilityai/sdxl-turbo",
+        "pipeline_class": "AutoPipelineForText2Image",
+        "height": 512,
+        "width": 512,
+        "steps": 1,
+        "guidance_scale": 0.0,
+        "license_hint": "stability-ai-noncommercial-community",
+        "expected_role": "heavy_turbo_load_candidate",
+        "notes": "Load-only first due SDXL memory/disk risk."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286599.773,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 66775285760,
+        "free_bytes": 88102125568
+      },
+      "max_rss_mb_before": 5677.996,
+      "method": "diffusers_load_only",
+      "pipeline_class": "AutoPipelineForText2Image",
+      "model_ref": "stabilityai/sdxl-turbo",
+      "load_seconds": 36.819,
+      "generate_seconds": null,
+      "total_seconds": 36.991,
+      "components": [
+        "feature_extractor",
+        "image_encoder",
+        "scheduler",
+        "text_encoder",
+        "text_encoder_2",
+        "tokenizer",
+        "tokenizer_2",
+        "unet",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 5677.996,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 80653041664,
+        "free_bytes": 74224369664
+      }
+    },
+    {
+      "candidate": {
+        "id": "ssd-1b-load",
+        "enabled": true,
+        "batch": "turbo",
+        "ci_stage": "load_only",
+        "method": "diffusers_load_only",
+        "model_ref": "segmind/SSD-1B",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 0.0,
+        "license_hint": "apache-2.0",
+        "expected_role": "small_sdxl_load_candidate",
+        "notes": "Small SDXL-class model. Load-only first."
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781286636.766,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 80653045760,
+        "free_bytes": 74224365568
+      },
+      "max_rss_mb_before": 5677.996,
+      "method": "diffusers_load_only",
+      "pipeline_class": "StableDiffusionXLPipeline",
+      "model_ref": "segmind/SSD-1B",
+      "load_seconds": 24.688,
+      "generate_seconds": null,
+      "total_seconds": 24.854,
+      "components": [
+        "feature_extractor",
+        "image_encoder",
+        "scheduler",
+        "text_encoder",
+        "text_encoder_2",
+        "tokenizer",
+        "tokenizer_2",
+        "unet",
+        "vae"
+      ],
+      "execution_attempted": false,
+      "load_only": true,
+      "max_rss_mb_after_candidate": 5677.996,
+      "diffusers_version": "0.38.0",
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 89586057216,
+        "free_bytes": 65291354112
+      }
+    },
+    {
+      "candidate": {
+        "id": "ssd-1b-lcm-lora-load",
+        "enabled": true,
+        "batch": "turbo",
+        "ci_stage": "load_only",
+        "method": "diffusers_lora_load_only",
+        "base_model_ref": "segmind/SSD-1B",
+        "lora_model_ref": "latent-consistency/lcm-lora-ssd-1b",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "scheduler_class": "LCMScheduler",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 1.0,
+        "expected_role": "small_sdxl_lcm_load_candidate",
+        "notes": "Load-only first. Promote to generation only if memory/disk are acceptable."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781286661.621,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 89586057216,
+        "free_bytes": 65291354112
+      },
+      "max_rss_mb_before": 5677.996,
+      "error_type": "ValueError",
+      "error": "PEFT backend is required for this method.",
+      "execution_attempted": false,
+      "total_seconds": 0.658,
+      "max_rss_mb_after_candidate": 5677.996,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 89586057216,
+        "free_bytes": 65291354112
+      }
+    },
+    {
+      "candidate": {
+        "id": "sdxl-lcm-lora-load",
+        "enabled": true,
+        "batch": "turbo",
+        "ci_stage": "load_only",
+        "method": "diffusers_lora_load_only",
+        "base_model_ref": "stabilityai/stable-diffusion-xl-base-1.0",
+        "lora_model_ref": "latent-consistency/lcm-lora-sdxl",
+        "pipeline_class": "StableDiffusionXLPipeline",
+        "scheduler_class": "LCMScheduler",
+        "height": 512,
+        "width": 512,
+        "steps": 4,
+        "guidance_scale": 1.0,
+        "expected_role": "sdxl_lcm_load_candidate",
+        "notes": "Likely heavy on standard runners; load-only evidence first."
+      },
+      "status": "failed",
+      "started_at_monotonic_seconds": 1781286662.283,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 89586057216,
+        "free_bytes": 65291354112
+      },
+      "max_rss_mb_before": 5677.996,
+      "error_type": "ValueError",
+      "error": "PEFT backend is required for this method.",
+      "execution_attempted": false,
+      "total_seconds": 38.816,
+      "max_rss_mb_after_candidate": 5677.996,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 103798444032,
+        "free_bytes": 51078967296
+      }
+    }
+  ],
+  "summary_so_far": {
+    "passed": 3,
+    "failed": 2,
+    "skipped": 0,
+    "total": 5
+  },
+  "seconds_so_far": 135.203,
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "skipped": 0,
+    "total": 5
+  },
+  "ci_conclusion": "success_with_candidate_failures",
+  "seconds": 135.204
+}
