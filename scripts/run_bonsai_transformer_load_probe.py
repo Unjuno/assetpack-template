@@ -14,6 +14,9 @@ import yaml
 T = TypeVar("T")
 
 
+FLOAT_ELEM_TYPES = {1, 10, 11, 16}  # FLOAT, FLOAT16, DOUBLE, BFLOAT16
+
+
 def load_config(path: str) -> dict:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
@@ -93,6 +96,17 @@ def collect_value_types(model) -> dict[str, int]:
     return value_types
 
 
+def node_record(node, value_types: dict[str, int]) -> dict:
+    return {
+        "name": node.name,
+        "op_type": node.op_type,
+        "input_types": [tensor_elem_type_name(value_types.get(name)) for name in node.input],
+        "output_types": [tensor_elem_type_name(value_types.get(name)) for name in node.output],
+        "inputs": list(node.input),
+        "outputs": list(node.output),
+    }
+
+
 def onnx_graph_diagnostics(onnx_path: Path, focus_ops: tuple[str, ...] = ("Cos", "Sin")) -> dict:
     import onnx
     from onnx import shape_inference
@@ -126,20 +140,40 @@ def onnx_graph_diagnostics(onnx_path: Path, focus_ops: tuple[str, ...] = ("Cos",
         typed_model = model
     value_types = collect_value_types(typed_model)
     focus_nodes = []
+    non_float_focus_nodes = []
+    target_node_names = {"node_cos_1", "node_sin_1"}
+    target_nodes = []
+    producer_by_output = {}
+    consumers_by_input = {}
+    for node in typed_model.graph.node:
+        for output in node.output:
+            producer_by_output[output] = node
+        for input_name in node.input:
+            consumers_by_input.setdefault(input_name, []).append(node)
     for node in typed_model.graph.node:
         if node.op_type not in focus_ops:
             continue
-        focus_nodes.append({
-            "name": node.name,
-            "op_type": node.op_type,
-            "input_types": [tensor_elem_type_name(value_types.get(name)) for name in node.input],
-            "output_types": [tensor_elem_type_name(value_types.get(name)) for name in node.output],
-            "inputs": list(node.input),
-            "outputs": list(node.output),
-        })
+        record = node_record(node, value_types)
+        focus_nodes.append(record)
+        input_elem_types = [value_types.get(name) for name in node.input]
+        if any(elem_type is not None and elem_type not in FLOAT_ELEM_TYPES for elem_type in input_elem_types):
+            non_float_focus_nodes.append(record)
+        if node.name in target_node_names:
+            producers = [producer_by_output.get(name) for name in node.input]
+            consumers = []
+            for output in node.output:
+                consumers.extend(consumers_by_input.get(output, []))
+            target_nodes.append({
+                "node": record,
+                "input_producers": [node_record(prod, value_types) for prod in producers if prod is not None],
+                "output_consumers": [node_record(consumer, value_types) for consumer in consumers[:20]],
+            })
     diagnostics["focus_ops"] = list(focus_ops)
     diagnostics["focus_nodes"] = focus_nodes[:100]
     diagnostics["focus_node_count"] = len(focus_nodes)
+    diagnostics["non_float_focus_nodes"] = non_float_focus_nodes[:100]
+    diagnostics["non_float_focus_node_count"] = len(non_float_focus_nodes)
+    diagnostics["target_nodes"] = target_nodes
     diagnostics["focus_node_type_counts"] = {}
     for node in focus_nodes:
         for elem_type in node["input_types"]:
@@ -148,7 +182,7 @@ def onnx_graph_diagnostics(onnx_path: Path, focus_ops: tuple[str, ...] = ("Cos",
     return diagnostics
 
 
-def patch_trig_fp16_for_ort_cpu(src_path: Path, patched_path: Path) -> dict:
+def patch_trig_input_cast_for_ort_cpu(src_path: Path, patched_path: Path, cast_back: bool) -> dict:
     import onnx
     from onnx import TensorProto, helper, shape_inference
 
@@ -164,11 +198,14 @@ def patch_trig_fp16_for_ort_cpu(src_path: Path, patched_path: Path) -> dict:
     new_nodes = []
     patched_nodes = []
     for index, node in enumerate(model.graph.node):
+        input_elem_type = value_types.get(node.input[0]) if len(node.input) == 1 else None
+        output_elem_type = value_types.get(node.output[0]) if len(node.output) == 1 else None
         should_patch = (
             node.op_type in {"Cos", "Sin"}
             and len(node.input) == 1
             and len(node.output) == 1
-            and value_types.get(node.input[0]) == TensorProto.FLOAT16
+            and input_elem_type is not None
+            and input_elem_type not in FLOAT_ELEM_TYPES
         )
         if not should_patch:
             new_nodes.append(node)
@@ -185,27 +222,34 @@ def patch_trig_fp16_for_ort_cpu(src_path: Path, patched_path: Path) -> dict:
             name=f"{base_name}_cast_input_to_float32",
             to=TensorProto.FLOAT,
         )
+        trig_output = float_output if cast_back else original_output
         trig = helper.make_node(
             node.op_type,
             inputs=[float_input],
-            outputs=[float_output],
+            outputs=[trig_output],
             name=f"{base_name}_float32",
         )
-        cast_out = helper.make_node(
-            "Cast",
-            inputs=[float_output],
-            outputs=[original_output],
-            name=f"{base_name}_cast_output_to_float16",
-            to=TensorProto.FLOAT16,
-        )
-        new_nodes.extend([cast_in, trig, cast_out])
+        nodes_to_add = [cast_in, trig]
+        patch_kind = "non_float_trig_input_cast_to_float32"
+        if cast_back:
+            cast_out = helper.make_node(
+                "Cast",
+                inputs=[float_output],
+                outputs=[original_output],
+                name=f"{base_name}_cast_output_back_to_original_type",
+                to=output_elem_type or input_elem_type,
+            )
+            nodes_to_add.append(cast_out)
+            patch_kind = "non_float_trig_input_cast_to_float32_and_output_cast_back"
+        new_nodes.extend(nodes_to_add)
         patched_nodes.append({
             "name": node.name,
             "op_type": node.op_type,
             "input": original_input,
             "output": original_output,
-            "input_type": tensor_elem_type_name(value_types.get(original_input)),
-            "patch": "Cast FLOAT16->FLOAT, op in FLOAT, Cast FLOAT->FLOAT16",
+            "input_type": tensor_elem_type_name(input_elem_type),
+            "output_type": tensor_elem_type_name(output_elem_type),
+            "patch": patch_kind,
         })
     del model.graph.node[:]
     model.graph.node.extend(new_nodes)
@@ -214,7 +258,8 @@ def patch_trig_fp16_for_ort_cpu(src_path: Path, patched_path: Path) -> dict:
         "status": "passed",
         "source_path": str(src_path),
         "patched_path": str(patched_path),
-        "patch_kind": "fp16_trig_cast_for_onnxruntime_cpu_load",
+        "patch_kind": "non_float_trig_cast_for_onnxruntime_cpu_load",
+        "cast_back": cast_back,
         "shape_inference_status": shape_inference_status,
         "patched_node_count": len(patched_nodes),
         "patched_nodes": patched_nodes[:100],
@@ -263,7 +308,7 @@ def run(config_path: str, out_dir: str) -> int:
     hf_retry_attempts = env_int("BONSAI_HF_RETRY_ATTEMPTS", 3)
     hf_retry_sleep_seconds = env_int("BONSAI_HF_RETRY_SLEEP_SECONDS", 20)
     report = {
-        "experiment_id": "bonsai-transformer-load-probe-v7",
+        "experiment_id": "bonsai-transformer-load-probe-v8",
         "model_ref": model_ref,
         "download_weights": True,
         "runtime_load": True,
@@ -396,12 +441,12 @@ def run(config_path: str, out_dir: str) -> int:
                         "error_type": type(ort_exc).__name__,
                         "error": str(ort_exc)[:4000],
                         "likely_failure_boundary": "onnxruntime_session_initialization_kernel_resolution",
-                        "diagnostic_hint": "Inspect onnx_graph_diagnostics.focus_nodes for Cos/Sin input dtypes; CPUExecutionProvider may lack kernels for specific low-precision element types.",
+                        "diagnostic_hint": "Inspect onnx_graph_diagnostics.non_float_focus_nodes and target_nodes for Cos/Sin input dtypes, especially node_cos_1.",
                         "seconds": round(time.time() - ort_load_start, 3),
                     }
                     report["ci_conclusion"] = "success_with_probe_failure"
                 if trig_cast_patch_attempt:
-                    patch_start = time.time()
+                    patch_attempts = {}
                     if original_ort_load_passed:
                         report["onnxruntime_trig_cast_patch"] = {
                             "status": "skipped",
@@ -410,32 +455,46 @@ def run(config_path: str, out_dir: str) -> int:
                             "execution_attempted": False,
                         }
                     else:
-                        try:
-                            patched_path = out / "transformer_minimal_ort_cpu_trig_cast.onnx"
-                            patch_report = patch_trig_fp16_for_ort_cpu(onnx_path, patched_path)
-                            patched_session = make_ort_session(patched_path)
-                            patched_files = sorted(p.name for p in out.glob("transformer_minimal_ort_cpu_trig_cast.onnx*"))
-                            report["onnxruntime_trig_cast_patch"] = {
-                                "status": "passed",
-                                "claim_promotable_to_manifest": True,
-                                "allowed_claim": "bonsai_transformer_minimal_onnxruntime_cpu_load_with_trig_cast_patch_verified_not_execution",
-                                "source_path": str(onnx_path),
-                                "patched_path": str(patched_path),
-                                "files": patched_files,
-                                "patch": patch_report,
-                                "onnxruntime_load": ort_session_metadata(patched_session),
-                                "seconds": round(time.time() - patch_start, 3),
-                            }
-                        except BaseException as patch_exc:
-                            report["onnxruntime_trig_cast_patch"] = {
-                                "status": "failed",
-                                "claim_promotable_to_manifest": False,
-                                "allowed_claim": "bonsai_transformer_minimal_onnxruntime_cpu_load_with_trig_cast_patch_verified_not_execution",
-                                "execution_attempted": False,
-                                "error_type": type(patch_exc).__name__,
-                                "error": str(patch_exc)[:4000],
-                                "seconds": round(time.time() - patch_start, 3),
-                            }
+                        for label, cast_back in {
+                            "input_cast_float_output": False,
+                            "input_cast_and_output_cast_back": True,
+                        }.items():
+                            patch_start = time.time()
+                            try:
+                                patched_path = out / f"transformer_minimal_ort_cpu_trig_{label}.onnx"
+                                patch_report = patch_trig_input_cast_for_ort_cpu(onnx_path, patched_path, cast_back=cast_back)
+                                patched_session = make_ort_session(patched_path)
+                                patched_files = sorted(p.name for p in out.glob(f"transformer_minimal_ort_cpu_trig_{label}.onnx*"))
+                                patch_attempts[label] = {
+                                    "status": "passed",
+                                    "claim_promotable_to_manifest": True,
+                                    "allowed_claim": "bonsai_transformer_minimal_onnxruntime_cpu_load_with_non_float_trig_cast_patch_verified_not_execution",
+                                    "source_path": str(onnx_path),
+                                    "patched_path": str(patched_path),
+                                    "files": patched_files,
+                                    "patch": patch_report,
+                                    "onnxruntime_load": ort_session_metadata(patched_session),
+                                    "seconds": round(time.time() - patch_start, 3),
+                                }
+                            except BaseException as patch_exc:
+                                patch_attempts[label] = {
+                                    "status": "failed",
+                                    "claim_promotable_to_manifest": False,
+                                    "allowed_claim": "bonsai_transformer_minimal_onnxruntime_cpu_load_with_non_float_trig_cast_patch_verified_not_execution",
+                                    "execution_attempted": False,
+                                    "error_type": type(patch_exc).__name__,
+                                    "error": str(patch_exc)[:4000],
+                                    "seconds": round(time.time() - patch_start, 3),
+                                }
+                        any_patch_passed = any(item.get("status") == "passed" for item in patch_attempts.values())
+                        report["onnxruntime_trig_cast_patch"] = {
+                            "status": "passed" if any_patch_passed else "failed",
+                            "claim_promotable_to_manifest": any_patch_passed,
+                            "allowed_claim": "bonsai_transformer_minimal_onnxruntime_cpu_load_with_non_float_trig_cast_patch_verified_not_execution",
+                            "attempts": patch_attempts,
+                            "execution_attempted": False,
+                        }
+                        if not any_patch_passed:
                             report["ci_conclusion"] = "success_with_probe_failure"
         elif ort_load_attempt:
             report["onnxruntime_load"] = {
