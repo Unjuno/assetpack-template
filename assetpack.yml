@@ -17,6 +17,34 @@ generation:
   images_per_prompt: 1
   timeout_minutes_per_model: 20
 
+issue_generation:
+  enabled: true
+  required_label: asset-request
+  artifact_retention_days: 7
+  form_fields:
+    required:
+      - subject
+      - scene
+      - audience
+      - license
+    optional:
+      - constraints
+      - model
+  field_limits:
+    subject: 80
+    scene: 120
+    audience: 80
+    constraints: 240
+  reject_unknown_nonempty_sections: true
+  reject_urls: true
+  output_root: reports/issue-generation
+
+prompt_recipe:
+  template: "{subject}, {scene}, for {audience}, {constraints}, {required_terms}"
+  empty_constraints: "simple composition"
+  negative_prompt: "low quality, text, watermark, logo"
+  recipe_id_prefix: assetpack
+
 prompt_policy:
   mechanical_only: true
   allow_free_prompt: false
