@@ -1,10 +1,15 @@
 name: Asset request
-description: Submit structured fields for a fixed-theme asset recipe.
+description: Submit structured fields for this repository's fixed-theme asset generator.
 title: "[asset] "
 labels:
   - asset-request
   - needs-validation
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Submit structured slots only. CI will build the final prompt from `assetpack.yml`.
+
   - type: input
     id: subject
     attributes:
@@ -26,6 +31,25 @@ body:
     attributes:
       label: Audience
       placeholder: children
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      placeholder: simple shapes, no background clutter
+    validations:
+      required: false
+
+  - type: dropdown
+    id: model
+    attributes:
+      label: Model
+      options:
+        - default
+        - sdxl-turbo-quality
+        - ssd-1b-lcm-lora-quality
     validations:
       required: true
 
