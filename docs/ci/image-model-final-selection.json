@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "decision": {
+    "default_model_id": "sdxl-turbo-quality",
+    "alternate_model_id": "ssd-1b-lcm-lora-quality",
+    "mode": "fixed_default_with_configurable_alternate",
+    "runtime_override": {
+      "enabled": true,
+      "environment_variable": "ASSETPACK_IMAGE_MODEL_ID",
+      "allowed_values": [
+        "sdxl-turbo-quality",
+        "ssd-1b-lcm-lora-quality"
+      ]
+    },
+    "not_selected_finalist": "segmind-vega-quality"
+  },
+  "evidence": {
+    "workflow": "image-model-ci-final-runoff-hard-subjects",
+    "run_id": 27446158099,
+    "run_head_sha": "dfd09fe5cc7f964583072dff3782ad81cbbb4814",
+    "expected_artifacts": 60,
+    "downloaded_artifacts": 60,
+    "expected_images": 60,
+    "extracted_pngs": 57,
+    "no_png": [
+      {
+        "subject_id": "stag-beetle",
+        "candidate_id": "segmind-vega-quality"
+      },
+      {
+        "subject_id": "lacewing",
+        "candidate_id": "sdxl-turbo-quality"
+      },
+      {
+        "subject_id": "pangolin",
+        "candidate_id": "ssd-1b-lcm-lora-quality"
+      }
+    ]
+  },
+  "candidate_rank": [
+    {
+      "rank": 1,
+      "candidate_id": "sdxl-turbo-quality",
+      "selection_status": "selected_default",
+      "summary": "Best overall target-identity and topology preservation across the 20 hard-subject runoff. It is the default model for this repository concept."
+    },
+    {
+      "rank": 2,
+      "candidate_id": "ssd-1b-lcm-lora-quality",
+      "selection_status": "configurable_alternate",
+      "summary": "Close second with strong visual asset quality. Keep configurable as the alternate when style is prioritized."
+    },
+    {
+      "rank": 3,
+      "candidate_id": "segmind-vega-quality",
+      "selection_status": "not_selected_after_final_runoff",
+      "summary": "Often visually attractive, but less reliable on difficult morphology and target-identity preservation than the selected pair."
+    }
+  ],
+  "scoring_principle": "Prefer target identity, topology, small-part anatomy, and contact with the bonsai branch or pot over merely attractive images.",
+  "scope": {
+    "claim": "Evidence-based model selection for this repository's current fixed-theme asset-generation concept.",
+    "non_claim": "This is not a general model-quality benchmark and does not claim universal superiority."
+  },
+  "artifact_policy": {
+    "generated_images_committed_to_git": false,
+    "reason": "Generated images remain temporary CI artifacts; the repository stores selection evidence and configuration only."
+  }
+}
