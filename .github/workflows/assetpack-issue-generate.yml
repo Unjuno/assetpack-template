@@ -1,0 +1,89 @@
+name: assetpack-issue-generate
+
+on:
+  issues:
+    types: [opened, edited, reopened, labeled]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: assetpack-issue-generate-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  generate-from-issue:
+    if: ${{ contains(github.event.issue.labels.*.name, 'asset-request') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      ISSUE_BODY_FILE: ${{ runner.temp }}/issue-body.md
+      OUT_DIR: reports/issue-generation/issue-${{ github.event.issue.number }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Write issue body
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          mkdir -p "$OUT_DIR"
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          Path(os.environ['ISSUE_BODY_FILE']).write_text(os.environ.get('ISSUE_BODY', ''), encoding='utf-8')
+          PY
+
+      - name: Validate request
+        id: validate
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir pyyaml
+          python scripts/validate_issue_request.py \
+            --config assetpack.yml \
+            --issue-body-file "$ISSUE_BODY_FILE" \
+            --issue-number "$ISSUE_NUMBER" \
+            --out-dir "$OUT_DIR" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Comment validation result
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body-file "$OUT_DIR/validation-comment.md"
+
+      - name: Install generation dependencies
+        if: ${{ steps.validate.outputs.valid == 'true' }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+          pip install --no-cache-dir pyyaml huggingface_hub safetensors diffusers transformers accelerate pillow sentencepiece protobuf peft
+
+      - name: Run image generation
+        if: ${{ steps.validate.outputs.valid == 'true' }}
+        env:
+          ASSETPACK_IMAGE_MODEL_ID: ${{ steps.validate.outputs.selected_model_id }}
+          IMAGE_MODEL_CANDIDATE_TIMEOUT_SECONDS: "1200"
+        run: |
+          python scripts/run_issue_asset_generation.py \
+            --config assetpack.yml \
+            --request-json "$OUT_DIR/request.json" \
+            --out-dir "$OUT_DIR"
+
+      - name: Upload issue generation artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: assetpack-issue-${{ github.event.issue.number }}-${{ steps.validate.outputs.recipe_id || 'validation' }}
+          path: |
+            reports/issue-generation/issue-${{ github.event.issue.number }}/request.json
+            reports/issue-generation/issue-${{ github.event.issue.number }}/validation-comment.md
+            reports/issue-generation/issue-${{ github.event.issue.number }}/issue-generation-config.yml
+            reports/issue-generation/issue-${{ github.event.issue.number }}/report.json
+            reports/issue-generation/issue-${{ github.event.issue.number }}/images/**/*.png
+          if-no-files-found: warn
+          retention-days: 7
