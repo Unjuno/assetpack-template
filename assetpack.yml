@@ -51,18 +51,92 @@ license:
   default: CC0-1.0
 
 models:
+  image_generation:
+    mode: fixed_default_with_configurable_alternate
+    default_model_id: sdxl-turbo-quality
+    alternate_model_id: ssd-1b-lcm-lora-quality
+    allowed_model_ids:
+      - sdxl-turbo-quality
+      - ssd-1b-lcm-lora-quality
+    runtime_override:
+      enabled: true
+      environment_variable: ASSETPACK_IMAGE_MODEL_ID
+      allowed_values:
+        - sdxl-turbo-quality
+        - ssd-1b-lcm-lora-quality
+    selection_basis:
+      decision: "Use sdxl-turbo-quality by default; allow ssd-1b-lcm-lora-quality as the visual-style alternate."
+      evidence_file: docs/ci/image-model-final-selection.json
+      human_report: docs/ci/image-model-final-selection.md
+      workflow: image-model-ci-final-runoff-hard-subjects
+      run_id: 27446158099
+      run_head_sha: dfd09fe5cc7f964583072dff3782ad81cbbb4814
+      total_expected_images: 60
+      extracted_pngs: 57
+      no_png:
+        - subject_id: stag-beetle
+          candidate_id: segmind-vega-quality
+        - subject_id: lacewing
+          candidate_id: sdxl-turbo-quality
+        - subject_id: pangolin
+          candidate_id: ssd-1b-lcm-lora-quality
+    notes:
+      - "Generated images remain CI artifacts and are not committed to Git by default."
+      - "The selection is evidence-based for this repository's current fixed-theme asset-generation concept, not a general model-quality claim."
   candidates:
+    - id: sdxl-turbo-quality
+      enabled: true
+      role: primary_image_generation
+      backend: diffusers
+      method: diffusers_text_to_image
+      model_ref: stabilityai/sdxl-turbo
+      pipeline_class: AutoPipelineForText2Image
+      height: 512
+      width: 512
+      steps: 1
+      guidance_scale: 0.0
+      license_hint: stability-ai-noncommercial-community
+      selection_status: selected_default
+      selection_reason: "Best overall target-identity and topology preservation in the final 20-subject runoff."
+    - id: ssd-1b-lcm-lora-quality
+      enabled: true
+      role: alternate_image_generation
+      backend: diffusers_lora
+      method: diffusers_lora_text_to_image
+      base_model_ref: segmind/SSD-1B
+      lora_model_ref: latent-consistency/lcm-lora-ssd-1b
+      pipeline_class: StableDiffusionXLPipeline
+      scheduler_class: LCMScheduler
+      height: 512
+      width: 512
+      steps: 4
+      guidance_scale: 1.0
+      selection_status: configurable_alternate
+      selection_reason: "Strong visual asset quality and close second-place result; useful when style is prioritized."
+    - id: segmind-vega-quality
+      enabled: false
+      role: finalist_not_selected
+      backend: diffusers
+      method: diffusers_text_to_image
+      model_ref: segmind/Segmind-Vega
+      pipeline_class: StableDiffusionXLPipeline
+      height: 512
+      width: 512
+      steps: 8
+      guidance_scale: 7.5
+      selection_status: not_selected_after_final_runoff
+      selection_reason: "Often visually attractive but less reliable on hard morphology and target-identity preservation than the selected pair."
     - id: tiny-sd
       enabled: false
-      role: cpu_smoke
+      role: legacy_cpu_smoke_candidate
       backend: diffusers
     - id: sd-turbo
       enabled: false
-      role: cpu_smoke
+      role: legacy_cpu_smoke_candidate
       backend: diffusers
     - id: bk-sdm-tiny
       enabled: false
-      role: cpu_smoke
+      role: legacy_cpu_smoke_candidate
       backend: diffusers
     - id: bonsai-image-4b
       enabled: false
