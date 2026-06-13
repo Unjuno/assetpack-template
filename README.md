@@ -133,7 +133,7 @@ The final selection came from `image-model-ci-final-runoff-hard-subjects` run `2
 | `corpus/` | Structured subject, scene, and modifier inputs. |
 | `recipes/` | Generated and approved prompt recipes. |
 | `experiments/` | Model-selection and stress-test configuration history. |
-| `scripts/` | Python utilities for validation, generation checks, and evidence probes. |
+| `scripts/` | Python utilities for validation and generation checks. |
 | `.github/workflows/` | GitHub Actions workflows. Includes both template-facing and experiment workflows. |
 | `docs/` | Template guides, technical design notes, and CI evidence records. |
 
@@ -207,12 +207,11 @@ models:
 |---|---|
 | CI | GitHub Actions |
 | Runtime scripts | Python 3.11 |
-| Image generation experiments | PyTorch CPU + Diffusers |
-| LoRA candidates | Diffusers LoRA loading |
+| Image generation | PyTorch CPU + Diffusers |
+| LoRA model option | Diffusers LoRA loading |
 | Configuration | YAML |
 | Reports | JSON |
 | Generated images | GitHub Actions artifacts |
-| ONNX probes | ONNX Runtime CPU, evidence-gated |
 
 ## Artifact policy
 
