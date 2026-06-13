@@ -9,6 +9,7 @@ The stable configuration is `assetpack.yml`.
 | Script | Purpose |
 |---|---|
 | `validate_issue_request.py` | Parses and validates a structured Issue request. |
+| `check_required_terms.py` | Verifies that the final prompt contains every configured required term. |
 | `run_issue_asset_generation.py` | Runs generation for a validated Issue request. |
 | `write_issue_generation_comment.py` | Writes a result comment body for the Issue workflow. |
 | `select_image_model.py` | Resolves the configured model from `assetpack.yml`. |
@@ -47,6 +48,8 @@ It writes:
 request.json
 validation-comment.md
 ```
+
+`check_required_terms.py` reads `request.json` and `assetpack.yml`. If the final prompt is missing a configured required term, it marks the request invalid and rewrites the validation comment.
 
 ## Issue generation
 
