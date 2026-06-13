@@ -1,182 +1,65 @@
 # assetpack-template
 
-Template repository for fixed-theme, CI-driven AI asset recipe generation, image-generation smoke tests, and reproducible prompt workflows.
+Template repository for fixed-theme, CI-driven AI asset recipe generation.
 
-## Purpose
+This repository is not a general prompt playground. It is a template for building derived assetpack repositories where the theme is fixed, prompts are generated mechanically, generated images are kept as CI artifacts by default, and model choices are evidence-gated.
 
-`assetpack-template` is a template repository for creating fixed-theme AI asset generation repositories.
+## What this template is for
 
-The intended workflow is:
+Use this template when you want a repository that can:
 
-1. A repository creator uses this template.
-2. The creator fixes a theme, prompt template, required terms, banned terms, and generation policy.
-3. Users contribute by either:
-   - creating an Issue with structured prompt inputs, or
-   - cloning the repository and running local commands.
-4. GitHub Actions validates the input, builds a mechanical prompt recipe, removes duplicates, and runs image-generation experiments when enabled.
-5. Experimental results are recorded so the best model can later be selected and fixed.
+1. lock one asset concept;
+2. accept structured generation input;
+3. build prompt recipes from templates and constraints;
+4. deduplicate generated recipes;
+5. run lightweight image-generation checks in GitHub Actions;
+6. keep compact evidence records;
+7. select practical image models based on recorded results.
 
-This repository is not a general free-form prompt site. It is a fixed-theme prompt and image-generation experiment framework.
-
-## Core Requirements
-
-### 1. Fixed Theme
-
-Each derived repository must define one fixed theme.
-
-Examples:
-
-- `coloring_lineart_animals`
-- `game_item_icons_fantasy`
-- `blog_ogp_science`
-- `ui_icons_minimal`
-
-The theme must be configured in `assetpack.yml`.
-
-```yaml
-theme:
-  locked: true
-  category: coloring_lineart
-  description: "Flood-fill friendly animal line art"
-```
-
-If `theme.locked` is not `true`, CI should reject generation jobs.
-
-### 2. Mechanical Prompt Generation
-
-Prompts must be generated mechanically from:
-
-- fixed templates,
-- structured Issue inputs,
-- corpus files,
-- required terms,
-- banned terms,
-- generation constraints.
-
-Free-form prompts are not the default mode.
-
-```yaml
-prompt_policy:
-  mechanical_only: true
-  allow_free_prompt: false
-```
-
-The user does not directly control the final prompt string. The user supplies slots such as `subject`, `scene`, `audience`, or `constraints`. The repository template builds the final prompt.
-
-### 3. Required Terms
-
-A derived repository may require specific terms or constraints to appear in the generated prompt.
-
-Example:
-
-```yaml
-prompt_policy:
-  required_terms:
-    - "black outline"
-    - "white background"
-    - "closed regions"
-    - "no text"
-```
-
-CI must verify that the generated prompt contains the required terms before any image generation is attempted.
-
-### 4. Issue-Based Generation
-
-Users can create an Issue to request generation.
-
-The Issue should not be treated as executable code. Issue content is untrusted input and must be parsed as structured data.
-
-Example Issue fields:
-
-```yaml
-category: coloring_lineart
-subject: sleeping cat
-scene: simple sitting pose
-audience: children
-license: CC0-1.0
-```
-
-The workflow is:
+Examples of derived repositories:
 
 ```text
-Issue input
-  -> parse structured fields
-  -> validate theme and constraints
-  -> build prompt from template
-  -> deduplicate recipe
-  -> run image-generation smoke test if enabled
-  -> record result
-  -> comment back on the Issue
+coloring_lineart_animals
+game_item_icons_fantasy
+blog_ogp_science
+ui_icons_minimal
 ```
 
-### 5. Clone-Based Usage
+## What this template is not for
 
-Users can also clone a derived repository and run commands locally.
+This repository does not aim to:
 
-Expected future commands:
+- host a general image-generation service;
+- accept arbitrary free-form prompts by default;
+- commit generated image batches to Git;
+- store model weights or caches;
+- claim general model superiority from one CI run;
+- publish generated images without review.
 
-```bash
-git clone https://github.com/<owner>/<assetpack-repo>.git
-cd <assetpack-repo>
+## Core concept
 
-assetpack validate-config
-assetpack generate-recipes
-assetpack dedupe
-assetpack smoke-bench
-assetpack report
+```text
+structured input
+  -> validation
+  -> mechanical prompt recipe
+  -> deduplication
+  -> optional CI image-generation check
+  -> artifact upload
+  -> compact evidence record
+  -> optional human review / publish step
 ```
 
-The exact CLI is not fixed yet. The repository structure should be designed so these commands can be added later without changing the concept.
+The stable template contract is:
 
-### 6. CI Image Generation
-
-This template is intended to support CI-based image-generation experiments.
-
-CI should be able to:
-
-- validate the repository configuration,
-- validate Issue input,
-- build a prompt recipe,
-- check required terms,
-- check banned terms,
-- remove duplicate recipes,
-- run lightweight image-generation smoke tests,
-- record model results,
-- upload temporary artifacts,
-- comment results back to the Issue.
-
-Image generation should be controlled by configuration.
-
-```yaml
-generation:
-  image_generation: true
-  mode: smoke_test
-  width: 256
-  height: 256
-  images_per_prompt: 1
-  timeout_minutes_per_model: 20
+```text
+assetpack.yml
 ```
 
-Generated images are experiment artifacts. They should not be committed to Git by default.
+Experiment YAML files under `experiments/` are reproducibility records. They are not the main template API.
 
-### 7. Model Candidates
+## Current selected image models
 
-Model selection is evidence-gated. The project should test candidate models first, then fix the highest-quality practical model for each use case.
-
-Initial candidate classes:
-
-- Bonsai Image 4B
-- Tiny-SD
-- SD-Turbo
-- BK-SDM Tiny / Small
-- OnnxStream or stable-diffusion.cpp based runners
-- other lightweight text-to-image models discovered later
-
-The repository should store model test results so the final model decision is based on evidence, not preference.
-
-#### Current image-generation model selection
-
-The current evidence-based image-generation choice is configured in `assetpack.yml`.
+The current image-generation model decision is recorded in `assetpack.yml` and `docs/ci/`.
 
 Default model:
 
@@ -190,201 +73,81 @@ Configurable alternate:
 ssd-1b-lcm-lora-quality
 ```
 
-Runtime override key:
+Runtime override:
 
-```text
-ASSETPACK_IMAGE_MODEL_ID
+```bash
+ASSETPACK_IMAGE_MODEL_ID=ssd-1b-lcm-lora-quality
 ```
 
-Allowed override values:
+Allowed production model IDs are listed under:
 
 ```text
-sdxl-turbo-quality
-ssd-1b-lcm-lora-quality
+models.image_generation.allowed_model_ids
 ```
 
-Evidence records:
+Evidence:
 
 ```text
 docs/ci/image-model-final-selection.md
 docs/ci/image-model-final-selection.json
 ```
 
-The final runoff used `image-model-ci-final-runoff-hard-subjects` run `27446158099`: 3 candidates across 20 hard subjects, for 60 expected images. The selection prioritizes target identity, topology, small parts, and contact with the bonsai branch or pot over merely attractive images.
+The final selection came from `image-model-ci-final-runoff-hard-subjects` run `27446158099`, which tested 3 finalists across 20 difficult subjects for 60 expected images. This is a repository-specific asset-generation decision, not a universal benchmark claim.
 
-This is a repository-specific asset-generation decision, not a general benchmark claim.
+## Repository map
 
-#### Bonsai ONNX Runtime CPU experiment
+| Path | Purpose |
+|---|---|
+| `assetpack.yml` | Main template configuration and selected model policy. |
+| `templates/` | Prompt templates for mechanical prompt construction. |
+| `constraints/` | Required, disallowed, and validation-related constraints. |
+| `corpus/` | Structured subject, scene, and modifier inputs. |
+| `recipes/` | Generated and approved prompt recipes. |
+| `experiments/` | Model-selection and stress-test configuration history. |
+| `scripts/` | Python utilities for validation, generation checks, and evidence probes. |
+| `.github/workflows/` | GitHub Actions workflows. Includes both template-facing and experiment workflows. |
+| `docs/` | Template guides, technical design notes, and CI evidence records. |
 
-`bonsai-onnx-smoke` is a CPU experiment. It does not use the official Bonsai GPU runtime.
+## Documentation
 
-The previous probe tried to export `prism-ml/bonsai-image-binary-4B-unpacked` as one complete Diffusers pipeline with `optimum-cli export onnx --library diffusers`. That path fails before runtime because the model repository does not provide `model_index.json` for whole-pipeline loading.
-
-The current experiment is staged:
-
-1. `layout_probe` inspects the Hugging Face repository file layout.
-2. `component_export` exports an explicit component to ONNX. The first implemented target is `vae_decoder`.
-3. `ort_cpu_forward` loads the exported ONNX model with ONNX Runtime CPU and runs one tensor forward pass.
-4. `cpu_image_generation` is reserved for a later composed pipeline with text encoder, scheduler, transformer, and VAE.
-
-The default config currently requires `ort_cpu_forward`. That means CI must at least produce an ONNX component and execute it on CPU. It is not yet a full text-to-image pass. Full Bonsai CPU image generation remains a separate milestone because it must compose multiple heavy components and may exceed GitHub-hosted runner RAM.
-
-#### Bonsai low-bit verification evidence
-
-Bonsai low-bit verification is evidence-gated. The canonical machine-readable source is:
+Start here:
 
 ```text
-docs/bonsai-lowbit-verification-manifest.json
+docs/getting-started.md
+docs/configuration.md
+docs/technical-design.md
+docs/ci/README.md
+experiments/README.md
+.github/workflows/README.md
+scripts/README.md
 ```
 
-Supporting human-readable records are:
+Model-selection evidence:
 
 ```text
-docs/bonsai-lowbit-claim-matrix.md
-docs/bonsai-lowbit-local-artifact-audit.md
-docs/bonsai-lowbit-completion-plan.md
-docs/bonsai-lowbit-scope-cap.md
+docs/ci/image-model-final-selection.md
+docs/ci/image-model-final-selection.json
 ```
 
-Current verified low-bit scope, based only on manifest-recorded artifact reports:
+## Minimum derived repository setup
 
-- attention `to_out` path;
-- single block modulated attention `to_out` residual;
-- two single blocks modulated residual stack;
-- four single blocks via two-by-two segmented ONNX;
-- eight single blocks via four-by-two segmented ONNX;
-- sixteen single blocks via eight-by-two segmented ONNX;
-- all ten pair segments for blocks 0-19;
-- twenty single blocks via ten-by-two chained segmented export probe;
-- twenty single blocks via split persistent ten-by-two ONNX segment artifacts, validated as a reusable segmented ONNX Runtime CPU chain;
-- ten-by-two chain-state handoff report;
-- ten-by-two input boundary report.
-
-Current pending low-bit scope:
-
-- none for the current low-bit critical-path scope through ten-by-two input-boundary documentation.
-
-Scope cap decision:
-
-- the current low-bit critical-path scope is closed in `docs/bonsai-lowbit-scope-cap.md`;
-- the strongest allowed claim is a reusable segmented ONNX Runtime CPU critical-path chain with persisted two-block ONNX artifacts, hidden-state handoff evidence, and hidden/temb-only external input-boundary evidence;
-- any future expansion must start a new manifest key and evidence boundary.
-
-The twenty-block ten-by-two evidence has four distinct verified boundaries:
-
-1. `bonsai-lowbit-ten-by-two-chain-report-json` verifies a reproducible export probe. It exports temporary segmented ONNX files, validates them, and uploads JSON reports only.
-2. `bonsai-lowbit-ten-by-two-split-persistent-onnx-validation-report-json` verifies persisted ONNX artifacts. It validates ten downloaded two-block ONNX segment artifacts plus a reference artifact without reloading the low-bit source.
-3. `bonsai-lowbit-ten-by-two-chain-handoff-report-json` verifies the segment-to-segment tensor handoff evidence for the reusable segmented chain.
-4. `bonsai-lowbit-ten-by-two-input-boundary-report-json` verifies that the current ONNX chain accepts only `hidden` and `temb` as external ONNX inputs and does not include prompt tokens, a text encoder, scheduler, VAE, image latents, or full Bonsai pipeline inputs.
-
-Any future verification claim must be represented in `docs/bonsai-lowbit-verification-manifest.json` before the README or other docs may treat it as verified.
-
-Do not collapse segmented critical-path evidence into a broader claim. In particular, the current low-bit evidence does not verify:
-
-- full Bonsai ONNX pipeline execution;
-- real transformer block ONNX execution;
-- prompt-to-image generation;
-- single monolithic multi-block ONNX, where the verified path is segmented.
-
-### 8. Experiment Records
-
-Experiment records must be kept even if generated images are later deleted.
-
-Keep:
-
-- experiment ID,
-- date,
-- runner type,
-- model ID,
-- backend,
-- prompt recipe ID,
-- width and height,
-- step count,
-- timeout,
-- success or failure,
-- failure reason,
-- runtime seconds,
-- memory if available,
-- output artifact reference if available.
-
-Do not permanently keep by default:
-
-- large generated image batches,
-- model weights,
-- caches,
-- raw logs that are already summarized.
-
-## Suggested Repository Structure
-
-```text
-assetpack-template/
-  README.md
-  assetpack.yml
-
-  .github/
-    ISSUE_TEMPLATE/
-      generate.yml
-    workflows/
-      validate-template.yml
-      issue-to-recipe.yml
-      smoke-bench.yml
-      report.yml
-
-  templates/
-    default.prompt.yml
-
-  constraints/
-    required_terms.json
-    banned_terms.json
-    dedupe.json
-    schema.recipe.json
-
-  corpus/
-    subjects.jsonl
-    scenes.jsonl
-    modifiers.jsonl
-
-  recipes/
-    approved/
-      .gitkeep
-    generated/
-      .gitkeep
-
-  experiments/
-    smoke-bench.yml
-
-  reports/
-    index.jsonl
-    latest.json
-    failures.jsonl
-
-  scripts/
-    validate_config.py
-    parse_issue.py
-    build_recipe.py
-    dedupe.py
-    run_smoke.py
-    make_report.py
-```
-
-## Minimum Derived Repository Setup
-
-After creating a new repository from this template, edit `assetpack.yml`:
+After creating a derived repository from this template, edit `assetpack.yml`:
 
 ```yaml
 assetpack:
-  id: coloring-animals
-  title: "Coloring Animals Assetpack"
+  id: my-assetpack
+  title: "My Assetpack"
   version: 0.1.0
 
 theme:
   locked: true
-  category: coloring_lineart
-  description: "Flood-fill friendly animal line art"
+  category: game_item_icons
+  description: "Small fantasy item icons for a fixed visual style"
 
 generation:
   image_generation: true
   mode: smoke_test
+  allow_commit_generated_images: false
   width: 256
   height: 256
   images_per_prompt: 1
@@ -396,8 +159,7 @@ prompt_policy:
   required_terms:
     - "black outline"
     - "white background"
-    - "closed regions"
-    - "no text"
+  banned_terms_file: constraints/banned_terms.json
 
 models:
   image_generation:
@@ -409,27 +171,43 @@ models:
       - ssd-1b-lcm-lora-quality
 ```
 
-## Non-Goals
+## Technical stack
 
-This template does not aim to:
+| Area | Technology |
+|---|---|
+| CI | GitHub Actions |
+| Runtime scripts | Python 3.11 |
+| Image generation experiments | PyTorch CPU + Diffusers |
+| LoRA candidates | Diffusers LoRA loading |
+| Configuration | YAML |
+| Reports | JSON |
+| Generated images | GitHub Actions artifacts |
+| ONNX probes | ONNX Runtime CPU, evidence-gated |
 
-- host a general image-generation service,
-- accept arbitrary free-form prompts by default,
-- store model weights in Git,
-- store large generated image collections in Git,
-- guarantee that every model runs on every GitHub runner,
-- automatically publish generated images without review.
+## Artifact policy
 
-## Current Status
+Generated images are experiment or smoke-test artifacts. They should not be committed to Git by default.
 
-Early template design with an evidence-recorded image-model selection for the current fixed-theme asset-generation concept.
+Commit:
 
-Next steps:
+- configuration;
+- prompt recipes;
+- validation logic;
+- compact reports;
+- evidence summaries;
+- model-selection decisions.
 
-1. Add Issue Form for structured generation requests.
-2. Add validation workflow.
-3. Add recipe builder.
-4. Add deduplication logic.
-5. Add smoke benchmark workflow.
-6. Wire generation workflows to `models.image_generation.default_model_id` and `ASSETPACK_IMAGE_MODEL_ID`.
-7. Keep generated images as temporary artifacts unless an explicit review/publish step is added.
+Keep generated images as artifacts unless a derived repository adds an explicit review and publish workflow.
+
+## Current status
+
+The repository has completed an evidence-gated image-model selection for the current template concept.
+
+Next implementation steps:
+
+1. add or finalize the Issue Form for structured generation requests;
+2. add validation workflow around `assetpack.yml`;
+3. implement recipe builder and dedupe flow;
+4. wire production generation to `models.image_generation.default_model_id`;
+5. enforce `ASSETPACK_IMAGE_MODEL_ID` against `allowed_model_ids`;
+6. keep generated images as temporary artifacts unless reviewed for publication.
