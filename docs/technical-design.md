@@ -17,11 +17,10 @@ Generated images are not the source of truth. Configuration, recipes, reports, a
 | Automation | GitHub Actions |
 | Configuration | YAML |
 | Runner language | Python 3.11 |
-| Image experiments | PyTorch CPU and Diffusers |
-| LoRA experiments | Diffusers LoRA loading |
+| Image generation | PyTorch CPU and Diffusers |
+| LoRA model option | Diffusers LoRA loading |
 | Reports | JSON |
 | Generated images | GitHub Actions artifacts |
-| ONNX probes | ONNX Runtime CPU |
 
 ## Stable template contract
 
@@ -32,13 +31,14 @@ It defines:
 - repository identity;
 - locked theme;
 - generation policy;
+- Issue generation policy;
 - prompt policy;
 - deduplication policy;
 - record retention policy;
 - license policy;
 - selected image model configuration.
 
-Experiment files under `experiments/` are reproducibility records. They are not the main template API.
+Experiment files under `experiments/` are historical model-selection records. They are not the main template API.
 
 ## Prompt pipeline concept
 
@@ -49,7 +49,7 @@ Issue or local structured input
   -> parse fields
   -> validate theme and policy
   -> apply required terms
-  -> check disallowed terms
+  -> check configured term policy
   -> build prompt from a template
   -> normalize recipe
   -> deduplicate
@@ -58,9 +58,23 @@ Issue or local structured input
 
 The template deliberately avoids arbitrary prompt execution as its default mode.
 
+## Issue-driven CI path
+
+The current template path is:
+
+```text
+.github/ISSUE_TEMPLATE/generate.yml
+.github/workflows/assetpack-issue-generate.yml
+scripts/validate_issue_request.py
+scripts/run_issue_asset_generation.py
+scripts/write_issue_generation_comment.py
+```
+
+The workflow validates Issue fields, comments validation feedback on the Issue, runs generation only for valid requests, uploads artifacts, and comments successful generation feedback.
+
 ## Image generation runner
 
-The current benchmark runner is:
+The shared runner is:
 
 ```text
 scripts/run_image_model_ci_benchmark.py
@@ -107,17 +121,17 @@ models.image_generation.runtime_override.environment_variable
 
 There are two workflow classes.
 
-### Template / future production workflows
+### Template workflows
 
-These should validate structured input, build recipes, dedupe recipes, run the selected image model, upload artifacts, and optionally publish reviewed outputs.
+These validate structured input, build recipes, run the selected image model, upload artifacts, and provide Issue feedback.
 
 These workflows should use `assetpack.yml` as their source of truth.
 
-### Experiment / evidence workflows
+### Historical experiment workflows
 
 The `image-model-ci-*` workflows are model-selection and stress-test workflows.
 
-They are retained for reproducibility and evidence. They should not be treated as the primary template user interface.
+They can be removed from derived repositories after the final model-selection evidence has been copied or retained.
 
 ## Artifact policy
 
@@ -147,4 +161,4 @@ Model selection should distinguish:
 - visual acceptance: the output is useful for the target concept;
 - production selection: the model is configured as allowed/default for the template.
 
-The current model selection reached production-selection status only after subject-transfer tests and a final 20-subject runoff.
+The current model selection reached production-selection status after subject-transfer tests and a final 20-subject runoff.
