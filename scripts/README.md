@@ -8,6 +8,7 @@ The scripts are implementation tools. The stable template configuration remains 
 
 | Script | Purpose |
 |---|---|
+| `select_image_model.py` | Resolves the configured image model from `assetpack.yml` and validates runtime overrides. |
 | `run_image_model_ci_benchmark.py` | Runs Diffusers and Diffusers-LoRA image-generation candidates from experiment YAML files. Writes `report.json` and image artifacts. |
 | `run_diffusers_smoke.py` | Lightweight Diffusers smoke-test helper. |
 | `run_image_model_onnx_feasibility.py` | Records ONNX feasibility boundaries for image-model candidates. |
@@ -15,6 +16,30 @@ The scripts are implementation tools. The stable template configuration remains 
 | `run_bonsai_combined_component_probe.py` | Records combined Bonsai component evidence. |
 | `run_bonsai_lowbit_probe.py` | Probes Bonsai low-bit paths. |
 | `run_bonsai_transformer_load_probe.py` | Probes transformer loading and minimal export evidence. |
+
+## Selected image model helper
+
+`select_image_model.py` is the bridge from template configuration to production generation code.
+
+Default resolution:
+
+```bash
+python scripts/select_image_model.py --pretty
+```
+
+Explicit model selection:
+
+```bash
+python scripts/select_image_model.py --model-id ssd-1b-lcm-lora-quality --pretty
+```
+
+Environment override:
+
+```bash
+ASSETPACK_IMAGE_MODEL_ID=ssd-1b-lcm-lora-quality python scripts/select_image_model.py --pretty
+```
+
+The script rejects unknown model IDs and disabled candidates. Future production workflows should use this helper or the same validation rules before attempting image generation.
 
 ## Benchmark runner contract
 
