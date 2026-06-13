@@ -161,9 +161,7 @@ Generated images are experiment artifacts. They should not be committed to Git b
 
 ### 7. Model Candidates
 
-The final model is not fixed yet.
-
-The project should test candidate models first, then fix the highest-quality practical model for each use case.
+Model selection is evidence-gated. The project should test candidate models first, then fix the highest-quality practical model for each use case.
 
 Initial candidate classes:
 
@@ -174,7 +172,47 @@ Initial candidate classes:
 - OnnxStream or stable-diffusion.cpp based runners
 - other lightweight text-to-image models discovered later
 
-The repository should store model test results in `reports/` so the final model decision is based on evidence, not preference.
+The repository should store model test results so the final model decision is based on evidence, not preference.
+
+#### Current image-generation model selection
+
+The current evidence-based image-generation choice is configured in `assetpack.yml`.
+
+Default model:
+
+```text
+sdxl-turbo-quality
+```
+
+Configurable alternate:
+
+```text
+ssd-1b-lcm-lora-quality
+```
+
+Runtime override key:
+
+```text
+ASSETPACK_IMAGE_MODEL_ID
+```
+
+Allowed override values:
+
+```text
+sdxl-turbo-quality
+ssd-1b-lcm-lora-quality
+```
+
+Evidence records:
+
+```text
+docs/ci/image-model-final-selection.md
+docs/ci/image-model-final-selection.json
+```
+
+The final runoff used `image-model-ci-final-runoff-hard-subjects` run `27446158099`: 3 candidates across 20 hard subjects, for 60 expected images. The selection prioritizes target identity, topology, small parts, and contact with the bonsai branch or pot over merely attractive images.
+
+This is a repository-specific asset-generation decision, not a general benchmark claim.
 
 #### Bonsai ONNX Runtime CPU experiment
 
@@ -362,19 +400,13 @@ prompt_policy:
     - "no text"
 
 models:
-  candidates:
-    - id: tiny-sd
-      enabled: true
-      role: cpu_smoke
-    - id: sd-turbo
-      enabled: true
-      role: cpu_smoke
-    - id: bk-sdm-tiny
-      enabled: true
-      role: cpu_smoke
-    - id: bonsai-image-4b
-      enabled: false
-      role: experimental
+  image_generation:
+    mode: fixed_default_with_configurable_alternate
+    default_model_id: sdxl-turbo-quality
+    alternate_model_id: ssd-1b-lcm-lora-quality
+    allowed_model_ids:
+      - sdxl-turbo-quality
+      - ssd-1b-lcm-lora-quality
 ```
 
 ## Non-Goals
@@ -390,15 +422,14 @@ This template does not aim to:
 
 ## Current Status
 
-Early template design.
+Early template design with an evidence-recorded image-model selection for the current fixed-theme asset-generation concept.
 
 Next steps:
 
-1. Add `assetpack.yml`.
-2. Add Issue Form for structured generation requests.
-3. Add validation workflow.
-4. Add recipe builder.
-5. Add deduplication logic.
-6. Add smoke benchmark workflow.
-7. Test candidate models.
-8. Fix the best practical model based on recorded results.
+1. Add Issue Form for structured generation requests.
+2. Add validation workflow.
+3. Add recipe builder.
+4. Add deduplication logic.
+5. Add smoke benchmark workflow.
+6. Wire generation workflows to `models.image_generation.default_model_id` and `ASSETPACK_IMAGE_MODEL_ID`.
+7. Keep generated images as temporary artifacts unless an explicit review/publish step is added.
