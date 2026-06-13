@@ -1,41 +1,36 @@
 # Workflow guide
 
-This directory contains two workflow groups.
+This directory contains GitHub Actions workflows for the assetpack template.
 
-## Template-facing workflows
+## Main workflow
 
-Production-facing workflows should use `assetpack.yml` as the source of truth.
-
-A derived repository should eventually use workflows that:
-
-1. parse structured input;
-2. validate `assetpack.yml`;
-3. build a prompt recipe;
-4. deduplicate recipes;
-5. select a configured image model;
-6. run a small generation check when enabled;
-7. upload generated images as artifacts;
-8. write compact reports.
-
-## Experiment workflows
-
-The `image-model-ci-*` workflows are experiment and evidence workflows.
-
-They were used to test candidate models, collect artifacts, run subject-transfer checks, and select the current model pair.
-
-They are retained for reproducibility. They are not the main user interface for a derived assetpack repository.
-
-Related records:
+The main template workflow is:
 
 ```text
-experiments/README.md
-docs/ci/README.md
-docs/ci/image-model-final-selection.md
+assetpack-issue-generate.yml
 ```
 
-## Current model selection
+It implements:
 
-New production workflows should read model selection from `assetpack.yml`:
+```text
+Issue Form -> validation -> prompt recipe -> selected model -> artifact -> Issue feedback
+```
+
+## Behavior
+
+The workflow:
+
+1. runs for Issues with the `asset-request` label;
+2. parses the structured Issue Form body;
+3. validates the request against `assetpack.yml`;
+4. comments validation feedback on the Issue;
+5. runs image generation only when validation passes;
+6. uploads request, report, config, and generated PNGs as artifacts;
+7. comments successful generation feedback on the Issue.
+
+## Model selection
+
+Workflows should read model selection from `assetpack.yml`:
 
 ```text
 models.image_generation.default_model_id
@@ -55,6 +50,10 @@ Current alternate:
 ```text
 ssd-1b-lcm-lora-quality
 ```
+
+## Historical workflows
+
+Some historical experiment workflows may still exist while cleanup continues. Derived repositories do not need them for normal use.
 
 ## Artifact policy
 
