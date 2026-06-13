@@ -9,7 +9,7 @@ This repository is not a general prompt playground. It is a template for buildin
 Use this template when you want a repository that can:
 
 1. lock one asset concept;
-2. accept structured generation input;
+2. accept structured generation input through GitHub Issues;
 3. build prompt recipes from templates and constraints;
 4. deduplicate generated recipes;
 5. run lightweight image-generation checks in GitHub Actions;
@@ -39,13 +39,13 @@ This repository does not aim to:
 ## Core concept
 
 ```text
-structured input
+GitHub Issue
+  -> structured input
   -> validation
   -> mechanical prompt recipe
-  -> deduplication
   -> optional CI image-generation check
   -> artifact upload
-  -> compact evidence record
+  -> Issue feedback
   -> optional human review / publish step
 ```
 
@@ -56,6 +56,35 @@ assetpack.yml
 ```
 
 Experiment YAML files under `experiments/` are reproducibility records. They are not the main template API.
+
+## Issue-driven generation
+
+The current Issue entrypoint is:
+
+```text
+.github/ISSUE_TEMPLATE/generate.yml
+.github/workflows/assetpack-issue-generate.yml
+```
+
+The workflow validates the Issue fields with:
+
+```text
+scripts/validate_issue_request.py
+```
+
+If the request passes validation, CI builds a prompt recipe and runs:
+
+```text
+scripts/run_issue_asset_generation.py
+```
+
+The workflow comments validation feedback on the Issue and uploads generated outputs as artifacts. Generated images are not committed to Git by default.
+
+Detailed guide:
+
+```text
+docs/issue-driven-generation.md
+```
 
 ## Current selected image models
 
@@ -114,6 +143,7 @@ Start here:
 
 ```text
 docs/getting-started.md
+docs/issue-driven-generation.md
 docs/configuration.md
 docs/technical-design.md
 docs/ci/README.md
@@ -201,13 +231,15 @@ Keep generated images as artifacts unless a derived repository adds an explicit 
 
 ## Current status
 
-The repository has completed an evidence-gated image-model selection for the current template concept.
+The repository now has the core CI-driven image-generation template path:
+
+```text
+Issue Form -> validation -> prompt recipe -> selected model -> CI artifact
+```
 
 Next implementation steps:
 
-1. add or finalize the Issue Form for structured generation requests;
-2. add validation workflow around `assetpack.yml`;
-3. implement recipe builder and dedupe flow;
-4. wire production generation to `models.image_generation.default_model_id`;
-5. enforce `ASSETPACK_IMAGE_MODEL_ID` against `allowed_model_ids`;
-6. keep generated images as temporary artifacts unless reviewed for publication.
+1. add recipe persistence and dedupe records;
+2. add tests for Issue body validation;
+3. add optional review/publish workflow;
+4. tune derived repository templates for specific asset concepts.
