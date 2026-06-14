@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     env:
-      ISSUE_BODY_FILE: ${{ runner.temp }}/issue-body.md
+      ISSUE_BODY_FILE: /tmp/assetpack-issue-body.md
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
