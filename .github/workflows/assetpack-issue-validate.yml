@@ -1,8 +1,12 @@
 name: assetpack-issue-validate
 
 "on":
-  issues:
-    types: [opened, edited, reopened, labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to validate manually"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -10,11 +14,12 @@ permissions:
 
 jobs:
   validate-issue:
-    if: ${{ github.event_name == 'issues' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
+      ISSUE_NUMBER: ${{ inputs.issue_number }}
       ISSUE_BODY_FILE: ${{ runner.temp }}/issue-body.md
+      OUT_DIR: reports/issue-generation/issue-${{ inputs.issue_number }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -28,37 +33,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install --no-cache-dir pyyaml
 
-      - name: Initialize issue context
+      - name: Fetch issue body
         run: |
-          python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text(encoding='utf-8'))
-          issue = event.get('issue') or {}
-          number = str(issue.get('number') or '')
-          if not number:
-              raise SystemExit('missing issue number in issues event')
-          out_dir = f'reports/issue-generation/issue-{number}'
-          Path(out_dir).mkdir(parents=True, exist_ok=True)
-          Path(os.environ['ISSUE_BODY_FILE']).write_text(issue.get('body') or '', encoding='utf-8')
-          with Path(os.environ['GITHUB_ENV']).open('a', encoding='utf-8') as env:
-              env.write(f'ISSUE_NUMBER={number}\n')
-              env.write(f'OUT_DIR={out_dir}\n')
-          PY
-
-      - name: Check issue label
-        id: label_gate
-        run: |
-          python scripts/check_issue_label.py \
-            --config assetpack.yml \
-            --event-json "$GITHUB_EVENT_PATH" \
-            --github-output "$GITHUB_OUTPUT"
+          mkdir -p "$OUT_DIR"
+          gh issue view "$ISSUE_NUMBER" --json body --jq .body > "$ISSUE_BODY_FILE"
 
       - name: Validate request
         id: validate
-        if: ${{ steps.label_gate.outputs.should_run == 'true' }}
         run: |
           python scripts/validate_issue_request.py \
             --config assetpack.yml \
@@ -78,7 +59,7 @@ jobs:
             --github-output "$GITHUB_OUTPUT"
 
       - name: Comment validation result
-        if: ${{ steps.label_gate.outputs.should_run == 'true' && (steps.validate.outputs.valid != 'true' || steps.policy.outputs.valid != 'true') }}
+        if: ${{ steps.validate.outputs.valid != 'true' || steps.policy.outputs.valid != 'true' }}
         run: |
           gh issue comment "$ISSUE_NUMBER" --body-file "$OUT_DIR/validation-comment.md"
 
