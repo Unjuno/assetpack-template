@@ -14,7 +14,7 @@ This roadmap tracks the active template surface for issue-driven image asset gen
 
 ## P1 — repository contract hardening
 
-- [ ] Keep `assetpack.yml` as the single source of truth for generation policy.
+- [x] Keep `assetpack.yml` as the single source of truth for generation policy.
 - [x] Document the exact Issue form field contract.
 - [x] Document committed asset directory layout with an example.
 - [x] Document storage constraints and expected image size discipline.
