@@ -31,6 +31,26 @@ def image_dimensions(path: Path) -> tuple[int | None, int | None]:
         return None, None
 
 
+def first_candidate(report: dict[str, Any]) -> dict[str, Any]:
+    candidates = report.get("candidates") or []
+    if not candidates:
+        return {}
+    item = candidates[0]
+    return item if isinstance(item, dict) else {}
+
+
+def candidate_config(candidate: dict[str, Any]) -> dict[str, Any]:
+    item = candidate.get("candidate") or {}
+    return item if isinstance(item, dict) else {}
+
+
+def first_available(*values: Any) -> Any:
+    for value in values:
+        if value is not None:
+            return value
+    return None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="assetpack.yml")
@@ -63,6 +83,8 @@ def main() -> int:
     source_png = pngs[0]
     image_file_size_bytes = source_png.stat().st_size
     image_width, image_height = image_dimensions(source_png)
+    candidate = first_candidate(report)
+    config_candidate = candidate_config(candidate)
 
     recipe_id = str(req.get("recipe_id", "")).strip()
     issue_number = str(req.get("issue_number", "unknown")).strip() or "unknown"
@@ -74,8 +96,7 @@ def main() -> int:
         raise SystemExit(f"duplicate recipe_id already exists: {dest}")
 
     dest.mkdir(parents=True, exist_ok=False)
-    dest_png = dest / "image.png"
-    shutil.copy2(source_png, dest_png)
+    shutil.copy2(source_png, dest / "image.png")
     (dest / "prompt.txt").write_text(prompt + "\n", encoding="utf-8")
     (dest / "negative_prompt.txt").write_text(str(req.get("negative_prompt", "")) + "\n", encoding="utf-8")
     (dest / "request.json").write_text(json.dumps(req, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -90,8 +111,18 @@ def main() -> int:
         "source_png": str(source_png),
         "committed_path": str(dest),
         "image_file_size_bytes": image_file_size_bytes,
-        "image_width": image_width,
-        "image_height": image_height,
+        "image_width": first_available(image_width, candidate.get("width"), config_candidate.get("width")),
+        "image_height": first_available(image_height, candidate.get("height"), config_candidate.get("height")),
+        "seed": report.get("seed"),
+        "scheduler": first_available(candidate.get("scheduler"), config_candidate.get("scheduler")),
+        "steps": first_available(candidate.get("steps"), config_candidate.get("steps")),
+        "guidance_scale": first_available(candidate.get("guidance_scale"), config_candidate.get("guidance_scale")),
+        "method": first_available(candidate.get("method"), config_candidate.get("method")),
+        "pipeline_class": first_available(candidate.get("pipeline_class"), config_candidate.get("pipeline_class")),
+        "model_ref": first_available(candidate.get("model_ref"), config_candidate.get("model_ref")),
+        "image_sha256": candidate.get("image_sha256"),
+        "generate_seconds": candidate.get("generate_seconds"),
+        "load_seconds": candidate.get("load_seconds"),
     }
     (dest / "metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (dest / "README.md").write_text(
@@ -100,9 +131,12 @@ def main() -> int:
         f"- model: `{req.get('selected_model_id', 'unknown')}`\n"
         "- image: `image.png`\n"
         "- prompt: `prompt.txt`\n"
-        f"- image_file_size_bytes: `{image_file_size_bytes}`\n"
-        f"- image_width: `{image_width}`\n"
-        f"- image_height: `{image_height}`\n",
+        f"- image_file_size_bytes: `{metadata['image_file_size_bytes']}`\n"
+        f"- image_width: `{metadata['image_width']}`\n"
+        f"- image_height: `{metadata['image_height']}`\n"
+        f"- seed: `{metadata['seed']}`\n"
+        f"- steps: `{metadata['steps']}`\n"
+        f"- scheduler: `{metadata['scheduler']}`\n",
         encoding="utf-8",
     )
 
