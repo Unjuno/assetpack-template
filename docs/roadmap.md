@@ -18,7 +18,7 @@ This roadmap tracks the active template surface for issue-driven image asset gen
 - [x] Document the exact Issue form field contract.
 - [x] Document committed asset directory layout with an example.
 - [x] Document storage constraints and expected image size discipline.
-- [ ] Add a cleanup policy for smoke-test Issues and generated smoke assets.
+- [x] Add a cleanup policy for smoke-test Issues and generated smoke assets.
 
 ## P2 — test and CI coverage
 
