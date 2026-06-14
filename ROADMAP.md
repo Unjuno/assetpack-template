@@ -29,11 +29,12 @@ GitHub Issue
 
 ## Phase 1 — Keep the template surface clean
 
-- [x] Remove legacy Bonsai / lowbit / ONNX / image-model-ci files from the active search surface.
 - [x] Simplify README around Issue-driven asset generation.
 - [x] Simplify CI docs to the selected model pair and active artifact policy.
 - [x] Keep selected image models limited to `sdxl-turbo-quality` and `ssd-1b-lcm-lora-quality`.
-- [ ] Confirm with a local `git ls-files | grep -Ei 'bonsai|lowbit|onnx|image-model-ci'` pass.
+- [x] Use connector search instead of local-only verification for legacy cleanup.
+- [ ] Remove remaining connector-visible legacy files and CI evidence records.
+- [ ] Re-run connector searches for `bonsai`, `lowbit`, `onnx`, and `image-model-ci` until current-branch hits are cleared or explicitly blocked.
 
 ## Phase 2 — Harden duplicate and replay behavior
 
