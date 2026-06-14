@@ -62,11 +62,11 @@ GitHub Issue
 ## Phase 5 — Documentation for derived repositories
 
 - [x] Document persistent storage in `docs/storage-policy.md`.
-- [ ] Add a derived-repository setup guide.
-- [ ] Add a prompt-policy guide with required-term examples.
-- [ ] Add an operations guide for failed Issues and duplicate recipes.
-- [ ] Add an example Issue request that is expected to pass.
-- [ ] Add an example Issue request that is expected to fail ASCII-only validation.
+- [x] Add a derived-repository setup guide.
+- [x] Add a prompt-policy guide with required-term examples.
+- [x] Add an operations guide for failed Issues and duplicate recipes.
+- [x] Add an example Issue request that is expected to pass.
+- [x] Add an example Issue request that is expected to fail ASCII-only validation.
 
 ## Current known smoke record
 
