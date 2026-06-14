@@ -1,6 +1,6 @@
 # Scripts
 
-This directory contains Python utilities for the CI-driven asset-generation template.
+This directory contains Python utilities for the Issue-driven asset-generation template.
 
 The stable configuration is `assetpack.yml`.
 
@@ -9,12 +9,15 @@ The stable configuration is `assetpack.yml`.
 | Script | Purpose |
 |---|---|
 | `validate_issue_request.py` | Parses and validates a structured Issue request. |
-| `check_required_terms.py` | Verifies that the final prompt contains every configured required term. |
-| `run_issue_asset_generation.py` | Runs generation for a validated Issue request. |
+| `validate_issue_policy.py` | Enforces repository policy before generation. |
+| `check_issue_label.py` | Checks whether an Issue has the configured request label. |
+| `run_issue_safe.py` | Runs guarded generation and returns a failing exit code on generation failure. |
+| `run_issue_asset_generation.py` | Resolves the selected model and prepares the generation config. |
+| `run_issue_image_generation.py` | Issue-generation runner entry point. |
+| `prepare_committed_asset.py` | Stages generated image, prompt, request, report, and metadata for Git commit. |
+| `update_generated_assets_index.py` | Builds `assets/generated/README.md`. |
 | `write_issue_generation_comment.py` | Writes a result comment body for the Issue workflow. |
 | `select_image_model.py` | Resolves the configured model from `assetpack.yml`. |
-| `run_image_model_ci_benchmark.py` | Shared Diffusers runner used by Issue generation. |
-| `run_diffusers_smoke.py` | Lightweight Diffusers smoke-test helper. |
 
 ## Model selection helper
 
@@ -49,37 +52,34 @@ request.json
 validation-comment.md
 ```
 
-`check_required_terms.py` reads `request.json` and `assetpack.yml`. If the final prompt is missing a configured required term, it marks the request invalid and rewrites the validation comment.
+`validate_issue_policy.py` enforces ASCII-only fields, required terms, and duplicate recipe handling.
 
 ## Issue generation
 
-`run_issue_asset_generation.py` reads `request.json`, resolves the selected model, writes a temporary generation config, and calls `run_image_model_ci_benchmark.py`.
+`run_issue_safe.py` calls `run_issue_asset_generation.py` only after required terms are present in the final prompt. It returns a non-zero exit code when generation fails.
 
-It writes a compact `report.json` and any generated PNG under the workflow artifact directory.
+`run_issue_asset_generation.py` reads `request.json`, resolves the selected model, and writes a temporary generation config under the workflow output directory.
 
-## Shared runner
-
-`run_image_model_ci_benchmark.py` reads experiment-style YAML and writes a JSON report plus generated image files.
-
-Supported methods:
-
-```text
-diffusers_text_to_image
-diffusers_load_only
-diffusers_lora_text_to_image
-diffusers_lora_load_only
-```
+`run_issue_image_generation.py` runs the selected image generation candidate and writes `report.json` plus generated PNG files under the workflow output directory.
 
 Candidate timeout can be set with:
 
 ```text
-IMAGE_MODEL_CANDIDATE_TIMEOUT_SECONDS
+ASSETPACK_IMAGE_CANDIDATE_TIMEOUT_SECONDS
 ```
 
-or:
+or with the runner argument:
 
 ```text
 --candidate-timeout-seconds
 ```
 
-Generated images should remain workflow artifacts unless a derived repository adds a review and publish step.
+## Committed asset records
+
+`prepare_committed_asset.py` turns a successful workflow artifact into a committed record under:
+
+```text
+assets/generated/issue-<number>/<recipe_id>/
+```
+
+Each record contains the generated PNG, final prompt, request, report, metadata, and a README.
