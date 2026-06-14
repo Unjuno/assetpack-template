@@ -19,23 +19,27 @@ def main() -> int:
     report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.exists() else {}
     passed = report.get("summary", {}).get("passed", 0) > 0
 
+    recipe_id = request.get("recipe_id", "unknown")
+    model_id = request.get("selected_model_id", "unknown")
+
     if args.outcome == "success" and passed:
         body = (
-            "## Asset image generated\n\n"
-            "CI generated an image for this structured request.\n\n"
-            f"- recipe: `{request.get('recipe_id', 'unknown')}`\n"
-            f"- model: `{request.get('selected_model_id', 'unknown')}`\n"
-            "- image: available in the workflow artifact\n\n"
-            "Generated images are not committed to Git by default. Review the artifact before publishing.\n"
+            "## Asset image generated and committed\n\n"
+            "CI generated an image for this structured request. The prompt/image record is committed to the repository when the commit step succeeds.\n\n"
+            f"- recipe: `{recipe_id}`\n"
+            f"- model: `{model_id}`\n\n"
+            "The workflow appends the committed asset, image, and prompt paths below after staging succeeds.\n"
         )
     else:
+        reason = report.get("reason", "generation did not complete")
         body = (
             "## Asset image generation incomplete\n\n"
-            "The request passed validation, but the generation step did not produce a successful image.\n\n"
-            f"- recipe: `{request.get('recipe_id', 'unknown')}`\n"
-            f"- model: `{request.get('selected_model_id', 'unknown')}`\n"
-            f"- workflow outcome: `{args.outcome}`\n\n"
-            "Check the workflow artifact for `report.json`.\n"
+            "The request passed validation, but the generation step did not produce a committed image record.\n\n"
+            f"- recipe: `{recipe_id}`\n"
+            f"- model: `{model_id}`\n"
+            f"- workflow outcome: `{args.outcome}`\n"
+            f"- reason: `{reason}`\n\n"
+            "Check the workflow artifact for `request.json` and `report.json`.\n"
         )
 
     out.mkdir(parents=True, exist_ok=True)
