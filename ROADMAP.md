@@ -45,8 +45,8 @@ GitHub Issue
 ## Phase 3 — Improve generated asset records
 
 - [x] Commit `image.png`, `prompt.txt`, `negative_prompt.txt`, `request.json`, `metadata.json`, `report.json`, and `README.md` together.
-- [ ] Include a stable GitHub URL to the committed asset directory in the success comment.
-- [ ] Add image size and file size to `metadata.json`.
+- [x] Include a stable repository link to the committed asset directory in the success comment.
+- [x] Add image size and file size to `metadata.json`.
 - [ ] Add seed, scheduler, steps, width, and height to `metadata.json` when available from the generator.
 - [ ] Add a generated index file for `assets/generated/` after multiple assets exist.
 
