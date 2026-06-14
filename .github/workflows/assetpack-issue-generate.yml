@@ -1,6 +1,6 @@
 name: assetpack-issue-generate
 
-"on":
+on:
   issues:
     types: [opened, edited, reopened, labeled]
 
@@ -8,13 +8,8 @@ permissions:
   contents: write
   issues: write
 
-concurrency:
-  group: assetpack-issue-generate-${{ github.run_id }}
-  cancel-in-progress: false
-
 jobs:
   generate-from-issue:
-    if: ${{ github.event_name == 'issues' }}
     runs-on: ubuntu-latest
     timeout-minutes: 180
     env:
