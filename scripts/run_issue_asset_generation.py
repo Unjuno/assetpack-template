@@ -15,7 +15,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from select_image_model import load_config, resolve_image_model  # noqa: E402
-from run_image_model_ci_benchmark import run as run_benchmark  # noqa: E402
+from run_issue_image_generation import run as run_generation  # noqa: E402
 
 
 def candidate_for_generation(candidate: dict[str, Any], cfg: dict[str, Any]) -> dict[str, Any]:
@@ -74,7 +74,7 @@ def main() -> int:
     config_path.write_text(yaml.safe_dump(experiment, sort_keys=False, allow_unicode=True), encoding="utf-8")
     (out_dir / "request.json").write_text(json.dumps(request, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    code = run_benchmark(str(config_path), str(out_dir), candidate_ids=model_id, candidate_timeout_seconds=timeout_seconds)
+    code = run_generation(str(config_path), str(out_dir), candidate_ids=model_id, candidate_timeout_seconds=timeout_seconds)
     report_path = out_dir / "report.json"
     report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.exists() else {}
     passed = report.get("summary", {}).get("passed", 0) > 0
