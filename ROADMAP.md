@@ -55,7 +55,7 @@ GitHub Issue
 - [x] Add tests for ASCII-only rejection.
 - [x] Add tests for missing required terms.
 - [x] Add tests for duplicate recipe IDs.
-- [ ] Add a lightweight CI workflow that runs tests without invoking image generation.
+- [x] Add a lightweight CI workflow that runs tests without invoking image generation.
 - [x] Add a fixture-based test for `prepare_committed_asset.py`.
 - [x] Add a fixture-based test for `write_issue_generation_comment.py`.
 
