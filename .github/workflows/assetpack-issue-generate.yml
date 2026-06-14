@@ -9,11 +9,12 @@ permissions:
   issues: write
 
 concurrency:
-  group: assetpack-issue-generate-${{ github.event.issue.number }}
-  cancel-in-progress: true
+  group: assetpack-issue-generate-${{ github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   generate-from-issue:
+    if: ${{ github.event_name == 'issues' }}
     runs-on: ubuntu-latest
     timeout-minutes: 180
     env:
