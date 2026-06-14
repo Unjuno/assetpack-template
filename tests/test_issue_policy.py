@@ -25,7 +25,7 @@ prompt_policy:
     )
 
 
-def run_policy(tmp_path: Path, request: dict) -> dict:
+def run_policy_with_comment(tmp_path: Path, request: dict) -> tuple[dict, str]:
     cfg = tmp_path / "assetpack.yml"
     request_json = tmp_path / "request.json"
     comment_file = tmp_path / "comment.md"
@@ -39,7 +39,13 @@ def run_policy(tmp_path: Path, request: dict) -> dict:
         "--request-json", str(request_json),
         "--comment-file", str(comment_file),
     ], check=True)
-    return json.loads(request_json.read_text(encoding="utf-8"))
+    comment = comment_file.read_text(encoding="utf-8") if comment_file.exists() else ""
+    return json.loads(request_json.read_text(encoding="utf-8")), comment
+
+
+def run_policy(tmp_path: Path, request: dict) -> dict:
+    result, _ = run_policy_with_comment(tmp_path, request)
+    return result
 
 
 def valid_request() -> dict:
@@ -72,9 +78,12 @@ def test_rejects_missing_required_term(tmp_path):
     assert "white background" in result["missing_terms"]
 
 
-def test_rejects_duplicate_recipe_id(tmp_path):
+def test_duplicate_recipe_id_is_existing_asset_status(tmp_path):
     duplicate_dir = tmp_path / "assets" / "generated" / "issue-000001" / "assetpack-test"
     duplicate_dir.mkdir(parents=True)
-    result = run_policy(tmp_path, valid_request())
+    result, comment = run_policy_with_comment(tmp_path, valid_request())
     assert result["valid"] is False
+    assert result["policy_status"] == "duplicate"
     assert result["duplicate_path"] is not None
+    assert "already exists" in comment
+    assert "assetpack-test" in comment
