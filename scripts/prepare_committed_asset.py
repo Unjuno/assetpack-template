@@ -18,6 +18,19 @@ def find_pngs(root: Path) -> list[Path]:
     return sorted(root.glob("images/**/*.png"))
 
 
+def image_dimensions(path: Path) -> tuple[int | None, int | None]:
+    try:
+        from PIL import Image
+    except Exception:
+        return None, None
+    try:
+        with Image.open(path) as image:
+            width, height = image.size
+        return int(width), int(height)
+    except Exception:
+        return None, None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="assetpack.yml")
@@ -47,6 +60,10 @@ def main() -> int:
     if len(pngs) != 1:
         raise SystemExit(f"expected exactly one PNG, got {len(pngs)}")
 
+    source_png = pngs[0]
+    image_file_size_bytes = source_png.stat().st_size
+    image_width, image_height = image_dimensions(source_png)
+
     recipe_id = str(req.get("recipe_id", "")).strip()
     issue_number = str(req.get("issue_number", "unknown")).strip() or "unknown"
     output_root = Path(args.repo_output_root or cfg.get("issue_generation", {}).get("committed_output_root", "assets/generated"))
@@ -57,7 +74,8 @@ def main() -> int:
         raise SystemExit(f"duplicate recipe_id already exists: {dest}")
 
     dest.mkdir(parents=True, exist_ok=False)
-    shutil.copy2(pngs[0], dest / "image.png")
+    dest_png = dest / "image.png"
+    shutil.copy2(source_png, dest_png)
     (dest / "prompt.txt").write_text(prompt + "\n", encoding="utf-8")
     (dest / "negative_prompt.txt").write_text(str(req.get("negative_prompt", "")) + "\n", encoding="utf-8")
     (dest / "request.json").write_text(json.dumps(req, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -69,8 +87,11 @@ def main() -> int:
         "selected_model_id": req.get("selected_model_id"),
         "github_run_id": args.github_run_id,
         "github_sha": args.github_sha,
-        "source_png": str(pngs[0]),
+        "source_png": str(source_png),
         "committed_path": str(dest),
+        "image_file_size_bytes": image_file_size_bytes,
+        "image_width": image_width,
+        "image_height": image_height,
     }
     (dest / "metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (dest / "README.md").write_text(
@@ -78,7 +99,10 @@ def main() -> int:
         f"- recipe_id: `{recipe_id}`\n"
         f"- model: `{req.get('selected_model_id', 'unknown')}`\n"
         "- image: `image.png`\n"
-        "- prompt: `prompt.txt`\n",
+        "- prompt: `prompt.txt`\n"
+        f"- image_file_size_bytes: `{image_file_size_bytes}`\n"
+        f"- image_width: `{image_width}`\n"
+        f"- image_height: `{image_height}`\n",
         encoding="utf-8",
     )
 
