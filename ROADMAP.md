@@ -38,9 +38,9 @@ GitHub Issue
 ## Phase 2 — Harden duplicate and replay behavior
 
 - [x] Add duplicate `recipe_id` detection against `assets/generated/**/<recipe_id>`.
-- [ ] Add a targeted replay test for re-labeling or editing an already-generated request.
-- [ ] Decide whether duplicate requests should remain hard failures or become explicit no-op comments.
-- [ ] Add a workflow-level note explaining why repeated Issue events may occur.
+- [x] Add a policy replay test for an already-generated request.
+- [x] Treat duplicate requests as existing-asset status comments instead of generation attempts.
+- [x] Add a workflow note explaining why repeated Issue events may occur.
 
 ## Phase 3 — Improve generated asset records
 
