@@ -149,7 +149,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: assetpack-issue-${{ github.event.issue.number }}-${{ steps.validate.outputs.recipe_id || 'validation' }}
+          name: assetpack-issue-${{ github.event.issue.number }}
           path: |
             reports/issue-generation/issue-${{ github.event.issue.number }}/request.json
             reports/issue-generation/issue-${{ github.event.issue.number }}/validation-comment.md
