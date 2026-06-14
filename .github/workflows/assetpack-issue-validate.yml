@@ -1,0 +1,96 @@
+name: assetpack-issue-validate
+
+"on":
+  issues:
+    types: [opened, edited, reopened, labeled]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  validate-issue:
+    if: ${{ github.event_name == 'issues' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ISSUE_BODY_FILE: ${{ runner.temp }}/issue-body.md
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install validation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir pyyaml
+
+      - name: Initialize issue context
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text(encoding='utf-8'))
+          issue = event.get('issue') or {}
+          number = str(issue.get('number') or '')
+          if not number:
+              raise SystemExit('missing issue number in issues event')
+          out_dir = f'reports/issue-generation/issue-{number}'
+          Path(out_dir).mkdir(parents=True, exist_ok=True)
+          Path(os.environ['ISSUE_BODY_FILE']).write_text(issue.get('body') or '', encoding='utf-8')
+          with Path(os.environ['GITHUB_ENV']).open('a', encoding='utf-8') as env:
+              env.write(f'ISSUE_NUMBER={number}\n')
+              env.write(f'OUT_DIR={out_dir}\n')
+          PY
+
+      - name: Check issue label
+        id: label_gate
+        run: |
+          python scripts/check_issue_label.py \
+            --config assetpack.yml \
+            --event-json "$GITHUB_EVENT_PATH" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Validate request
+        id: validate
+        if: ${{ steps.label_gate.outputs.should_run == 'true' }}
+        run: |
+          python scripts/validate_issue_request.py \
+            --config assetpack.yml \
+            --issue-body-file "$ISSUE_BODY_FILE" \
+            --issue-number "$ISSUE_NUMBER" \
+            --out-dir "$OUT_DIR" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Validate request policy
+        id: policy
+        if: ${{ steps.validate.outputs.valid == 'true' }}
+        run: |
+          python scripts/validate_issue_policy.py \
+            --config assetpack.yml \
+            --request-json "$OUT_DIR/request.json" \
+            --comment-file "$OUT_DIR/validation-comment.md" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Comment validation result
+        if: ${{ steps.label_gate.outputs.should_run == 'true' && (steps.validate.outputs.valid != 'true' || steps.policy.outputs.valid != 'true') }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body-file "$OUT_DIR/validation-comment.md"
+
+      - name: Comment accepted validation result
+        if: ${{ steps.policy.outputs.valid == 'true' }}
+        run: |
+          {
+            echo "## Asset request validation passed"
+            echo ""
+            echo "The structured request passed validation. The generation workflow may now process it."
+            echo ""
+            echo "- recipe: \`${{ steps.policy.outputs.recipe_id }}\`"
+            echo "- model: \`${{ steps.policy.outputs.selected_model_id }}\`"
+          } > "$OUT_DIR/validation-passed-comment.md"
+          gh issue comment "$ISSUE_NUMBER" --body-file "$OUT_DIR/validation-passed-comment.md"
