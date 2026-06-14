@@ -28,6 +28,7 @@
 - [x] Remove many legacy research scripts from active `scripts/` surface.
 - [x] Remove legacy experiment YAML files found through current cleanup passes.
 - [x] Simplify model-selection docs to the selected model pair only.
+- [x] Simplify `docs/ci/README.md` to active template records only.
 - [x] Rewrite README around Issue-driven asset repository generation.
 - [x] Rewrite docs to match repo-persistent generated assets where tool safety allowed.
 
@@ -40,4 +41,4 @@
 ## Follow-up
 
 - GitHub code search may still show stale results from older commits. Confirm remaining files with `git ls-files` or `fetch_file` before further deletion.
-- Some old CI evidence JSON directories may still remain under `docs/ci/` if not directly required by `assetpack.yml`.
+- Some old `docs/ci/image-model-ci-*` JSON records may still remain if they were not returned in the current cleanup passes. They are no longer part of the active template contract.
