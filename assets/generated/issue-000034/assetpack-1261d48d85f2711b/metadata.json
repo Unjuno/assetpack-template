@@ -5,5 +5,18 @@
   "github_run_id": "27504382103",
   "github_sha": "a783ad90b50250a4643954c16180e570f3035ae5",
   "source_png": "reports/issue-generation/issue-34/images/sdxl-turbo-quality/cat.png",
-  "committed_path": "assets/generated/issue-000034/assetpack-1261d48d85f2711b"
+  "committed_path": "assets/generated/issue-000034/assetpack-1261d48d85f2711b",
+  "image_file_size_bytes": 92543,
+  "image_width": 256,
+  "image_height": 256,
+  "seed": 12345,
+  "scheduler": null,
+  "steps": 1,
+  "guidance_scale": 0.0,
+  "method": "diffusers_text_to_image",
+  "pipeline_class": "AutoPipelineForText2Image",
+  "model_ref": "stabilityai/sdxl-turbo",
+  "image_sha256": "e8f2b123a4d582fde8abb47f5626b98fb162ae826044dd57493845817c7f724f",
+  "generate_seconds": 14.948,
+  "load_seconds": 40.375
 }
