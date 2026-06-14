@@ -6,12 +6,12 @@ assetpack:
 theme:
   locked: true
   category: coloring_lineart
-  description: "Fixed-theme prompt recipe generation and CI image-generation experiments"
+  description: "Fixed-theme issue-driven image asset generation"
 
 generation:
   image_generation: true
-  mode: smoke_test
-  allow_commit_generated_images: false
+  mode: issue_persistent_generation
+  allow_commit_generated_images: true
   width: 256
   height: 256
   images_per_prompt: 1
@@ -21,6 +21,8 @@ issue_generation:
   enabled: true
   required_label: asset-request
   artifact_retention_days: 7
+  commit_generated_assets: true
+  committed_output_root: assets/generated
   form_fields:
     required:
       - subject
@@ -38,6 +40,14 @@ issue_generation:
   reject_unknown_nonempty_sections: true
   reject_urls: true
   output_root: reports/issue-generation
+
+input_policy:
+  ascii_only: true
+  ascii_fields:
+    - subject
+    - scene
+    - audience
+    - constraints
 
 prompt_recipe:
   template: "{subject}, {scene}, for {audience}, {constraints}, {required_terms}"
@@ -68,7 +78,7 @@ dedupe:
 records:
   keep_summary: true
   keep_failure_reason: true
-  keep_artifacts: false
+  keep_artifacts: true
   artifact_retention_days: 7
 
 license:
@@ -93,24 +103,12 @@ models:
         - sdxl-turbo-quality
         - ssd-1b-lcm-lora-quality
     selection_basis:
-      decision: "Use sdxl-turbo-quality by default; allow ssd-1b-lcm-lora-quality as the visual-style alternate."
+      decision: "Use sdxl-turbo-quality by default and allow ssd-1b-lcm-lora-quality as the alternate."
       evidence_file: docs/ci/image-model-final-selection.json
       human_report: docs/ci/image-model-final-selection.md
-      workflow: image-model-ci-final-runoff-hard-subjects
-      run_id: 27446158099
-      run_head_sha: dfd09fe5cc7f964583072dff3782ad81cbbb4814
-      total_expected_images: 60
-      extracted_pngs: 57
-      no_png:
-        - subject_id: stag-beetle
-          candidate_id: segmind-vega-quality
-        - subject_id: lacewing
-          candidate_id: sdxl-turbo-quality
-        - subject_id: pangolin
-          candidate_id: ssd-1b-lcm-lora-quality
     notes:
-      - "Generated images remain CI artifacts and are not committed to Git by default."
-      - "The selection is evidence-based for this repository's current fixed-theme asset-generation concept, not a general model-quality claim."
+      - "Generated assets are committed with their prompts and metadata under assets/generated/."
+      - "This is a repository-specific model decision, not a general benchmark claim."
   candidates:
     - id: sdxl-turbo-quality
       enabled: true
@@ -123,9 +121,7 @@ models:
       width: 512
       steps: 1
       guidance_scale: 0.0
-      license_hint: stability-ai-noncommercial-community
       selection_status: selected_default
-      selection_reason: "Best overall target-identity and topology preservation in the final 20-subject runoff."
     - id: ssd-1b-lcm-lora-quality
       enabled: true
       role: alternate_image_generation
@@ -140,33 +136,3 @@ models:
       steps: 4
       guidance_scale: 1.0
       selection_status: configurable_alternate
-      selection_reason: "Strong visual asset quality and close second-place result; useful when style is prioritized."
-    - id: segmind-vega-quality
-      enabled: false
-      role: finalist_not_selected
-      backend: diffusers
-      method: diffusers_text_to_image
-      model_ref: segmind/Segmind-Vega
-      pipeline_class: StableDiffusionXLPipeline
-      height: 512
-      width: 512
-      steps: 8
-      guidance_scale: 7.5
-      selection_status: not_selected_after_final_runoff
-      selection_reason: "Often visually attractive but less reliable on hard morphology and target-identity preservation than the selected pair."
-    - id: tiny-sd
-      enabled: false
-      role: legacy_cpu_smoke_candidate
-      backend: diffusers
-    - id: sd-turbo
-      enabled: false
-      role: legacy_cpu_smoke_candidate
-      backend: diffusers
-    - id: bk-sdm-tiny
-      enabled: false
-      role: legacy_cpu_smoke_candidate
-      backend: diffusers
-    - id: bonsai-image-4b
-      enabled: false
-      role: cpu_experimental
-      backend: experimental
