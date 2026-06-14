@@ -8,8 +8,8 @@ This roadmap tracks the active template surface for issue-driven image asset gen
 - [x] Confirm generated `prompt.txt` and `image.png` are committed under `assets/generated/`.
 - [x] Remove stale artifact-only wording from validation acceptance comments.
 - [x] Remove stale artifact-only wording from generation result comments.
-- [ ] Prevent duplicate generation/comments when one Issue emits multiple events.
-- [ ] Make duplicate `recipe_id` rejection deterministic under concurrent issue events.
+- [x] Prevent duplicate generation/comments when one Issue emits multiple events.
+- [x] Make duplicate `recipe_id` rejection deterministic under concurrent issue events by serializing workflow runs per Issue.
 - [ ] Verify failure comments for ASCII-only rejection, missing required terms, and duplicate recipe IDs.
 
 ## P1 — repository contract hardening
@@ -46,4 +46,4 @@ This roadmap tracks the active template surface for issue-driven image asset gen
 
 ## Next action
 
-Serialize issue generation per Issue number so `opened` and `labeled` events cannot produce duplicate image/comment records for the same request.
+Verify failure comments for ASCII-only rejection, missing required terms, and duplicate recipe IDs.
