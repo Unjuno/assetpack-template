@@ -25,7 +25,7 @@ This roadmap tracks the active template surface for issue-driven image asset gen
 - [x] Add tests for ASCII-only rejection.
 - [x] Add tests for missing required terms.
 - [x] Add tests for duplicate recipe IDs.
-- [ ] Add a dry-run validation command documented in README.
+- [x] Add a dry-run validation command documented in README.
 - [ ] Add a workflow syntax guard or lightweight lint check.
 - [ ] Add a smoke-test procedure that does not create duplicate generated assets.
 
