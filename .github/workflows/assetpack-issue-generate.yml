@@ -97,7 +97,7 @@ jobs:
         continue-on-error: true
         env:
           ASSETPACK_IMAGE_MODEL_ID: ${{ steps.policy.outputs.selected_model_id }}
-          IMAGE_MODEL_CANDIDATE_TIMEOUT_SECONDS: "1200"
+          ASSETPACK_IMAGE_CANDIDATE_TIMEOUT_SECONDS: "1200"
         run: |
           python scripts/run_issue_safe.py \
             --config assetpack.yml \
