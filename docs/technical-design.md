@@ -1,14 +1,14 @@
 # Technical design
 
-This repository is a template for fixed-theme asset generation.
+This repository is a template for Issue-driven prompt/image asset generation.
 
 The intended flow is:
 
 ```text
-structured input -> validation -> recipe -> mechanical prompt -> dedupe -> CI generation check -> evidence record -> optional review
+structured Issue input -> validation -> recipe -> mechanical prompt -> dedupe -> image generation -> committed asset record -> Issue feedback
 ```
 
-Generated images are not the source of truth. Configuration, recipes, reports, and evidence records are the source of truth.
+Generated images and their prompt metadata are committed records under `assets/generated/`. The source of truth for each generated asset is the complete record directory: image, prompt, request, report, metadata, and README.
 
 ## Main technologies
 
@@ -20,7 +20,7 @@ Generated images are not the source of truth. Configuration, recipes, reports, a
 | Image generation | PyTorch CPU and Diffusers |
 | LoRA model option | Diffusers LoRA loading |
 | Reports | JSON |
-| Generated images | GitHub Actions artifacts |
+| Generated records | Git commits under `assets/generated/` |
 
 ## Stable template contract
 
@@ -34,18 +34,16 @@ It defines:
 - Issue generation policy;
 - prompt policy;
 - deduplication policy;
-- record retention policy;
+- committed asset storage policy;
 - license policy;
 - selected image model configuration.
 
-Experiment files under `experiments/` are historical model-selection records. They are not the main template API.
-
 ## Prompt pipeline concept
 
-Prompt creation should be mechanical by default.
+Prompt creation is mechanical by default.
 
 ```text
-Issue or local structured input
+Issue structured input
   -> parse fields
   -> validate theme and policy
   -> apply required terms
@@ -53,12 +51,12 @@ Issue or local structured input
   -> build prompt from a template
   -> normalize recipe
   -> deduplicate
-  -> run generation check when enabled
+  -> run generation when enabled
 ```
 
 The template deliberately avoids arbitrary prompt execution as its default mode.
 
-## Issue-driven CI path
+## Issue-driven path
 
 The current template path is:
 
@@ -66,30 +64,34 @@ The current template path is:
 .github/ISSUE_TEMPLATE/generate.yml
 .github/workflows/assetpack-issue-generate.yml
 scripts/validate_issue_request.py
+scripts/validate_issue_policy.py
+scripts/run_issue_safe.py
 scripts/run_issue_asset_generation.py
+scripts/run_issue_image_generation.py
+scripts/prepare_committed_asset.py
 scripts/write_issue_generation_comment.py
 ```
 
-The workflow validates Issue fields, comments validation feedback on the Issue, runs generation only for valid requests, uploads artifacts, and comments successful generation feedback.
+The workflow validates Issue fields, comments validation feedback on the Issue, runs generation only for valid requests, commits generated records, and comments success or failure back to the Issue.
 
 ## Image generation runner
 
-The shared runner is:
+The Issue-facing runner entry point is:
 
 ```text
-scripts/run_image_model_ci_benchmark.py
+scripts/run_issue_image_generation.py
 ```
 
 It supports:
 
 - Diffusers text-to-image pipelines;
 - Diffusers LoRA text-to-image pipelines;
-- load-only checks;
+- load-only checks when used by lower-level runner code;
 - per-candidate timeouts;
 - report writing to `report.json`;
-- image artifact writing under the report directory.
+- image artifact writing under the workflow output directory.
 
-CI results are measurements. They should not be converted into broad model-quality claims without evidence.
+Generation reports are operational records. They should not be converted into broad model-quality claims without separate evidence.
 
 ## Current selected image models
 
@@ -100,16 +102,9 @@ primary:   sdxl-turbo-quality
 alternate: ssd-1b-lcm-lora-quality
 ```
 
-The primary is selected for target identity and topology preservation. The alternate is kept for visual asset quality and style-sensitive use.
+The primary is selected as the default generation model. The alternate remains configured as an allowed fallback option.
 
-Evidence lives in:
-
-```text
-docs/ci/image-model-final-selection.md
-docs/ci/image-model-final-selection.json
-```
-
-Runtime selection should read these fields from `assetpack.yml`:
+Runtime selection reads these fields from `assetpack.yml`:
 
 ```text
 models.image_generation.default_model_id
@@ -117,48 +112,28 @@ models.image_generation.allowed_model_ids
 models.image_generation.runtime_override.environment_variable
 ```
 
-## Workflow classes
+## Storage layout
 
-There are two workflow classes.
+Committed generated records live under:
 
-### Template workflows
+```text
+assets/generated/issue-<number>/<recipe_id>/
+```
 
-These validate structured input, build recipes, run the selected image model, upload artifacts, and provide Issue feedback.
+Each record contains:
 
-These workflows should use `assetpack.yml` as their source of truth.
+```text
+image.png
+prompt.txt
+negative_prompt.txt
+request.json
+metadata.json
+report.json
+README.md
+```
 
-### Historical experiment workflows
+The generated asset index is:
 
-The `image-model-ci-*` workflows are model-selection and stress-test workflows.
-
-They can be removed from derived repositories after the final model-selection evidence has been copied or retained.
-
-## Artifact policy
-
-Generated images are temporary artifacts by default.
-
-Commit:
-
-- configuration;
-- prompt recipes;
-- validation logic;
-- compact reports;
-- evidence summaries;
-- model-selection decisions.
-
-Do not commit by default:
-
-- generated image batches;
-- model weights;
-- cache directories;
-- raw logs that are already summarized.
-
-## Evidence discipline
-
-Model selection should distinguish:
-
-- CI success: the workflow ran and produced a report or image;
-- visual acceptance: the output is useful for the target concept;
-- production selection: the model is configured as allowed/default for the template.
-
-The current model selection reached production-selection status after subject-transfer tests and a final 20-subject runoff.
+```text
+assets/generated/README.md
+```
