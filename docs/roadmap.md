@@ -15,7 +15,7 @@ This roadmap tracks the active template surface for issue-driven image asset gen
 ## P1 — repository contract hardening
 
 - [ ] Keep `assetpack.yml` as the single source of truth for generation policy.
-- [ ] Document the exact Issue form field contract.
+- [x] Document the exact Issue form field contract.
 - [ ] Document committed asset directory layout with an example.
 - [ ] Document storage constraints and expected image size discipline.
 - [ ] Add a cleanup policy for smoke-test Issues and generated smoke assets.
@@ -46,4 +46,4 @@ This roadmap tracks the active template surface for issue-driven image asset gen
 
 ## Next action
 
-Verify failure comments for ASCII-only rejection, missing required terms, and duplicate recipe IDs.
+Verify failure comments for ASCII-only rejection and duplicate recipe IDs. Missing required-term verification remains covered by policy tests unless the prompt template is intentionally changed in a test branch.
