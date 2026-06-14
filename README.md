@@ -9,7 +9,7 @@ Use GitHub Issues for structured requests. CI validates each request with `asset
 - Structured fields only.
 - ASCII-only text fields.
 - Required terms must be present in the final recipe.
-- Duplicate recipe IDs are rejected.
+- Duplicate recipe IDs are reported as existing assets.
 - Success and failure are reported back to the Issue.
 
 ## Main path
@@ -19,3 +19,9 @@ Use GitHub Issues for structured requests. CI validates each request with `asset
 .github/workflows/assetpack-issue-generate.yml
 assets/generated/
 ```
+
+## Documentation
+
+- [Documentation index](docs/README.md)
+- [Roadmap](ROADMAP.md)
+- [Generated assets index](assets/generated/README.md)
