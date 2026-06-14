@@ -4,6 +4,7 @@ This directory documents the active Issue-driven asset repository template.
 
 ## Guides
 
+- [Template build and use guide](template-build-and-use.md)
 - [Issue-driven workflow](issue-driven-generation.md)
 - [Storage policy](storage-policy.md)
 - [Derived repository setup](derived-repository-setup.md)
