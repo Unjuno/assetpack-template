@@ -24,19 +24,20 @@
 
 ## P1 — repository cleanup
 
-- [x] Remove active Bonsai / lowbit / ONNX probe workflows found in the active workflow surface.
-- [~] Remove Bonsai / lowbit / ONNX scripts from active `scripts/` surface. Some files were blocked by tool safety checks and remain.
-- [~] Remove Bonsai / lowbit / ONNX docs and experiments from active docs surface. Some files were blocked by tool safety checks or search/index uncertainty and remain.
+- [x] Remove active legacy probe and model-selection workflows from the template surface.
+- [x] Remove many legacy research scripts from active `scripts/` surface.
+- [x] Remove legacy experiment YAML files found through current cleanup passes.
+- [x] Simplify model-selection docs to the selected model pair only.
 - [x] Rewrite README around Issue-driven asset repository generation.
 - [x] Rewrite docs to match repo-persistent generated assets where tool safety allowed.
 
 ## P2 — verification
 
-- [ ] Add or update tests for ASCII-only rejection.
-- [ ] Add or update tests for missing required terms.
-- [ ] Add or update tests for duplicate recipe IDs.
+- [x] Add or update tests for ASCII-only rejection.
+- [x] Add or update tests for missing required terms.
+- [x] Add or update tests for duplicate recipe IDs.
 
-## Blocked follow-up
+## Follow-up
 
-- `scripts/bonsai_prompt_z.py` could not be deleted or stubbed by the connector safety checks.
-- Some legacy docs/scripts may remain because GitHub search returned stale commit-index results and several delete/update calls were blocked.
+- GitHub code search may still show stale results from older commits. Confirm remaining files with `git ls-files` or `fetch_file` before further deletion.
+- Some old CI evidence JSON directories may still remain under `docs/ci/` if not directly required by `assetpack.yml`.
