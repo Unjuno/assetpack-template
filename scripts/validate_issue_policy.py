@@ -23,6 +23,7 @@ def write_outputs(path: str, req: dict[str, Any]) -> None:
         f.write(f"valid={'true' if req.get('valid') else 'false'}\n")
         f.write(f"selected_model_id={req.get('selected_model_id', '')}\n")
         f.write(f"recipe_id={req.get('recipe_id', '')}\n")
+        f.write(f"policy_status={req.get('policy_status', '')}\n")
 
 
 def duplicate_recipe_path(root: Path, recipe_id: str) -> str | None:
@@ -35,6 +36,16 @@ def duplicate_recipe_path(root: Path, recipe_id: str) -> str | None:
 
 
 def write_rejection_comment(path: Path, req: dict[str, Any]) -> None:
+    if req.get("policy_status") == "duplicate":
+        body = (
+            "## Asset request already exists\n\n"
+            "This request resolves to a recipe that is already present in the repository.\n\n"
+            f"- recipe: `{req.get('recipe_id', '')}`\n"
+            f"- existing asset: `{req.get('duplicate_path', '')}`\n"
+        )
+        path.write_text(body, encoding="utf-8")
+        return
+
     errors = req.get("errors", [])
     lines = "\n".join(f"- {error}" for error in errors)
     body = (
@@ -79,14 +90,16 @@ def main() -> int:
     recipe_id = str(req.get("recipe_id", ""))
     output_root = Path(cfg.get("issue_generation", {}).get("committed_output_root", "assets/generated"))
     duplicate_path = duplicate_recipe_path(output_root, recipe_id)
-    if duplicate_path:
+    duplicate_without_other_errors = bool(duplicate_path) and not errors
+    if duplicate_path and errors:
         errors.append(f"duplicate recipe_id already exists: {recipe_id} at {duplicate_path}")
 
     req["required_terms"] = required_terms
     req["missing_terms"] = missing_terms
     req["duplicate_path"] = duplicate_path
     req["errors"] = errors
-    req["valid"] = bool(req.get("valid")) and not errors
+    req["policy_status"] = "duplicate" if duplicate_without_other_errors else ("invalid" if errors else "accepted")
+    req["valid"] = bool(req.get("valid")) and not errors and not duplicate_without_other_errors
 
     req_path.write_text(json.dumps(req, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if not req["valid"]:
