@@ -27,7 +27,7 @@ This roadmap tracks the active template surface for issue-driven image asset gen
 - [x] Add tests for duplicate recipe IDs.
 - [x] Add a dry-run validation command documented in README.
 - [ ] Add a workflow syntax guard or lightweight lint check.
-- [ ] Add a smoke-test procedure that does not create duplicate generated assets.
+- [x] Add a smoke-test procedure that does not create duplicate generated assets.
 
 ## P3 — template polish
 
