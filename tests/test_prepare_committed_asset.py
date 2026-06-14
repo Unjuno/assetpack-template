@@ -62,7 +62,10 @@ def test_prepare_committed_asset_stages_record(tmp_path):
     assert "black outline" in (dest / "prompt.txt").read_text(encoding="utf-8")
     assert (dest / "request.json").exists()
     assert (dest / "report.json").exists()
-    assert (dest / "metadata.json").exists()
+    metadata = json.loads((dest / "metadata.json").read_text(encoding="utf-8"))
+    assert metadata["image_file_size_bytes"] == len(b"fake-png")
+    assert "image_width" in metadata
+    assert "image_height" in metadata
     assert (dest / "README.md").exists()
     assert "committed_asset_dir=" in github_output.read_text(encoding="utf-8")
 
