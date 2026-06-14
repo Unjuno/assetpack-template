@@ -35,7 +35,29 @@ def test_prepare_committed_asset_stages_record(tmp_path):
         "prompt": "cat, black outline, white background",
         "negative_prompt": "low quality",
     }
-    report = {"summary": {"passed": 1, "failed": 0}}
+    report = {
+        "seed": 12345,
+        "summary": {"passed": 1, "failed": 0},
+        "candidates": [
+            {
+                "candidate": {
+                    "width": 256,
+                    "height": 256,
+                    "steps": 1,
+                    "scheduler": "test-scheduler",
+                    "method": "diffusers_text_to_image",
+                    "pipeline_class": "AutoPipelineForText2Image",
+                    "model_ref": "stabilityai/sdxl-turbo",
+                },
+                "width": 256,
+                "height": 256,
+                "steps": 1,
+                "image_sha256": "abc123",
+                "generate_seconds": 1.25,
+                "load_seconds": 2.5,
+            }
+        ],
+    }
     request_json = out_dir / "request.json"
     report_json = out_dir / "report.json"
     request_json.write_text(json.dumps(request), encoding="utf-8")
@@ -64,8 +86,13 @@ def test_prepare_committed_asset_stages_record(tmp_path):
     assert (dest / "report.json").exists()
     metadata = json.loads((dest / "metadata.json").read_text(encoding="utf-8"))
     assert metadata["image_file_size_bytes"] == len(b"fake-png")
-    assert "image_width" in metadata
-    assert "image_height" in metadata
+    assert metadata["image_width"] == 256
+    assert metadata["image_height"] == 256
+    assert metadata["seed"] == 12345
+    assert metadata["steps"] == 1
+    assert metadata["scheduler"] == "test-scheduler"
+    assert metadata["model_ref"] == "stabilityai/sdxl-turbo"
+    assert metadata["image_sha256"] == "abc123"
     assert (dest / "README.md").exists()
     assert "committed_asset_dir=" in github_output.read_text(encoding="utf-8")
 
