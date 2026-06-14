@@ -1,0 +1,30 @@
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "fields": {
+    "subject": "sleeping fox",
+    "scene": "sitting on a white rug",
+    "audience": "children",
+    "constraints": "simple composition, friendly pose",
+    "model": "default",
+    "license": "CC0-1.0"
+  },
+  "selected_model_id": "sdxl-turbo-quality",
+  "allowed_model_ids": [
+    "sdxl-turbo-quality",
+    "ssd-1b-lcm-lora-quality"
+  ],
+  "recipe_id": "assetpack-1261d48d85f2711b",
+  "prompt": "sleeping fox, sitting on a white rug, for children, simple composition, friendly pose, black outline, white background, closed regions, no text",
+  "negative_prompt": "low quality, text, watermark, logo",
+  "issue_number": "34",
+  "required_terms": [
+    "black outline",
+    "white background",
+    "closed regions",
+    "no text"
+  ],
+  "missing_terms": [],
+  "duplicate_path": null
+}

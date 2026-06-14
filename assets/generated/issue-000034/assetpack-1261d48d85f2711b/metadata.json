@@ -1,0 +1,9 @@
+{
+  "issue_number": "34",
+  "recipe_id": "assetpack-1261d48d85f2711b",
+  "selected_model_id": "sdxl-turbo-quality",
+  "github_run_id": "27504382103",
+  "github_sha": "a783ad90b50250a4643954c16180e570f3035ae5",
+  "source_png": "reports/issue-generation/issue-34/images/sdxl-turbo-quality/cat.png",
+  "committed_path": "assets/generated/issue-000034/assetpack-1261d48d85f2711b"
+}
