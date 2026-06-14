@@ -154,7 +154,7 @@ def comment(result: dict[str, Any]) -> str:
             "The structured request passed validation. CI will attempt image generation.\n\n"
             f"- recipe: `{result['recipe_id']}`\n"
             f"- model: `{result['selected_model_id']}`\n\n"
-            "Generated images are uploaded as workflow artifacts and are not committed to Git by default.\n"
+            "On success, the generated image, prompt, request, metadata, and report are committed under `assets/generated/`.\n"
         )
     lines = "\n".join(f"- {e}" for e in result.get("errors", []))
     return (
