@@ -5,7 +5,7 @@ on:
     types: [opened, edited, reopened, labeled]
 
 permissions:
-  contents: read
+  contents: write
   issues: write
 
 concurrency:
@@ -28,7 +28,21 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install validation dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir pyyaml
+
+      - name: Check issue label
+        id: label_gate
+        run: |
+          python scripts/check_issue_label.py \
+            --config assetpack.yml \
+            --event-json "$GITHUB_EVENT_PATH" \
+            --github-output "$GITHUB_OUTPUT"
+
       - name: Write issue body
+        if: ${{ steps.label_gate.outputs.should_run == 'true' }}
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
@@ -41,9 +55,8 @@ jobs:
 
       - name: Validate request
         id: validate
+        if: ${{ steps.label_gate.outputs.should_run == 'true' }}
         run: |
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir pyyaml
           python scripts/validate_issue_request.py \
             --config assetpack.yml \
             --issue-body-file "$ISSUE_BODY_FILE" \
@@ -51,21 +64,33 @@ jobs:
             --out-dir "$OUT_DIR" \
             --github-output "$GITHUB_OUTPUT"
 
+      - name: Validate request policy
+        id: policy
+        if: ${{ steps.validate.outputs.valid == 'true' }}
+        run: |
+          python scripts/validate_issue_policy.py \
+            --config assetpack.yml \
+            --request-json "$OUT_DIR/request.json" \
+            --comment-file "$OUT_DIR/validation-comment.md" \
+            --github-output "$GITHUB_OUTPUT"
+
       - name: Comment validation result
+        if: ${{ steps.label_gate.outputs.should_run == 'true' && (steps.validate.outputs.valid != 'true' || steps.policy.outputs.valid != 'true') }}
         run: |
           gh issue comment "$ISSUE_NUMBER" --body-file "$OUT_DIR/validation-comment.md"
 
       - name: Install generation dependencies
-        if: ${{ steps.validate.outputs.valid == 'true' }}
+        if: ${{ steps.policy.outputs.valid == 'true' }}
         run: |
-          python -m pip install --upgrade pip
           pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
           pip install --no-cache-dir pyyaml huggingface_hub safetensors diffusers transformers accelerate pillow sentencepiece protobuf peft
 
       - name: Run image generation
-        if: ${{ steps.validate.outputs.valid == 'true' }}
+        id: generation
+        if: ${{ steps.policy.outputs.valid == 'true' }}
+        continue-on-error: true
         env:
-          ASSETPACK_IMAGE_MODEL_ID: ${{ steps.validate.outputs.selected_model_id }}
+          ASSETPACK_IMAGE_MODEL_ID: ${{ steps.policy.outputs.selected_model_id }}
           IMAGE_MODEL_CANDIDATE_TIMEOUT_SECONDS: "1200"
         run: |
           python scripts/run_issue_safe.py \
@@ -73,10 +98,51 @@ jobs:
             --request-json "$OUT_DIR/request.json" \
             --out-dir "$OUT_DIR"
 
-      - name: Comment generated image result
-        if: ${{ steps.validate.outputs.valid == 'true' }}
+      - name: Prepare committed asset
+        id: committed_asset
+        if: ${{ steps.policy.outputs.valid == 'true' && steps.generation.outcome == 'success' }}
+        continue-on-error: true
         run: |
-          python scripts/write_issue_generation_comment.py --out-dir "$OUT_DIR" --outcome success
+          python scripts/prepare_committed_asset.py \
+            --config assetpack.yml \
+            --request-json "$OUT_DIR/request.json" \
+            --report-json "$OUT_DIR/report.json" \
+            --source-out-dir "$OUT_DIR" \
+            --repo-output-root assets/generated \
+            --github-run-id "${{ github.run_id }}" \
+            --github-sha "${{ github.sha }}" \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Commit generated asset
+        if: ${{ steps.committed_asset.outcome == 'success' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/generated
+          if git diff --cached --quiet; then
+            echo "No generated asset changes to commit."
+            exit 0
+          fi
+          git commit -m "Add generated asset for issue #${ISSUE_NUMBER}"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep 2
+          done
+          echo "Failed to push generated asset after retries."
+          exit 1
+
+      - name: Comment generated image result
+        if: ${{ steps.policy.outputs.valid == 'true' && !cancelled() }}
+        run: |
+          python scripts/write_issue_generation_comment.py --out-dir "$OUT_DIR" --outcome "${{ steps.generation.outcome }}"
+          if [ "${{ steps.committed_asset.outcome }}" = "success" ]; then
+            {
+              echo ""
+              echo "Committed asset: \`${{ steps.committed_asset.outputs.committed_asset_dir }}\`"
+              echo "Image: \`${{ steps.committed_asset.outputs.committed_image_path }}\`"
+              echo "Prompt: \`${{ steps.committed_asset.outputs.committed_prompt_path }}\`"
+            } >> "$OUT_DIR/generation-comment.md"
+          fi
           gh issue comment "$ISSUE_NUMBER" --body-file "$OUT_DIR/generation-comment.md"
 
       - name: Upload issue generation artifact
@@ -93,3 +159,7 @@ jobs:
             reports/issue-generation/issue-${{ github.event.issue.number }}/images/**/*.png
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Fail job if generation or commit failed
+        if: ${{ steps.policy.outputs.valid == 'true' && (steps.generation.outcome == 'failure' || steps.committed_asset.outcome == 'failure') }}
+        run: exit 1
