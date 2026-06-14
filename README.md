@@ -22,6 +22,7 @@ assets/generated/
 
 ## Documentation
 
+- [Template build and use guide](docs/template-build-and-use.md)
 - [Documentation index](docs/README.md)
 - [Roadmap](ROADMAP.md)
 - [Generated assets index](assets/generated/README.md)
