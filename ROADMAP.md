@@ -48,7 +48,7 @@ GitHub Issue
 - [x] Include a stable repository link to the committed asset directory in the success comment.
 - [x] Add image size and file size to `metadata.json`.
 - [ ] Add seed, scheduler, steps, width, and height to `metadata.json` when available from the generator.
-- [ ] Add a generated index file for `assets/generated/` after multiple assets exist.
+- [x] Add a generated index file for `assets/generated/` after multiple assets exist.
 
 ## Phase 4 — Test and CI hygiene
 
