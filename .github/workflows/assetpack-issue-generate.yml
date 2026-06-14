@@ -69,7 +69,7 @@ jobs:
           ASSETPACK_IMAGE_MODEL_ID: ${{ steps.validate.outputs.selected_model_id }}
           IMAGE_MODEL_CANDIDATE_TIMEOUT_SECONDS: "1200"
         run: |
-          python scripts/run_issue_asset_generation.py \
+          python scripts/run_issue_safe.py \
             --config assetpack.yml \
             --request-json "$OUT_DIR/request.json" \
             --out-dir "$OUT_DIR"
