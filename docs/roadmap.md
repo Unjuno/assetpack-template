@@ -16,7 +16,7 @@ This roadmap tracks the active template surface for issue-driven image asset gen
 
 - [ ] Keep `assetpack.yml` as the single source of truth for generation policy.
 - [x] Document the exact Issue form field contract.
-- [ ] Document committed asset directory layout with an example.
+- [x] Document committed asset directory layout with an example.
 - [ ] Document storage constraints and expected image size discipline.
 - [ ] Add a cleanup policy for smoke-test Issues and generated smoke assets.
 
