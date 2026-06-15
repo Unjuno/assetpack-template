@@ -1,50 +1,10 @@
-name: bonsai-lowbit-runtime-linear
+name: obsolete workflow
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
-  probe:
+  disabled:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Show runner resources
-        run: |
-          python --version
-          df -h
-          free -h
-          nproc
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir huggingface_hub
-
-      - name: Run low-bit runtime linear probe
-        run: |
-          python scripts/probe_bonsai_lowbit_runtime_linear.py
-
-      - name: Show probe summary
-        if: always()
-        run: |
-          if [ -f reports/bonsai-lowbit-runtime-linear/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-runtime-linear/report.json').read_text()); print(json.dumps({'source_model_ref': r.get('source_model_ref'), 'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'layer': r.get('layer'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error_vs_recovered_weight_linear')}, indent=2))"
-          fi
-
-      - name: Upload probe report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bonsai-lowbit-runtime-linear-report
-          path: reports/bonsai-lowbit-runtime-linear/report.json
-          retention-days: 7
+      - run: echo obsolete
