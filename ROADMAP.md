@@ -17,28 +17,34 @@ GitHub Issue
 ## Phase 0 — Stabilize the active generation path
 
 - [x] Use `issues` events as the active trigger.
-- [x] Gate requests with the configured `asset-request` label.
+- [x] Gate requests with the configured request label.
 - [x] Validate required fields, license, model, URLs, and unknown sections.
 - [x] Enforce ASCII-only structured text fields.
-- [x] Enforce `prompt_policy.required_terms` before generation.
-- [x] Reject duplicate `recipe_id` records before generation.
+- [x] Enforce configured required terms before generation.
+- [x] Reject duplicate recipe records before generation.
 - [x] Generate at least one smoke asset from a valid Issue.
 - [x] Commit the generated PNG and prompt metadata under `assets/generated/`.
 - [x] Comment generation success or failure back to the Issue.
 - [x] Remove obsolete artifact-only success wording from validation and generation comments.
+- [x] Propagate generation subprocess failures through the guarded Issue runner.
+- [x] Use a neutral Issue generation runner entry point for active generation.
 
 ## Phase 1 — Keep the template surface clean
 
 - [x] Simplify README around Issue-driven asset generation.
 - [x] Simplify CI docs to the selected model pair and active artifact policy.
-- [x] Keep selected image models limited to `sdxl-turbo-quality` and `ssd-1b-lcm-lora-quality`.
-- [x] Use connector search instead of local-only verification for legacy cleanup.
-- [ ] Remove remaining connector-visible legacy files and CI evidence records.
-- [ ] Re-run connector searches for `bonsai`, `lowbit`, `onnx`, and `image-model-ci` until current-branch hits are cleared or explicitly blocked.
+- [x] Keep selected image models limited to the configured default and alternate IDs.
+- [x] Use connector search instead of local-only verification for cleanup.
+- [x] Move active generation off the old runner implementation.
+- [x] Replace the old runner file with a tombstone because direct deletion is blocked.
+- [x] Disable or tombstone several obsolete probe and smoke helpers.
+- [x] Remove or tombstone several obsolete generated evidence records.
+- [ ] Continue clearing connector-visible legacy surface where the GitHub contents API allows it.
+- [ ] Keep a short blocked-path list for files that cannot be changed through the connector.
 
 ## Phase 2 — Harden duplicate and replay behavior
 
-- [x] Add duplicate `recipe_id` detection against `assets/generated/**/<recipe_id>`.
+- [x] Add duplicate recipe detection against committed generated records.
 - [x] Add a policy replay test for an already-generated request.
 - [x] Treat duplicate requests as existing-asset status comments instead of generation attempts.
 - [x] Add a workflow note explaining why repeated Issue events may occur.
