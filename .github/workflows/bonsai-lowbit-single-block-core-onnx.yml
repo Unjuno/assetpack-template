@@ -1,50 +1,10 @@
-name: bonsai-lowbit-single-block-core-onnx
+name: obsolete workflow
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
-  probe:
+  disabled:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Show runner resources
-        run: |
-          python --version
-          df -h
-          free -h
-          nproc
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir huggingface_hub onnx onnxscript onnxruntime
-
-      - name: Export and run low-bit single block core ONNX
-        run: |
-          python scripts/export_bonsai_lowbit_single_block_core_onnx.py
-
-      - name: Show block core ONNX summary
-        if: always()
-        run: |
-          if [ -f reports/bonsai-lowbit-single-block-core-onnx/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-single-block-core-onnx/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'not_full_diffusers_block': r.get('not_full_diffusers_block'), 'attention_lowering': r.get('attention_lowering'), 'allclose': r.get('allclose_rtol_1e_4_atol_1e_5'), 'max_abs_error': r.get('max_abs_error'), 'initializer_to_expanded_fp32_ratio': r.get('initializer_to_expanded_fp32_ratio')}, indent=2))"
-          fi
-
-      - name: Upload block core ONNX report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bonsai-lowbit-single-block-core-onnx-report
-          path: reports/bonsai-lowbit-single-block-core-onnx/report.json
-          retention-days: 7
+      - run: echo obsolete
