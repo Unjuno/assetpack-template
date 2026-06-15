@@ -1,52 +1,10 @@
-name: bonsai-lowbit-runtime-linears-onnx
+name: obsolete workflow
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
-  probe:
+  disabled:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Show runner resources
-        run: |
-          python --version
-          df -h
-          free -h
-          nproc
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir huggingface_hub onnx onnxscript onnxruntime
-
-      - name: Export and run sampled low-bit runtime linears ONNX
-        env:
-          BONSAI_RUNTIME_LINEAR_ONNX_LIMIT: "8"
-        run: |
-          python scripts/export_bonsai_lowbit_runtime_linears_onnx.py
-
-      - name: Show ONNX probe summary
-        if: always()
-        run: |
-          if [ -f reports/bonsai-lowbit-runtime-linears-onnx/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-lowbit-runtime-linears-onnx/report.json').read_text()); print(json.dumps({'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'sampled_layer_count': r.get('sampled_layer_count'), 'failure_count': r.get('failure_count'), 'all_passed': r.get('all_passed'), 'max_abs_error': r.get('max_abs_error'), 'max_initializer_to_expanded_fp32_ratio': r.get('max_initializer_to_expanded_fp32_ratio')}, indent=2))"
-          fi
-
-      - name: Upload ONNX probe report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bonsai-lowbit-runtime-linears-onnx-report
-          path: reports/bonsai-lowbit-runtime-linears-onnx/report.json
-          retention-days: 7
+      - run: echo obsolete
