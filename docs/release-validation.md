@@ -14,6 +14,7 @@ The Issue-driven generation path has been validated end to end.
 | Duplicate replay | PASS | Issue #38 resolved to the existing asset from Issue #37. |
 | Invalid request | PASS | Issue #36 was rejected before generation because the `scene` field contained a URL. |
 | Existing duplicate | PASS | Issue #35 resolved to the existing asset from Issue #34. |
+| Manual smoke Issue | PASS with one superseded failed run | Issue #39 first produced one incomplete-generation comment, then generated and committed `assets/generated/issue-000039/assetpack-315db6d7e5f10403`. The workflow trigger was then narrowed to avoid duplicate `opened`/`labeled` runs. |
 
 ## Fresh smoke Issue
 
@@ -84,11 +85,22 @@ Issue #35 repeated an older request and resolved to the existing asset:
 assets/generated/issue-000034/assetpack-1261d48d85f2711b
 ```
 
+## Manual smoke follow-up
+
+Issue #39 used a manually submitted hedgehog request.
+
+The first run reported incomplete generation. A later run generated and committed:
+
+```text
+assets/generated/issue-000039/assetpack-315db6d7e5f10403
+```
+
+After observing this, the workflow trigger was narrowed from `opened`, `edited`, `reopened`, and `labeled` to `labeled`, `edited`, and `reopened`. The workflow no longer starts from `opened` events, reducing duplicate runs when an Issue is created with the request label attached.
+
 ## Known caveats
 
 These caveats are documented but are not blockers for this template release:
 
-- An Issue that is opened and labeled in the same interaction can produce duplicate bot comments because both `opened` and `labeled` events may run.
 - `prompt_policy.required_terms` applies to the generated final prompt. It is not an Issue-field required-word policy.
 - A derived repository should reset template-generated sample records before accepting real requests.
 - The lightweight test workflow exists and is part of the repository, but this release validation record focuses on the Issue-driven generation path.
@@ -99,5 +111,4 @@ The repository is suitable for release as an Issue-driven image asset generation
 
 Recommended follow-up hardening:
 
-- Reduce duplicate bot comments when an Issue is both opened and labeled in the same interaction.
 - Optionally add a separate `required_issue_terms` policy if a derived repository wants specific words to appear in the user-submitted Issue fields, not just in the final generated prompt.
