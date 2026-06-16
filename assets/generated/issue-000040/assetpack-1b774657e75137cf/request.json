@@ -1,0 +1,31 @@
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "fields": {
+    "subject": "tiny robot watering a flower",
+    "scene": "standing beside a small flower pot",
+    "audience": "children",
+    "constraints": "simple composition, centered character, large clear shapes, friendly pose, no background clutter",
+    "model": "default",
+    "license": "CC0-1.0"
+  },
+  "selected_model_id": "sdxl-turbo-quality",
+  "allowed_model_ids": [
+    "sdxl-turbo-quality",
+    "ssd-1b-lcm-lora-quality"
+  ],
+  "recipe_id": "assetpack-1b774657e75137cf",
+  "prompt": "tiny robot watering a flower, standing beside a small flower pot, for children, simple composition, centered character, large clear shapes, friendly pose, no background clutter, black outline, white background, closed regions, no text",
+  "negative_prompt": "low quality, text, watermark, logo",
+  "issue_number": "40",
+  "required_terms": [
+    "black outline",
+    "white background",
+    "closed regions",
+    "no text"
+  ],
+  "missing_terms": [],
+  "duplicate_path": null,
+  "policy_status": "accepted"
+}

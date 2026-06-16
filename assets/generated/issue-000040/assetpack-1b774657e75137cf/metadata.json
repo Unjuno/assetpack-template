@@ -1,0 +1,22 @@
+{
+  "issue_number": "40",
+  "recipe_id": "assetpack-1b774657e75137cf",
+  "selected_model_id": "sdxl-turbo-quality",
+  "github_run_id": "27617314764",
+  "github_sha": "18ce1344b2325121ed9d70b7b214b5f6e3557637",
+  "source_png": "reports/issue-generation/issue-40/images/sdxl-turbo-quality/image.png",
+  "committed_path": "assets/generated/issue-000040/assetpack-1b774657e75137cf",
+  "image_file_size_bytes": 82962,
+  "image_width": 256,
+  "image_height": 256,
+  "seed": 12345,
+  "scheduler": null,
+  "steps": 1,
+  "guidance_scale": 0.0,
+  "method": "diffusers_text_to_image",
+  "pipeline_class": "AutoPipelineForText2Image",
+  "model_ref": "stabilityai/sdxl-turbo",
+  "image_sha256": "fe6bff18016b38694e597b6e788fccac0d763d7acdc9d15c7e98dec0d84281f2",
+  "generate_seconds": 15.029,
+  "load_seconds": 39.126
+}

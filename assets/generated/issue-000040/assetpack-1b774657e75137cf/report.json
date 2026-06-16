@@ -1,0 +1,103 @@
+{
+  "experiment_id": "assetpack-issue-generation-assetpack-1b774657e75137cf",
+  "prompt": "tiny robot watering a flower, standing beside a small flower pot, for children, simple composition, centered character, large clear shapes, friendly pose, no background clutter, black outline, white background, closed regions, no text",
+  "negative_prompt": "low quality, text, watermark, logo",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true
+  },
+  "selection": {
+    "candidate_ids": [
+      "sdxl-turbo-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 1200,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61394391040,
+      "free_bytes": 93483020288
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 75272298496,
+      "free_bytes": 79605112832
+    },
+    "max_rss_mb_end": 13709.875
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "assetpack_issue_generation_record_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sdxl-turbo-quality",
+        "enabled": true,
+        "batch": "issue_generation",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "stabilityai/sdxl-turbo",
+        "pipeline_class": "AutoPipelineForText2Image",
+        "height": 256,
+        "width": 256,
+        "steps": 1,
+        "guidance_scale": 0.0,
+        "expected_role": "assetpack_issue_generation_selected_model"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781612746.103,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61394395136,
+        "free_bytes": 93483016192
+      },
+      "max_rss_mb_before": 19.43,
+      "candidate_timeout_seconds": 1200,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "AutoPipelineForText2Image",
+      "model_ref": "stabilityai/sdxl-turbo",
+      "load_seconds": 39.126,
+      "generate_seconds": 15.029,
+      "total_seconds": 55.881,
+      "height": 256,
+      "width": 256,
+      "steps": 1,
+      "guidance_scale": 0.0,
+      "call_kwargs": {
+        "prompt": "tiny robot watering a flower, standing beside a small flower pot, for children, simple composition, centered character, large clear shapes, friendly pose, no background clutter, black outline, white background, closed regions, no text",
+        "num_inference_steps": 1,
+        "negative_prompt": "low quality, text, watermark, logo",
+        "height": 256,
+        "width": 256,
+        "guidance_scale": 0.0
+      },
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 13709.875,
+      "diffusers_version": "0.38.0",
+      "image_path": "reports/issue-generation/issue-40/images/sdxl-turbo-quality/image.png",
+      "image_sha256": "fe6bff18016b38694e597b6e788fccac0d763d7acdc9d15c7e98dec0d84281f2",
+      "image_size_bytes": 82962,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 75272298496,
+        "free_bytes": 79605112832
+      }
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds": 58.982
+}
