@@ -14,6 +14,12 @@ GitHub Issue
   -> Issue feedback
 ```
 
+## Status
+
+Release-ready for template use on `main`.
+
+The remaining items in this roadmap are optional hardening items, not blockers for the current template release.
+
 ## Phase 0 — Stabilize the active generation path
 
 - [x] Use `issues` events as the active trigger.
@@ -73,15 +79,29 @@ GitHub Issue
 - [x] Add an external user manual.
 - [x] Add a maintainer release checklist for publishing a derived repository.
 - [x] Confirm that README, docs index, Issue template, and manual describe the same request fields and model options.
+- [x] Document how derived repositories should reset template-generated sample assets.
 
-## Remaining public-readiness work
+## Release validation
 
-- [ ] Run the lightweight test workflow on the latest main commit.
-- [ ] Submit one fresh smoke Issue after documentation stabilization.
-- [ ] Confirm duplicate replay behavior after the fresh smoke Issue.
-- [ ] Confirm one intentionally invalid Issue fails before generation.
+- [x] Submit one fresh smoke Issue after documentation stabilization.
+- [x] Confirm the smoke Issue generates and commits an asset.
+- [x] Confirm duplicate replay behavior after the fresh smoke Issue.
+- [x] Confirm one intentionally invalid Issue fails before generation.
+- [x] Document the release validation record.
 
-## Current known smoke record
+Evidence is recorded in:
+
+```text
+docs/release-validation.md
+```
+
+## Optional hardening after this release
+
+- [ ] Reduce duplicate bot comments when an Issue is opened and labeled in the same interaction.
+- [ ] Add a separate `required_issue_terms` policy if a derived repository needs specific words to appear in the user-submitted Issue fields.
+- [ ] Add a more direct workflow-run status reference for the lightweight test workflow if a future automation surface exposes run IDs.
+
+## Current known smoke records
 
 Issue #34 generated and committed:
 
@@ -89,4 +109,10 @@ Issue #34 generated and committed:
 assets/generated/issue-000034/assetpack-1261d48d85f2711b/
 ```
 
-This proves the active Issue -> generation -> commit path works at least once.
+Issue #37 generated and committed:
+
+```text
+assets/generated/issue-000037/assetpack-d5d6ce9df8725f4c/
+```
+
+These records prove the active Issue -> generation -> commit path works on `main`.
