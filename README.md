@@ -71,7 +71,7 @@ Recommended follow-up hardening:
    ```
 
 7. Open a new Issue using the `Asset request` template.
-8. Apply the `asset-request` label.
+8. Confirm that the `asset-request` label is present. If the template did not add it automatically, apply it after checking the fields.
 9. Wait for the generation workflow to finish.
 10. Confirm that the generated record appears under:
 
@@ -88,7 +88,7 @@ The generation workflow intentionally starts from Issue `labeled`, `edited`, and
 The normal manual path is:
 
 ```text
-create or edit Issue -> apply asset-request label -> wait for CI result comment
+create or edit Issue -> confirm or apply asset-request label -> wait for CI result comment
 ```
 
 ## Example Issue request
