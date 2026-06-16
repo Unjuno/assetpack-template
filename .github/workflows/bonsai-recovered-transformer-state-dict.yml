@@ -1,58 +1,10 @@
-name: bonsai-recovered-transformer-state-dict
+name: obsolete workflow
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-concurrency:
-  group: bonsai-recovered-transformer-state-dict-queue
-  cancel-in-progress: false
-
 jobs:
-  validate:
+  disabled:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
-    env:
-      HF_HUB_DISABLE_TELEMETRY: "1"
-      PIP_DISABLE_PIP_VERSION_CHECK: "1"
-      PYTHONUNBUFFERED: "1"
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Show runner resources
-        run: |
-          python --version
-          df -h
-          free -h
-          nproc
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir huggingface_hub safetensors
-
-      - name: Validate recovered transformer state dict
-        run: |
-          python scripts/validate_bonsai_recovered_transformer_state_dict.py
-
-      - name: Show validation summary
-        if: always()
-        run: |
-          if [ -f reports/bonsai-recovered-transformer-state-dict/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-recovered-transformer-state-dict/report.json').read_text()); print(json.dumps({'all_keys_match': r.get('all_keys_match'), 'quantized_prefix_count': r.get('quantized_prefix_count'), 'recovered_key_count': r.get('recovered_key_count'), 'reference_key_count': r.get('reference_key_count'), 'missing_vs_reference_count': r.get('missing_vs_reference_count'), 'unexpected_vs_reference_count': r.get('unexpected_vs_reference_count'), 'quantized_failure_count': r.get('quantized_failure_count'), 'passthrough_failure_count': r.get('passthrough_failure_count')}, indent=2))"
-          fi
-
-      - name: Upload validation report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bonsai-recovered-transformer-state-dict-report
-          path: reports/bonsai-recovered-transformer-state-dict/
-          retention-days: 7
+      - run: echo obsolete
