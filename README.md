@@ -4,6 +4,12 @@ Issue-driven asset repository template.
 
 Use GitHub Issues for structured requests. CI validates each request with `assetpack.yml`, builds a fixed recipe, runs the selected generator, and stores the resulting record under `assets/generated/`.
 
+## For users
+
+Start here if you want to submit or review generated assets:
+
+- [User manual](docs/user-manual.md)
+
 ## Rules
 
 - Structured fields only.
@@ -22,6 +28,7 @@ assets/generated/
 
 ## Documentation
 
+- [User manual](docs/user-manual.md)
 - [Template build and use guide](docs/template-build-and-use.md)
 - [Documentation index](docs/README.md)
 - [Roadmap](ROADMAP.md)
