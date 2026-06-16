@@ -2,7 +2,10 @@ name: assetpack-issue-generate
 
 on:
   issues:
-    types: [opened, edited, reopened, labeled]
+    # `labeled` is the normal generation trigger. `edited` and `reopened`
+    # allow maintainers to retry after fixing an Issue. `opened` is intentionally
+    # excluded to avoid duplicate runs when an Issue is created with labels.
+    types: [labeled, edited, reopened]
 
 permissions:
   contents: write
