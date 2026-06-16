@@ -4,7 +4,7 @@ Use these examples to verify request formatting.
 
 ## Expected to pass
 
-Apply the configured request label, usually `asset-request`.
+Confirm that the configured request label is present, usually `asset-request`. If the Issue template did not add it automatically, apply it after checking the fields.
 
 ```md
 ### Subject
@@ -35,7 +35,7 @@ Expected behavior:
 
 ## Expected to fail ASCII-only validation
 
-Apply the configured request label, then place a non-ASCII character in one of the checked fields such as Subject, Scene, Audience, or Constraints.
+Confirm that the configured request label is present, then place a non-ASCII character in one of the checked fields such as Subject, Scene, Audience, or Constraints.
 
 Expected behavior:
 
