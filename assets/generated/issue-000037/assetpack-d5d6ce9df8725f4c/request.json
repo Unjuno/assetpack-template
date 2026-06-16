@@ -1,0 +1,31 @@
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [],
+  "fields": {
+    "subject": "round owl with tiny glasses",
+    "scene": "perched on a simple branch",
+    "audience": "children",
+    "constraints": "simple composition, friendly pose, clear large shapes",
+    "model": "default",
+    "license": "CC0-1.0"
+  },
+  "selected_model_id": "sdxl-turbo-quality",
+  "allowed_model_ids": [
+    "sdxl-turbo-quality",
+    "ssd-1b-lcm-lora-quality"
+  ],
+  "recipe_id": "assetpack-d5d6ce9df8725f4c",
+  "prompt": "round owl with tiny glasses, perched on a simple branch, for children, simple composition, friendly pose, clear large shapes, black outline, white background, closed regions, no text",
+  "negative_prompt": "low quality, text, watermark, logo",
+  "issue_number": "37",
+  "required_terms": [
+    "black outline",
+    "white background",
+    "closed regions",
+    "no text"
+  ],
+  "missing_terms": [],
+  "duplicate_path": null,
+  "policy_status": "accepted"
+}

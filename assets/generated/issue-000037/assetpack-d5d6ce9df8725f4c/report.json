@@ -1,0 +1,103 @@
+{
+  "experiment_id": "assetpack-issue-generation-assetpack-d5d6ce9df8725f4c",
+  "prompt": "round owl with tiny glasses, perched on a simple branch, for children, simple composition, friendly pose, clear large shapes, black outline, white background, closed regions, no text",
+  "negative_prompt": "low quality, text, watermark, logo",
+  "seed": 12345,
+  "runtime": {
+    "device": "cpu",
+    "torch_dtype": "float32",
+    "num_threads": 1,
+    "save_images": true
+  },
+  "selection": {
+    "candidate_ids": [
+      "sdxl-turbo-quality"
+    ],
+    "batches": [],
+    "include_disabled": false,
+    "selected_count": 1
+  },
+  "candidate_timeout_seconds": 1200,
+  "system": {
+    "platform": "Linux-6.17.0-1018-azure-x86_64-with-glibc2.39",
+    "python": "3.11.15",
+    "cwd": "/home/runner/work/assetpack-template/assetpack-template",
+    "disk_start": {
+      "total_bytes": 154894188544,
+      "used_bytes": 61394132992,
+      "free_bytes": 93483278336
+    },
+    "disk_end": {
+      "total_bytes": 154894188544,
+      "used_bytes": 75272019968,
+      "free_bytes": 79605391360
+    },
+    "max_rss_mb_end": 13699.457
+  },
+  "claim_promotable_to_manifest": false,
+  "allowed_claim": "assetpack_issue_generation_record_not_model_quality_claim",
+  "status": "passed",
+  "candidates": [
+    {
+      "candidate": {
+        "id": "sdxl-turbo-quality",
+        "enabled": true,
+        "batch": "issue_generation",
+        "ci_stage": "generation",
+        "method": "diffusers_text_to_image",
+        "model_ref": "stabilityai/sdxl-turbo",
+        "pipeline_class": "AutoPipelineForText2Image",
+        "height": 256,
+        "width": 256,
+        "steps": 1,
+        "guidance_scale": 0.0,
+        "expected_role": "assetpack_issue_generation_selected_model"
+      },
+      "status": "passed",
+      "started_at_monotonic_seconds": 1781609485.606,
+      "disk_before": {
+        "total_bytes": 154894188544,
+        "used_bytes": 61394137088,
+        "free_bytes": 93483274240
+      },
+      "max_rss_mb_before": 19.527,
+      "candidate_timeout_seconds": 1200,
+      "method": "diffusers_text_to_image",
+      "pipeline_class": "AutoPipelineForText2Image",
+      "model_ref": "stabilityai/sdxl-turbo",
+      "load_seconds": 38.255,
+      "generate_seconds": 15.942,
+      "total_seconds": 55.959,
+      "height": 256,
+      "width": 256,
+      "steps": 1,
+      "guidance_scale": 0.0,
+      "call_kwargs": {
+        "prompt": "round owl with tiny glasses, perched on a simple branch, for children, simple composition, friendly pose, clear large shapes, black outline, white background, closed regions, no text",
+        "num_inference_steps": 1,
+        "negative_prompt": "low quality, text, watermark, logo",
+        "height": 256,
+        "width": 256,
+        "guidance_scale": 0.0
+      },
+      "execution_attempted": true,
+      "max_rss_mb_after_candidate": 13699.457,
+      "diffusers_version": "0.38.0",
+      "image_path": "reports/issue-generation/issue-37/images/sdxl-turbo-quality/image.png",
+      "image_sha256": "ad6a8b9869bdf778fe72ef0aa87983b3b909aaa58fda794605f7dad0569da298",
+      "image_size_bytes": 73937,
+      "disk_after": {
+        "total_bytes": 154894188544,
+        "used_bytes": 75272019968,
+        "free_bytes": 79605391360
+      }
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "total": 1
+  },
+  "seconds": 59.287
+}
