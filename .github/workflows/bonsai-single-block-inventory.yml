@@ -1,50 +1,10 @@
-name: bonsai-single-block-inventory
+name: obsolete workflow
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
-  probe:
+  disabled:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Show runner resources
-        run: |
-          python --version
-          df -h
-          free -h
-          nproc
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir huggingface_hub safetensors diffusers transformers accelerate
-
-      - name: Probe single transformer block inventory
-        run: |
-          python scripts/probe_bonsai_single_block_inventory.py
-
-      - name: Show inventory summary
-        if: always()
-        run: |
-          if [ -f reports/bonsai-single-block-inventory/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-single-block-inventory/report.json').read_text()); print(json.dumps({'block_prefix': r.get('block_prefix'), 'uses_lowbit_source': r.get('uses_lowbit_source'), 'writes_expanded_checkpoint': r.get('writes_expanded_checkpoint'), 'module_block_key_count': r.get('module_block_key_count'), 'checkpoint_block_key_count': r.get('checkpoint_block_key_count'), 'recovered_block_key_count': r.get('recovered_block_key_count'), 'all_checkpoint_block_keys_recoverable': r.get('all_checkpoint_block_keys_recoverable'), 'fused_checkpoint_candidates': r.get('fused_checkpoint_candidates')}, indent=2))"
-          fi
-
-      - name: Upload inventory report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bonsai-single-block-inventory-report
-          path: reports/bonsai-single-block-inventory/report.json
-          retention-days: 7
+      - run: echo obsolete
