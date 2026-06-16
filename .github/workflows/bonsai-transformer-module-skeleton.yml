@@ -1,62 +1,10 @@
-name: bonsai-transformer-module-skeleton
+name: obsolete workflow
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-concurrency:
-  group: bonsai-transformer-module-skeleton-queue
-  cancel-in-progress: false
-
 jobs:
-  validate:
+  disabled:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
-    env:
-      HF_HUB_DISABLE_TELEMETRY: "1"
-      PIP_DISABLE_PIP_VERSION_CHECK: "1"
-      PYTHONUNBUFFERED: "1"
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Show runner resources
-        run: |
-          python --version
-          df -h
-          free -h
-          nproc
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir huggingface_hub safetensors diffusers transformers accelerate
-
-      - name: Verify dependencies
-        run: |
-          python -c "import torch, huggingface_hub, safetensors, diffusers, transformers; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('huggingface_hub', huggingface_hub.__version__); print('diffusers', diffusers.__version__); print('transformers', transformers.__version__)"
-
-      - name: Validate transformer module skeleton
-        run: |
-          python scripts/validate_bonsai_transformer_module_skeleton.py
-
-      - name: Show validation summary
-        if: always()
-        run: |
-          if [ -f reports/bonsai-transformer-module-skeleton/report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-transformer-module-skeleton/report.json').read_text()); print(json.dumps({'all_module_keys_match_recovered': r.get('all_module_keys_match_recovered'), 'all_module_shapes_match_recovered': r.get('all_module_shapes_match_recovered'), 'all_module_keys_match_reference': r.get('all_module_keys_match_reference'), 'all_module_shapes_match_reference': r.get('all_module_shapes_match_reference'), 'module_key_count': r.get('module_key_count'), 'recovered_key_count': r.get('recovered_key_count'), 'reference_key_count': r.get('reference_key_count'), 'shape_mismatch_count': r.get('shape_mismatch_count')}, indent=2))"
-          fi
-
-      - name: Upload validation report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bonsai-transformer-module-skeleton-report
-          path: reports/bonsai-transformer-module-skeleton/
-          retention-days: 7
+      - run: echo obsolete
