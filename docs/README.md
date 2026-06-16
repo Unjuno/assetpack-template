@@ -5,6 +5,7 @@ This directory documents the active Issue-driven asset repository template.
 ## Start here
 
 - [User manual](user-manual.md)
+- [Implementation status](implementation-status.md)
 - [Maintainer release checklist](maintainer-release-checklist.md)
 
 ## Guides
