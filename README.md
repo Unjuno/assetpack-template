@@ -22,7 +22,8 @@ The release validation passed:
 
 1. fresh smoke Issue,
 2. duplicate replay check,
-3. invalid Issue check.
+3. invalid Issue check,
+4. manual smoke Issue.
 
 See [Release validation](docs/release-validation.md) and [Implementation status](docs/implementation-status.md).
 
