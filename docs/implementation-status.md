@@ -29,10 +29,10 @@ Release validation passed:
 - Duplicate replay resolved to an existing asset.
 - Invalid Issue was rejected before generation.
 - Older duplicate request resolved to an existing asset.
+- Manual smoke Issue generated and committed an asset.
 
 Recommended hardening, not release blockers:
 
-- Reduce duplicate bot comments when an Issue is opened and labeled in the same interaction.
 - Optionally add a separate Issue-field required-term policy for derived repositories that need user-submitted words, not only configured final-prompt terms.
 
 ## Active workflow
@@ -54,6 +54,8 @@ GitHub Issue + asset-request label
   -> committed asset under assets/generated/
   -> Issue result comment
 ```
+
+The workflow starts from Issue `labeled`, `edited`, and `reopened` events. It does not start from `opened` events.
 
 ## Active configuration
 
