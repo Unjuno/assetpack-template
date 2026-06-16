@@ -10,6 +10,10 @@ Start here if you want to submit or review generated assets:
 
 - [User manual](docs/user-manual.md)
 
+## Current status
+
+- [Implementation status](docs/implementation-status.md)
+
 ## Rules
 
 - Structured fields only.
@@ -29,6 +33,7 @@ assets/generated/
 ## Documentation
 
 - [User manual](docs/user-manual.md)
+- [Implementation status](docs/implementation-status.md)
 - [Template build and use guide](docs/template-build-and-use.md)
 - [Documentation index](docs/README.md)
 - [Roadmap](ROADMAP.md)
