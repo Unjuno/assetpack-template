@@ -84,6 +84,15 @@ Issue #35 repeated an older request and resolved to the existing asset:
 assets/generated/issue-000034/assetpack-1261d48d85f2711b
 ```
 
+## Known caveats
+
+These caveats are documented but are not blockers for this template release:
+
+- An Issue that is opened and labeled in the same interaction can produce duplicate bot comments because both `opened` and `labeled` events may run.
+- `prompt_policy.required_terms` applies to the generated final prompt. It is not an Issue-field required-word policy.
+- A derived repository should reset template-generated sample records before accepting real requests.
+- The lightweight test workflow exists and is part of the repository, but this release validation record focuses on the Issue-driven generation path.
+
 ## Release judgment
 
 The repository is suitable for release as an Issue-driven image asset generation template.
