@@ -6,6 +6,7 @@ This directory documents the active Issue-driven asset repository template.
 
 - [User manual](user-manual.md)
 - [Release validation](release-validation.md)
+- [Final text audit](final-text-audit.md)
 - [Implementation status](implementation-status.md)
 - [Maintainer release checklist](maintainer-release-checklist.md)
 
