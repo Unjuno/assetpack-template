@@ -3,7 +3,6 @@ description: Submit structured fields for this repository's fixed-theme asset ge
 title: "[asset] "
 labels:
   - asset-request
-  - needs-validation
 body:
   - type: markdown
     attributes:
