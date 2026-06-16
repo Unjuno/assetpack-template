@@ -46,31 +46,41 @@ Recommended follow-up hardening:
 
 ## Quick start for a derived repository
 
-1. Create a new repository from this template.
-2. Enable GitHub Actions.
-3. Create the request label:
+1. Create a new repository from this template or clone it into a new repository.
+2. Reset template-generated sample assets before accepting requests:
+
+   ```bash
+   python scripts/reset_template_generated_assets.py --yes
+   git add assets/generated
+   git commit -m "Reset generated assets for this repository"
+   ```
+
+   This removes `assets/generated/issue-*` directories copied from the template and resets `assets/generated/README.md` to an empty generated-asset index. Keep the `assets/generated/` root itself.
+
+3. Enable GitHub Actions.
+4. Create the request label:
 
    ```text
    asset-request
    ```
 
-4. Review `assetpack.yml` and adjust the repository theme, prompt recipe, policy, license list, and model settings.
-5. Run the lightweight test workflow:
+5. Review `assetpack.yml` and adjust the repository theme, prompt recipe, policy, license list, and model settings.
+6. Run the lightweight test workflow:
 
    ```text
    .github/workflows/assetpack-tests.yml
    ```
 
-6. Open a new Issue using the `Asset request` template.
-7. Apply the `asset-request` label.
-8. Wait for the generation workflow to finish.
-9. Confirm that the generated record appears under:
+7. Open a new Issue using the `Asset request` template.
+8. Apply the `asset-request` label.
+9. Wait for the generation workflow to finish.
+10. Confirm that the generated record appears under:
 
    ```text
    assets/generated/issue-<issue-number>/<recipe_id>/
    ```
 
-10. Confirm that the Issue received a success or failure comment.
+11. Confirm that the Issue received a success or failure comment.
 
 ## Example Issue request
 
@@ -205,6 +215,7 @@ scripts/run_issue_safe.py
 scripts/run_issue_image_generation.py
 scripts/prepare_committed_asset.py
 scripts/write_issue_generation_comment.py
+scripts/reset_template_generated_assets.py
 assets/generated/
 ```
 
