@@ -1,50 +1,10 @@
-name: bonsai-recovered-transformer-forward
+name: obsolete workflow
 
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
-  forward:
+  disabled:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Show runner resources
-        run: |
-          python --version
-          df -h
-          free -h
-          nproc
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-          pip install --no-cache-dir huggingface_hub safetensors diffusers transformers accelerate
-
-      - name: Run recovered transformer forward smoke
-        run: |
-          python scripts/forward_bonsai_recovered_transformer_smoke.py
-
-      - name: Show forward summary
-        if: always()
-        run: |
-          if [ -f reports/bonsai-recovered-transformer-checkpoint/forward_report.json ]; then
-            python -c "import json; from pathlib import Path; r=json.loads(Path('reports/bonsai-recovered-transformer-checkpoint/forward_report.json').read_text()); print(json.dumps({'forward_status': r.get('forward_status'), 'seconds': r.get('seconds'), 'output': r.get('output')}, indent=2))"
-          fi
-
-      - name: Upload forward report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bonsai-recovered-transformer-forward-report
-          path: reports/bonsai-recovered-transformer-checkpoint/forward_report.json
-          retention-days: 7
+      - run: echo obsolete
