@@ -71,8 +71,15 @@ GitHub Issue
 - [x] Add an operations guide for failed Issues and duplicate recipes.
 - [x] Add example Issue requests.
 - [x] Add an external user manual.
-- [ ] Add a short maintainer release checklist for publishing a derived repository.
-- [ ] Confirm that README, docs index, Issue template, and manual all describe the same request fields and model options.
+- [x] Add a maintainer release checklist for publishing a derived repository.
+- [x] Confirm that README, docs index, Issue template, and manual describe the same request fields and model options.
+
+## Remaining public-readiness work
+
+- [ ] Run the lightweight test workflow on the latest main commit.
+- [ ] Submit one fresh smoke Issue after documentation stabilization.
+- [ ] Confirm duplicate replay behavior after the fresh smoke Issue.
+- [ ] Confirm one intentionally invalid Issue fails before generation.
 
 ## Current known smoke record
 
