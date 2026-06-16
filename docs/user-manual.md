@@ -55,7 +55,10 @@ If these are not true, the request may validate correctly but fail before a comm
 4. Keep text fields ASCII-only unless the repository policy has been changed.
 5. Select a model.
 6. Select a license.
-7. Submit the Issue with the `asset-request` label.
+7. Submit the Issue.
+8. Confirm that the `asset-request` label is present. If the template did not add it automatically, apply it after checking the fields.
+
+The generation workflow starts from the request label, not from the Issue being opened by itself. It also runs again when a labeled Issue is edited or reopened.
 
 Default fields are:
 
@@ -93,7 +96,7 @@ Use `default` for normal requests. Select a named model only when the repository
 
 ## 5. What happens after submission
 
-The workflow runs when the Issue is opened, edited, reopened, or labeled.
+The workflow runs when the Issue is labeled, edited, or reopened.
 
 Expected success sequence:
 
@@ -145,7 +148,7 @@ To intentionally generate a different asset, change one of the structured fields
 | URL in a structured field | Remove URLs from request fields. |
 | Unknown non-empty section | Use only the Issue template fields. |
 | Non-ASCII text | Rewrite checked fields using ASCII-only text. |
-| Missing required term | Adjust the structured fields so the final recipe includes the required term. |
+| Missing required term in the final prompt | Ask a maintainer to inspect `assetpack.yml`; normal users do not need to type the default required terms manually. |
 
 After editing the Issue, re-run by editing, reopening, or re-applying the configured request label.
 
