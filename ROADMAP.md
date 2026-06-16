@@ -1,6 +1,6 @@
 # Roadmap
 
-This repository is now an Issue-driven prompt/image asset repository template.
+This repository is an Issue-driven prompt/image asset repository template.
 
 The active contract is:
 
@@ -25,7 +25,6 @@ GitHub Issue
 - [x] Generate at least one smoke asset from a valid Issue.
 - [x] Commit the generated PNG and prompt metadata under `assets/generated/`.
 - [x] Comment generation success or failure back to the Issue.
-- [x] Remove obsolete artifact-only success wording from validation and generation comments.
 - [x] Propagate generation subprocess failures through the guarded Issue runner.
 - [x] Use a neutral Issue generation runner entry point for active generation.
 
@@ -34,13 +33,11 @@ GitHub Issue
 - [x] Simplify README around Issue-driven asset generation.
 - [x] Simplify CI docs to the selected model pair and active artifact policy.
 - [x] Keep selected image models limited to the configured default and alternate IDs.
-- [x] Use connector search instead of local-only verification for cleanup.
 - [x] Move active generation off the old runner implementation.
-- [x] Replace the old runner file with a tombstone because direct deletion is blocked.
-- [x] Disable or tombstone several obsolete probe and smoke helpers.
-- [x] Remove or tombstone several obsolete generated evidence records.
-- [ ] Continue clearing connector-visible legacy surface where the GitHub contents API allows it.
-- [ ] Keep a short blocked-path list for files that cannot be changed through the connector.
+- [x] Tombstone obsolete probe, smoke, benchmark, ONNX, Bonsai, and lowbit helpers where deletion is not appropriate or is blocked.
+- [x] Tombstone obsolete generated evidence records under `docs/ci`.
+- [x] Disable legacy experiment workflows with inert `workflow_dispatch` workflows.
+- [x] Verify that major legacy search terms no longer resolve to current active implementation paths, except active/generated records.
 
 ## Phase 2 — Harden duplicate and replay behavior
 
@@ -66,14 +63,16 @@ GitHub Issue
 - [x] Add a fixture-based test for `prepare_committed_asset.py`.
 - [x] Add a fixture-based test for `write_issue_generation_comment.py`.
 
-## Phase 5 — Documentation for derived repositories
+## Phase 5 — Documentation for external and derived repository users
 
 - [x] Document persistent storage in `docs/storage-policy.md`.
 - [x] Add a derived-repository setup guide.
 - [x] Add a prompt-policy guide with required-term examples.
 - [x] Add an operations guide for failed Issues and duplicate recipes.
-- [x] Add an example Issue request that is expected to pass.
-- [x] Add an example Issue request that is expected to fail ASCII-only validation.
+- [x] Add example Issue requests.
+- [x] Add an external user manual.
+- [ ] Add a short maintainer release checklist for publishing a derived repository.
+- [ ] Confirm that README, docs index, Issue template, and manual all describe the same request fields and model options.
 
 ## Current known smoke record
 
