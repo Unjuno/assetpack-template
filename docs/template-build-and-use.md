@@ -58,12 +58,26 @@ assets/generated/
 ## Build a derived repository
 
 1. Create a new repository from this template.
-2. Enable GitHub Actions.
-3. Create the request label configured in `assetpack.yml`.
-4. Review the generator and prompt policy settings.
-5. Run the lightweight test workflow.
-6. Submit one smoke Issue.
-7. Confirm that `assets/generated/` receives a committed record.
+2. Reset template-generated sample records:
+
+   ```bash
+   python scripts/reset_template_generated_assets.py --yes
+   git add assets/generated
+   git commit -m "Reset generated assets for this repository"
+   ```
+
+   Use the dry run first if you want to inspect the affected paths:
+
+   ```bash
+   python scripts/reset_template_generated_assets.py
+   ```
+
+3. Enable GitHub Actions.
+4. Create the request label configured in `assetpack.yml`.
+5. Review the generator and prompt policy settings.
+6. Run the lightweight test workflow.
+7. Submit one smoke Issue.
+8. Confirm that `assets/generated/` receives a committed record.
 
 ## Configure `assetpack.yml`
 
@@ -146,7 +160,7 @@ Expected result:
 Open the generated directory:
 
 ```text
-assets/generated/issue-000034/assetpack-1261d48d85f2711b/
+assets/generated/issue-000001/<recipe_id>/
 ```
 
 Use:
@@ -207,6 +221,7 @@ pytest -q
 
 Before accepting normal requests in a derived repository:
 
+- Confirm generated sample records from the template have been reset.
 - Confirm `assetpack.yml` matches the target theme.
 - Confirm the request label exists.
 - Confirm Actions are enabled.
