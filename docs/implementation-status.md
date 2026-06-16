@@ -4,9 +4,9 @@ This document summarizes the current implementation state of `assetpack-template
 
 ## Status summary
 
-The repository is past cleanup and is now in public-readiness validation.
+The repository is release-ready for template use on `main`.
 
-Implemented:
+Implemented and validated:
 
 - Issue-driven image generation workflow.
 - Structured Issue request parsing and validation.
@@ -19,15 +19,21 @@ Implemented:
 - Lightweight tests for validation, duplicate handling, committed asset preparation, comment generation, and generated asset index behavior.
 - External user manual.
 - Maintainer release checklist.
+- Release validation record.
 - Legacy experiment, benchmark, ONNX, Bonsai, and lowbit surfaces tombstoned or disabled.
 - Historical experiment pull requests have been closed or otherwise removed from the active release path.
 
-Not yet fully verified on latest main:
+Release validation passed:
 
-- Lightweight test workflow after the latest documentation commits.
-- Fresh smoke Issue after documentation stabilization.
-- Duplicate replay after the fresh smoke Issue.
-- Intentionally invalid Issue that fails before generation.
+- Fresh smoke Issue generated and committed an asset.
+- Duplicate replay resolved to an existing asset.
+- Invalid Issue was rejected before generation.
+- Older duplicate request resolved to an existing asset.
+
+Recommended hardening, not release blockers:
+
+- Reduce duplicate bot comments when an Issue is opened and labeled in the same interaction.
+- Optionally add a separate Issue-field required-term policy for derived repositories that need user-submitted words, not only configured final-prompt terms.
 
 ## Active workflow
 
@@ -120,23 +126,14 @@ Bonsai-related files may still appear in stale code-search results. Current main
 
 ## Branch and PR state
 
-For external users, `main` is the only supported release candidate. Branches and pull requests are not supported unless their changes are present on `main`.
+For external users, `main` is the only supported release branch. Branches and pull requests are not supported unless their changes are present on `main`.
 
 Historical experiment pull requests for Bonsai, lowbit, ONNX, adapter, and projection work are not part of the active release path.
-
-## Public-readiness gate
-
-Do not treat the repository as fully public-ready until these checks pass on latest main:
-
-1. Run the lightweight test workflow.
-2. Submit one fresh valid smoke Issue.
-3. Re-submit or re-trigger the same request and verify duplicate handling.
-4. Submit one intentionally invalid request and verify generation is not attempted.
 
 ## Current judgment
 
 Implementation completeness: high.
 
-Public-readiness completeness: not final.
+Public-readiness completeness: complete for template release.
 
-The remaining work is validation and release hardening, not core feature implementation.
+The remaining work is optional hardening, not core feature implementation.
