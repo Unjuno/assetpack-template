@@ -51,6 +51,7 @@ The remaining items in this roadmap are optional hardening items, not blockers f
 - [x] Add a policy replay test for an already-generated request.
 - [x] Treat duplicate requests as existing-asset status comments instead of generation attempts.
 - [x] Add a workflow note explaining why repeated Issue events may occur.
+- [x] Narrow the Issue workflow trigger to avoid duplicate `opened`/`labeled` runs.
 
 ## Phase 3 — Improve generated asset records
 
@@ -87,6 +88,7 @@ The remaining items in this roadmap are optional hardening items, not blockers f
 - [x] Confirm the smoke Issue generates and commits an asset.
 - [x] Confirm duplicate replay behavior after the fresh smoke Issue.
 - [x] Confirm one intentionally invalid Issue fails before generation.
+- [x] Confirm a manual smoke Issue generated and committed an asset.
 - [x] Document the release validation record.
 
 Evidence is recorded in:
@@ -97,7 +99,6 @@ docs/release-validation.md
 
 ## Optional hardening after this release
 
-- [ ] Reduce duplicate bot comments when an Issue is opened and labeled in the same interaction.
 - [ ] Add a separate `required_issue_terms` policy if a derived repository needs specific words to appear in the user-submitted Issue fields.
 - [ ] Add a more direct workflow-run status reference for the lightweight test workflow if a future automation surface exposes run IDs.
 
@@ -113,6 +114,12 @@ Issue #37 generated and committed:
 
 ```text
 assets/generated/issue-000037/assetpack-d5d6ce9df8725f4c/
+```
+
+Issue #39 generated and committed:
+
+```text
+assets/generated/issue-000039/assetpack-315db6d7e5f10403/
 ```
 
 These records prove the active Issue -> generation -> commit path works on `main`.
