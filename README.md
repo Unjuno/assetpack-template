@@ -28,7 +28,6 @@ See [Release validation](docs/release-validation.md) and [Implementation status]
 
 Recommended follow-up hardening:
 
-- reduce duplicate bot comments when an Issue is opened and labeled in the same interaction,
 - optionally add a separate Issue-field required-term policy for derived repositories that need user-submitted words, not only configured final-prompt terms.
 
 ## What this template provides
@@ -81,6 +80,16 @@ Recommended follow-up hardening:
    ```
 
 11. Confirm that the Issue received a success or failure comment.
+
+## Trigger behavior
+
+The generation workflow intentionally starts from Issue `labeled`, `edited`, and `reopened` events. It does not start from `opened` events. This prevents duplicate generation runs when an Issue is created with the request label already attached.
+
+The normal manual path is:
+
+```text
+create or edit Issue -> apply asset-request label -> wait for CI result comment
+```
 
 ## Example Issue request
 
