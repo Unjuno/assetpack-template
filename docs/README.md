@@ -2,6 +2,10 @@
 
 This directory documents the active Issue-driven asset repository template.
 
+## Start here
+
+- [User manual](user-manual.md)
+
 ## Guides
 
 - [Template build and use guide](template-build-and-use.md)
