@@ -76,7 +76,7 @@ assets/generated/
 4. Create the request label configured in `assetpack.yml`.
 5. Review the generator and prompt policy settings.
 6. Run the lightweight test workflow.
-7. Submit one smoke Issue.
+7. Submit one smoke Issue and confirm the configured request label is present.
 8. Confirm that `assets/generated/` receives a committed record.
 
 ## Configure `assetpack.yml`
@@ -145,7 +145,7 @@ default
 CC0-1.0
 ```
 
-Apply the configured request label.
+Confirm that the configured request label is present. If the Issue template did not add it automatically, apply it after checking the fields.
 
 Expected result:
 
