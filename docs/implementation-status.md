@@ -27,6 +27,7 @@ Not yet fully verified on latest main:
 - Fresh smoke Issue after documentation stabilization.
 - Duplicate replay after the fresh smoke Issue.
 - Intentionally invalid Issue that fails before generation.
+- Open historical experiment pull requests are still visible in the repository UI.
 
 ## Active workflow
 
@@ -117,6 +118,21 @@ Confirmed removed or no longer active in current main:
 
 Bonsai-related files may still appear in stale code-search results. Current main has representative Bonsai scripts tombstoned and representative Bonsai workflows replaced with inert `workflow_dispatch` workflows.
 
+## Open pull requests
+
+The repository still has open historical experiment pull requests. They are not part of the release surface unless merged into `main` after explicit review.
+
+Known open legacy PRs at the time of this status update:
+
+| PR | Category | Release relevance |
+| --- | --- | --- |
+| #10 | Bonsai adapter skeleton | Not part of the Issue-driven asset template release. |
+| #12 | Bonsai adapter contract smoke | Not part of the Issue-driven asset template release. |
+| #28 | Bonsai lowbit ONNX probe | Not part of the Issue-driven asset template release. |
+| #29 | Bonsai lowbit ONNX probe | Not part of the Issue-driven asset template release. |
+
+For external users, `main` is the only supported release candidate. Branches and PRs are not supported unless their changes are present on `main`.
+
 ## Public-readiness gate
 
 Do not treat the repository as fully public-ready until these checks pass on latest main:
@@ -125,6 +141,7 @@ Do not treat the repository as fully public-ready until these checks pass on lat
 2. Submit one fresh valid smoke Issue.
 3. Re-submit or re-trigger the same request and verify duplicate handling.
 4. Submit one intentionally invalid request and verify generation is not attempted.
+5. Resolve or clearly archive historical experiment pull requests.
 
 ## Current judgment
 
