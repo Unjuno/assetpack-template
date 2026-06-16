@@ -20,6 +20,7 @@ Implemented:
 - External user manual.
 - Maintainer release checklist.
 - Legacy experiment, benchmark, ONNX, Bonsai, and lowbit surfaces tombstoned or disabled.
+- Historical experiment pull requests have been closed or otherwise removed from the active release path.
 
 Not yet fully verified on latest main:
 
@@ -27,7 +28,6 @@ Not yet fully verified on latest main:
 - Fresh smoke Issue after documentation stabilization.
 - Duplicate replay after the fresh smoke Issue.
 - Intentionally invalid Issue that fails before generation.
-- Open historical experiment pull requests are still visible in the repository UI.
 
 ## Active workflow
 
@@ -118,20 +118,11 @@ Confirmed removed or no longer active in current main:
 
 Bonsai-related files may still appear in stale code-search results. Current main has representative Bonsai scripts tombstoned and representative Bonsai workflows replaced with inert `workflow_dispatch` workflows.
 
-## Open pull requests
+## Branch and PR state
 
-The repository still has open historical experiment pull requests. They are not part of the release surface unless merged into `main` after explicit review.
+For external users, `main` is the only supported release candidate. Branches and pull requests are not supported unless their changes are present on `main`.
 
-Known open legacy PRs at the time of this status update:
-
-| PR | Category | Release relevance |
-| --- | --- | --- |
-| #10 | Bonsai adapter skeleton | Not part of the Issue-driven asset template release. |
-| #12 | Bonsai adapter contract smoke | Not part of the Issue-driven asset template release. |
-| #28 | Bonsai lowbit ONNX probe | Not part of the Issue-driven asset template release. |
-| #29 | Bonsai lowbit ONNX probe | Not part of the Issue-driven asset template release. |
-
-For external users, `main` is the only supported release candidate. Branches and PRs are not supported unless their changes are present on `main`.
+Historical experiment pull requests for Bonsai, lowbit, ONNX, adapter, and projection work are not part of the active release path.
 
 ## Public-readiness gate
 
@@ -141,7 +132,6 @@ Do not treat the repository as fully public-ready until these checks pass on lat
 2. Submit one fresh valid smoke Issue.
 3. Re-submit or re-trigger the same request and verify duplicate handling.
 4. Submit one intentionally invalid request and verify generation is not attempted.
-5. Resolve or clearly archive historical experiment pull requests.
 
 ## Current judgment
 
