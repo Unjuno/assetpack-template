@@ -36,11 +36,11 @@ Validation stops before generation. Typical causes:
 - Non-ASCII text in a checked field.
 - Required term missing from the final prompt.
 
-Action: edit the Issue fields and re-run by editing or re-labeling the Issue.
+Action: edit the Issue fields and re-run by editing, reopening, or re-labeling the Issue.
 
 ## Duplicate recipe
 
-A repeated request can happen when an Issue is opened, edited, reopened, or labeled.
+A repeated request can happen when an Issue is edited, reopened, or labeled again.
 
 If the request resolves to an existing `recipe_id`, the workflow treats it as an existing asset status. It should not generate another image. The Issue comment should point at the existing directory under `assets/generated/`.
 
