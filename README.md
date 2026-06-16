@@ -16,16 +16,20 @@ GitHub Issue + asset-request label
 
 ## Status
 
-The core implementation is present on `main`.
+Release-ready for template use on `main`.
 
-This repository should still be treated as a release candidate until the latest `main` commit has passed:
+The release validation passed:
 
-1. the lightweight test workflow,
-2. one fresh smoke Issue,
-3. one duplicate replay check,
-4. one invalid Issue check.
+1. fresh smoke Issue,
+2. duplicate replay check,
+3. invalid Issue check.
 
-See [Implementation status](docs/implementation-status.md).
+See [Release validation](docs/release-validation.md) and [Implementation status](docs/implementation-status.md).
+
+Recommended follow-up hardening:
+
+- reduce duplicate bot comments when an Issue is opened and labeled in the same interaction,
+- optionally add a separate Issue-field required-term policy for derived repositories that need user-submitted words, not only configured final-prompt terms.
 
 ## What this template provides
 
@@ -209,6 +213,7 @@ assets/generated/
 - [User manual](docs/user-manual.md)
 - [Template build and use guide](docs/template-build-and-use.md)
 - [Maintainer release checklist](docs/maintainer-release-checklist.md)
+- [Release validation](docs/release-validation.md)
 - [Implementation status](docs/implementation-status.md)
 - [Documentation index](docs/README.md)
 - [Roadmap](ROADMAP.md)
