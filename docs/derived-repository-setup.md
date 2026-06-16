@@ -18,7 +18,27 @@ docs/
 assets/generated/
 ```
 
-## 2. Configure the repository contract
+## 2. Reset generated sample records
+
+A derived repository should start with its own generated records, not the template repository's validation records.
+
+Run this after creating the derived repository:
+
+```bash
+python scripts/reset_template_generated_assets.py --yes
+git add assets/generated
+git commit -m "Reset generated assets for this repository"
+```
+
+Dry run:
+
+```bash
+python scripts/reset_template_generated_assets.py
+```
+
+The command targets generated issue record directories under `assets/generated/issue-*` and keeps the `assets/generated/` root available for future CI commits.
+
+## 3. Configure the repository contract
 
 Edit `assetpack.yml` before accepting real requests.
 
@@ -35,7 +55,7 @@ Minimum fields to review:
 
 The default repository contract assumes generated records are committed under `assets/generated/`.
 
-## 3. Configure labels
+## 4. Configure labels
 
 Create the label configured by `issue_generation.required_label`.
 
@@ -47,7 +67,7 @@ asset-request
 
 Issues without this label are ignored by the generation workflow.
 
-## 4. Enable GitHub Actions
+## 5. Enable GitHub Actions
 
 The repository needs Actions enabled and a workflow token that can write repository contents and Issue comments.
 
@@ -61,7 +81,7 @@ permissions:
 
 The lightweight test workflow uses read-only repository permissions.
 
-## 5. Submit a smoke request
+## 6. Submit a smoke request
 
 Create an Issue with the required sections and apply the request label.
 
@@ -75,7 +95,7 @@ assets/generated/issue-000001/<recipe_id>/
 
 The Issue receives a comment with the committed asset path.
 
-## 6. Review generated records
+## 7. Review generated records
 
 Each generated asset directory should contain:
 
