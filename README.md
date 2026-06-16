@@ -1,40 +1,215 @@
 # assetpack-template
 
-Issue-driven asset repository template.
+Issue-driven image asset generation template for GitHub repositories.
 
-Use GitHub Issues for structured requests. CI validates each request with `assetpack.yml`, builds a fixed recipe, runs the selected generator, and stores the resulting record under `assets/generated/`.
-
-## For users
-
-Start here if you want to submit or review generated assets:
-
-- [User manual](docs/user-manual.md)
-
-## Current status
-
-- [Implementation status](docs/implementation-status.md)
-
-## Rules
-
-- Structured fields only.
-- ASCII-only text fields.
-- Required terms must be present in the final recipe.
-- Duplicate recipe IDs are reported as existing assets.
-- Success and failure are reported back to the Issue.
-
-## Main path
+This template lets a repository accept structured GitHub Issues, validate them against a fixed policy, generate an image with a configured model, and commit the generated image record under `assets/generated/`.
 
 ```text
+GitHub Issue + asset-request label
+  -> request validation
+  -> policy check
+  -> fixed prompt recipe
+  -> configured image model
+  -> committed asset record under assets/generated/
+  -> Issue success/failure comment
+```
+
+## Status
+
+The core implementation is present on `main`.
+
+This repository should still be treated as a release candidate until the latest `main` commit has passed:
+
+1. the lightweight test workflow,
+2. one fresh smoke Issue,
+3. one duplicate replay check,
+4. one invalid Issue check.
+
+See [Implementation status](docs/implementation-status.md).
+
+## What this template provides
+
+- A structured Issue template for image asset requests.
+- A GitHub Actions workflow that runs from Issues.
+- Label-gated generation using `asset-request`.
+- Validation for required fields, license, model id, URLs, unknown sections, and ASCII-only fields.
+- A fixed prompt recipe controlled by `assetpack.yml`.
+- Required prompt terms injected by configuration.
+- Default and alternate image model configuration.
+- Generated asset commits under `assets/generated/`.
+- Success, duplicate, validation-failure, and generation-failure Issue comments.
+- User and maintainer documentation.
+
+## Quick start for a derived repository
+
+1. Create a new repository from this template.
+2. Enable GitHub Actions.
+3. Create the request label:
+
+   ```text
+   asset-request
+   ```
+
+4. Review `assetpack.yml` and adjust the repository theme, prompt recipe, policy, license list, and model settings.
+5. Run the lightweight test workflow:
+
+   ```text
+   .github/workflows/assetpack-tests.yml
+   ```
+
+6. Open a new Issue using the `Asset request` template.
+7. Apply the `asset-request` label.
+8. Wait for the generation workflow to finish.
+9. Confirm that the generated record appears under:
+
+   ```text
+   assets/generated/issue-<issue-number>/<recipe_id>/
+   ```
+
+10. Confirm that the Issue received a success or failure comment.
+
+## Example Issue request
+
+Use the Issue form fields, not a free-form prompt.
+
+```md
+### Subject
+sleeping fox
+
+### Scene
+sitting on a white rug
+
+### Audience
+children
+
+### Constraints
+simple composition, friendly pose
+
+### Model
+default
+
+### License
+CC0-1.0
+```
+
+## Request policy
+
+Requests are intentionally structured. The repository does not accept arbitrary free prompts.
+
+Required fields:
+
+- `subject`
+- `scene`
+- `audience`
+- `license`
+
+Optional fields:
+
+- `constraints`
+- `model`
+
+Default policy highlights:
+
+- structured fields only,
+- ASCII-only checked fields,
+- URLs rejected from request fields,
+- unknown non-empty sections rejected,
+- license must be one of the configured values,
+- model must be `default` or one of the configured model ids,
+- final prompt must contain configured required terms.
+
+The default required prompt terms are injected by `assetpack.yml`:
+
+```text
+black outline
+white background
+closed regions
+no text
+```
+
+Normal users do not need to type these terms manually. The configured prompt recipe inserts them into the final prompt, and policy validation confirms they are present before generation.
+
+## Models
+
+The default template currently exposes:
+
+| Role | Model id |
+| --- | --- |
+| Default | `sdxl-turbo-quality` |
+| Alternate | `ssd-1b-lcm-lora-quality` |
+
+Use `default` in normal Issue requests unless a maintainer asks for a specific model id.
+
+## Generated output
+
+A successful generation commits a directory like:
+
+```text
+assets/generated/issue-000034/assetpack-1261d48d85f2711b/
+```
+
+Expected files:
+
+```text
+image.png
+prompt.txt
+negative_prompt.txt
+request.json
+metadata.json
+report.json
+README.md
+```
+
+The generated asset index is:
+
+```text
+assets/generated/README.md
+```
+
+## Duplicate behavior
+
+The same structured request resolves to the same recipe id.
+
+If that recipe already exists under `assets/generated/`, the workflow should not generate a second image. It should comment with the existing asset path instead.
+
+## Failure behavior
+
+If validation fails, no image is generated and no generated asset record is committed.
+
+Common validation failures include:
+
+- missing required field,
+- invalid license,
+- invalid model id,
+- URL in a structured field,
+- unknown non-empty section,
+- non-ASCII text in a checked field,
+- missing required term in the final prompt.
+
+If generation or commit fails, the workflow comments back to the Issue and uploads the issue-generation artifact for inspection.
+
+## Main files
+
+```text
+assetpack.yml
 .github/ISSUE_TEMPLATE/generate.yml
 .github/workflows/assetpack-issue-generate.yml
+.github/workflows/assetpack-tests.yml
+scripts/validate_issue_request.py
+scripts/validate_issue_policy.py
+scripts/run_issue_safe.py
+scripts/run_issue_image_generation.py
+scripts/prepare_committed_asset.py
+scripts/write_issue_generation_comment.py
 assets/generated/
 ```
 
 ## Documentation
 
 - [User manual](docs/user-manual.md)
-- [Implementation status](docs/implementation-status.md)
 - [Template build and use guide](docs/template-build-and-use.md)
+- [Maintainer release checklist](docs/maintainer-release-checklist.md)
+- [Implementation status](docs/implementation-status.md)
 - [Documentation index](docs/README.md)
 - [Roadmap](ROADMAP.md)
 - [Generated assets index](assets/generated/README.md)
