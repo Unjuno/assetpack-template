@@ -38,6 +38,19 @@ Reviewed public and maintainer-facing text in:
 - Added maintainer checklist items for resetting `assets/generated/issue-*` records in derived repositories.
 - Documented the manual smoke Issue #39 and the follow-up workflow trigger narrowing.
 - Aligned README release validation summary with the release validation evidence.
+- Clarified that the lightweight test workflow runs on `push` to `main` and `pull_request`, with local `pytest` commands documented in the template guide.
+
+## Regression coverage added
+
+Added `tests/test_release_text_consistency.py` to cover recurring text and configuration regressions:
+
+- Issue generation workflow trigger contract is `labeled`, `edited`, and `reopened`.
+- Issue template labels are exactly `asset-request`.
+- README release summary includes smoke, duplicate, invalid, and manual smoke checks.
+- Documentation index links the final text audit.
+- Storage policy describes duplicate recipes as existing assets, not rejection.
+- User-facing docs do not reintroduce stale label instructions.
+- Workflow docs mention the current labeled trigger contract.
 
 ## Current verified behavior
 
